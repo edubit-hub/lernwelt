@@ -24,7 +24,7 @@ Lernwelt.modul({
     { id: 'lz3', text: 'Ich löse Teilaufgaben, indem ich die passende Malaufgabe suche.' }
   ],
 
-  wege: {                                    // Lösungswege des Lehrmittels, «geprueft» setzt Stefan nach dem Abgleich, nie ein Agent
+  wege: {                                    // Lösungswege des Lehrmittels, «geprueft» setzt der Vater nach dem Abgleich, nie ein Agent
     kern:         { titel: 'Auswendig wissen',                    quelle: 'Lehrmittel Seite __', geprueft: null },
     kernaufgaben: { titel: 'Mit Kernaufgaben rechnen',            quelle: 'Lehrmittel Seite __', geprueft: null },
     umkehren:     { titel: 'Teilen als Umkehrung des Malnehmens', quelle: 'Lehrmittel Seite __', geprueft: null }

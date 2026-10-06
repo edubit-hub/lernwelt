@@ -9,9 +9,9 @@
   const L = (g.Lernwelt = g.Lernwelt || {});
 
   L.version = {
-    app: "2026.10.06-1",
-    build: "20261006-21489c6e",
-    stand: "2026-10-06T14:52:44+02:00",
+    app: "2026.10.06-2",
+    build: "20261006-bb22362a",
+    stand: "2026-10-06T14:55:20+02:00",
     dateien: [
       { p: "app/ansichten/abschluss.js", h: "49e19e75c1252901" },
       { p: "app/ansichten/eltern-daten.js", h: "7f60adb241c5f67f" },
@@ -91,7 +91,7 @@
       { p: "module/_gemeinsam/rechnen.js", h: "798499d1d679957a" },
       { p: "module/katalog.js", h: "6a826671e58bbb1c" },
       { p: "module/mathe-einmaleins/generator.js", h: "d954c56f485a4b8b" },
-      { p: "module/mathe-einmaleins/modul.js", h: "1814cf29bc98be94" },
+      { p: "module/mathe-einmaleins/modul.js", h: "aba980d2b136c0bd" },
       { p: "version.js", h: null }
     ]
   };
