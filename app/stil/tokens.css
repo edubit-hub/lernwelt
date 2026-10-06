@@ -1,0 +1,47 @@
+/* app/stil/tokens.css: Design-Tokens der Lernwelt (Architektur 7.1). Nur Variablen, keine Regeln.
+   Die Palette oben steht wörtlich so in 7.1 und ist durch tests/ui.test.mjs mit der Spezifikation abgeglichen.
+   Alle anderen Stylesheets und die Welt-Themen holen Farben, Abstände und Schrift ausschliesslich von hier:
+   ausserhalb dieser Datei steht keine Hex- oder rgb()-Farbe. Kein Dunkelmodus, keine externen Schriften. */
+:root {
+  color-scheme: light;
+
+  /* Palette aus Architektur 7.1 */
+  --grund: #F3EFE6;  --flaeche: #FFFFFF;
+  --tinte: #1E2A34;  --tinte-leise: #5B6B78;
+  --meer: #BFDDE3;   --sand: #E8DCB8;  --gras: #A9CC96;  --stein: #C7CDD3;  --holz: #B88A5C;
+  --akzent: #2E7D8C; --akzent-warm: #D9962B;
+  --ok: #3B8C5A;     --fehler: #B5483A;                      /* gedämpft, nie Neon */
+  --radius: 8px;
+
+  /* Abgeleitete Töne der Oberfläche (aus dem Mockup AP-19). «-text» sind dunklere Fassungen für kleine Schrift auf Hell. */
+  --akzent-hell: #E0EEF0;   --akzent-mitte: #A9CBD1;   --akzent-dunkel: #276C79;
+  --ok-text: #2E7A4B;       --fehler-text: #A03F32;
+  --spur: #E4DFD1;          --gesperrt: #ECE8DD;
+  --linie: rgba(30, 42, 52, .14);   --linie-leise: rgba(30, 42, 52, .08);
+  --glas: rgba(255, 255, 255, .92); --glas-leise: rgba(255, 255, 255, .72);
+  --schleier: rgba(30, 42, 52, .38);
+  --schatten-leicht: 0 1px 2px rgba(30, 42, 52, .10);
+  --schatten-chip: 0 1px 3px rgba(30, 42, 52, .08);
+  --schatten-taste: 0 1px 0 rgba(30, 42, 52, .14);
+  --schatten-schwebend: 0 8px 28px rgba(30, 42, 52, .18);
+
+  /* Schrift: Systemschrift (SF auf dem iPad), Ziffern tabellarisch (gesetzt in basis.css) */
+  --schrift: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+  --t-fein: 11.5px;   --t-klein: 13px;   --t-text: 15px;   --t-gross: 17px;   --t-titel: 21px;   --t-seite: 24px;
+  --t-zahl: 18px;     --t-anzeige: 34px;
+
+  /* Abstände */
+  --a1: 4px;  --a2: 8px;  --a3: 12px;  --a4: 16px;  --a5: 24px;  --a6: 32px;
+
+  /* Bedienung: 44 CSS-Pixel entsprechen den 44 pt der iOS-Richtlinie für Berührungsflächen */
+  --ziel: 44px;
+  --knopf-hoehe: 46px;
+  --taste-hoehe: 56px;
+
+  /* Bewegung: 150 bis 250 ms, nur für Zustandsänderungen */
+  --dauer: 180ms;
+  --kurve: ease-out;
+
+  /* Raster der Ansichten (Ressourcenleiste oben, Menü links, Informationsfeld rechts, Statusleiste unten) */
+  --leiste-hoehe: 64px;   --menue-breite: 152px;   --info-breite: 320px;   --status-hoehe: 46px;
+}

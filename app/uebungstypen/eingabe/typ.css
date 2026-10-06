@@ -1,0 +1,46 @@
+/* app/uebungstypen/eingabe/typ.css: Anordnung des Typs «eingabe». Zahlenfeld und Tasten gestaltet app/stil/tastenfeld.css, den Knopf
+   «Hilfe» app/stil/basis.css (.knopf). Farben und Masse kommen aus app/stil/tokens.css. Hochformat: Aufgabe, Zahlenfeld, Hilfe untereinander.
+   Querformat: links Aufgabe und Hilfe, rechts das Zahlenfeld. */
+.uebung-eingabe {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-areas: "aufgabe" "eingabe" "hilfe";
+  gap: var(--a4) var(--a6);
+  align-items: start;
+  width: 100%;
+  max-width: 760px;
+  margin: 0 auto;
+  color: var(--tinte);
+  touch-action: manipulation;
+}
+.uebung-eingabe .aufgabe {
+  grid-area: aufgabe;
+  align-self: center;
+  margin: 0;
+  text-align: center;
+  font-size: var(--t-anzeige);
+  font-variant-numeric: tabular-nums;
+}
+.uebung-eingabe .eingabe {                /* Hülle für Anzeige und Tasten, Grundform in app/stil/tastenfeld.css */
+  grid-area: eingabe;
+  justify-self: center;
+  width: auto;
+  gap: var(--a3);
+}
+.uebung-eingabe .hilfe-bereich {
+  grid-area: hilfe;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--a3);
+}
+.uebung-eingabe .hilfe-ort:empty { display: none; }
+
+@media (min-width: 640px) {
+  .uebung-eingabe {
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-rows: auto 1fr;
+    grid-template-areas: "aufgabe eingabe" "hilfe eingabe";
+  }
+  .uebung-eingabe .aufgabe { font-size: calc(var(--t-anzeige) * 1.5); }
+}

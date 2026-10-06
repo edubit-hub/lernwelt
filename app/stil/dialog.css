@@ -1,0 +1,21 @@
+/* app/stil/dialog.css: Meldungen und Rückfragen (ui.dialog). Eine Hülle über der ganzen Seite, darin ein ruhiger Kasten.
+   Klassen: dialog-huelle, dialog, dialog-titel, dialog-text, dialog-knoepfe. Die Knöpfe sind normale .knopf. */
+
+.dialog-huelle {
+  position: fixed; inset: 0; z-index: 100; display: grid; place-items: center;
+  padding: max(var(--a4), env(safe-area-inset-top)) max(var(--a4), env(safe-area-inset-right)) max(var(--a4), env(safe-area-inset-bottom)) max(var(--a4), env(safe-area-inset-left));
+  background: var(--schleier);
+  animation: dialog-huelle-ein var(--dauer) var(--kurve);
+}
+.dialog {
+  width: min(100%, 440px); max-height: 100%; overflow: auto; padding: 22px 24px 20px;
+  border-radius: calc(var(--radius) + 4px); background: var(--flaeche); color: var(--tinte); box-shadow: var(--schatten-schwebend); outline: none;
+  animation: dialog-ein var(--dauer) var(--kurve);
+}
+.dialog-titel { margin-bottom: var(--a2); font-size: var(--t-titel); font-weight: 650; line-height: 1.2; }
+.dialog-text { font-size: var(--t-gross); line-height: 1.45; }
+.dialog-text p + p { margin-top: var(--a2); }
+.dialog-knoepfe { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: var(--a2); margin-top: 20px; }
+
+@keyframes dialog-huelle-ein { from { opacity: 0; } to { opacity: 1; } }
+@keyframes dialog-ein { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }

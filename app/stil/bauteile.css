@@ -1,0 +1,112 @@
+/* app/stil/bauteile.css: Raster und Bauteile der Ansichten nach Architektur 7.1 (Bedienung wie ein Strategiespiel):
+   Ressourcenleiste oben, Hauptmenü links, Hauptfläche, Informationsfeld rechts, Statusleiste unten.
+   Gerüst:  .app > header.leiste, nav.menue, main.haupt > .ansicht, aside.info, footer.status.  Ohne Informationsfeld: .app.ohne-info.
+   Leiste:  .marke, ul.ressourcen > li.res > .res-symbol + .res-text > .res-name + .res-zahl (.res-plus), .epoche.
+   Menü:    nav.menue > button (aria-selected="true" oder aria-current="page" hebt den Eintrag hervor, i.punkt = Hinweispunkt).
+   Info:    aside.info > .info-inhalt (.info-kopf, .abschnitt ...) und .info-aktionen. */
+
+.app {
+  display: grid; height: 100vh; height: 100dvh;
+  grid-template-columns: var(--menue-breite) minmax(0, 1fr) var(--info-breite);
+  grid-template-rows: minmax(var(--leiste-hoehe), auto) minmax(0, 1fr) minmax(var(--status-hoehe), auto);
+  grid-template-areas: "top top top" "menu haupt info" "status status status";
+  padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+  background: var(--grund);
+}
+.app.ohne-info { grid-template-columns: var(--menue-breite) minmax(0, 1fr); grid-template-areas: "top top" "menu haupt" "status status"; }
+.app.ohne-info > .info { display: none; }
+
+/* Ressourcenleiste */
+.leiste { grid-area: top; display: flex; align-items: center; gap: var(--a2); min-width: 0; padding: 0 var(--a4); background: var(--flaeche); border-bottom: 1px solid var(--linie); }
+.marke { display: flex; align-items: center; flex: none; gap: 10px; width: 136px; font-weight: 650; letter-spacing: .01em; }
+.marke .ico { width: 26px; height: 26px; color: var(--akzent-dunkel); }
+.marke small { display: block; font-size: var(--t-fein); font-weight: 500; line-height: 1.1; letter-spacing: 0; color: var(--tinte-leise); }
+.ressourcen { display: flex; align-items: center; gap: 2px; margin: 0; padding: 0; list-style: none; }
+.res { display: flex; align-items: center; gap: var(--a2); padding: 5px 12px 5px var(--a2); border-radius: var(--radius); }
+.res-symbol { display: grid; flex: none; place-items: center; width: 26px; height: 26px; }
+.res-symbol > svg { width: 26px; height: 26px; }
+.res-text { display: grid; line-height: 1.12; }
+.res-name { font-size: var(--t-fein); color: var(--tinte-leise); }
+.res-zahl { display: flex; align-items: baseline; gap: 5px; font-size: var(--t-zahl); font-weight: 650; }
+.res-plus { font-size: 12.5px; font-weight: 600; color: var(--ok-text); }
+.res.null .res-zahl { font-weight: 500; color: var(--tinte-leise); }
+.leiste .trenner { width: 1px; height: 30px; margin: 0 var(--a2); background: var(--linie); }
+.epoche { display: grid; min-width: 150px; margin-left: auto; padding: 0 var(--a2); line-height: 1.15; }
+.epoche .e { font-size: var(--t-fein); letter-spacing: .02em; color: var(--tinte-leise); }
+.epoche .n { font-size: 16px; font-weight: 650; }
+.epoche .tor { display: flex; align-items: center; gap: var(--a2); margin-top: 4px; font-size: var(--t-fein); color: var(--tinte-leise); }
+
+/* Hauptmenü */
+.menue { grid-area: menu; display: flex; flex-direction: column; gap: 6px; padding: 14px 10px; background: var(--grund); border-right: 1px solid var(--linie); }
+.menue > button {
+  position: relative; display: flex; align-items: center; gap: var(--a3); min-height: 50px; padding: 0 var(--a3);
+  border: 0; border-radius: var(--radius); background: transparent; color: var(--tinte-leise); font-weight: 600; text-align: left;
+}
+.menue > button[aria-selected="true"], .menue > button[aria-current="page"] {
+  background: var(--flaeche); color: var(--tinte); box-shadow: var(--schatten-leicht), inset 3px 0 0 var(--akzent);
+}
+.menue > button[aria-selected="true"] .ico, .menue > button[aria-current="page"] .ico { color: var(--akzent); }
+.menue .punkt { flex: none; width: 8px; height: 8px; margin-left: auto; border-radius: 50%; background: var(--akzent-warm); box-shadow: 0 0 0 2px var(--grund); }
+.menue > button[aria-selected="true"] .punkt, .menue > button[aria-current="page"] .punkt { box-shadow: 0 0 0 2px var(--flaeche); }
+
+/* Hauptfläche */
+.haupt { grid-area: haupt; position: relative; min-width: 0; min-height: 0; overflow: hidden; }
+.ansicht { position: absolute; inset: 0; overflow: auto; padding: 22px 26px; -webkit-overflow-scrolling: touch; }
+.ansicht[hidden] { display: none; }
+.seite { max-width: 880px; }
+.seite > h2 { font-size: 22px; }
+.seite > .unterzeile { margin: 2px 0 18px; color: var(--tinte-leise); }
+.hud { position: absolute; left: 14px; top: 14px; z-index: 2; display: flex; flex-direction: column; align-items: flex-start; gap: var(--a2); max-width: calc(100% - 28px); }
+
+/* Informationsfeld: Kosten, Wirkung und Voraussetzung stehen immer sichtbar da */
+.info { grid-area: info; display: flex; flex-direction: column; min-height: 0; background: var(--flaeche); border-left: 1px solid var(--linie); }
+.info-inhalt { flex: 1; overflow: auto; padding: var(--a4) 18px var(--a2); -webkit-overflow-scrolling: touch; }
+.info-aktionen { display: flex; gap: var(--a2); padding: var(--a3) 18px var(--a4); background: var(--flaeche); border-top: 1px solid var(--linie-leise); }
+.info-aktionen .knopf { flex: 1; padding: 0 10px; }
+.info-kopf { display: flex; align-items: center; gap: 14px; margin-bottom: 4px; }
+.info-kopf h2 { font-size: var(--t-titel); }
+.info-kopf .gruppe { margin-top: 2px; font-size: 12.5px; color: var(--tinte-leise); }
+.info-kopf .stufen { margin-top: 6px; }
+.info-bild { display: grid; flex: none; place-items: center; width: 108px; height: 84px; overflow: hidden; border-radius: var(--radius); background: var(--meer); }
+.info-bild.symbol { background: var(--akzent-hell); }
+.info-bild.symbol .ico { width: 40px; height: 40px; color: var(--akzent); }
+.info-inhalt > .abschnitt:first-of-type { margin-top: 10px; }
+
+/* Statusleiste */
+.status { grid-area: status; display: flex; align-items: center; gap: 22px; min-width: 0; padding: 0 var(--a4); background: var(--flaeche); border-top: 1px solid var(--linie); font-size: 14px; }
+.status .heute { display: flex; align-items: center; flex: none; gap: 10px; }
+.status .heute .spur { flex: none; width: 84px; }
+.status .meldung:empty { display: none; }
+.status .meldung { flex: 1; min-width: 0; overflow: hidden; font-size: 13.5px; color: var(--tinte-leise); text-overflow: ellipsis; white-space: nowrap; }
+.status .ziel { display: inline-flex; align-items: center; flex: none; gap: var(--a2); min-height: var(--ziel); padding: 0 4px; border: 0; background: transparent; color: var(--tinte); text-align: left; }
+.status .ziel .fahne { width: 9px; height: 9px; flex: none; border-radius: 50%; background: var(--akzent-warm); }
+.status .modus { flex: none; padding: 2px 10px; border: 1px solid var(--linie); border-radius: 999px; font-size: 12px; color: var(--tinte-leise); }
+
+/* Hochformat: Menü wird zur Zeile, das Informationsfeld rutscht nach unten */
+@media (orientation: portrait) {
+  .app { grid-template-columns: minmax(0, 1fr); grid-template-rows: auto auto minmax(0, 1fr) auto auto; grid-template-areas: "top" "menu" "haupt" "info" "status"; }
+  .app.ohne-info { grid-template-columns: minmax(0, 1fr); grid-template-areas: "top" "menu" "haupt" "status"; }
+  .menue { flex-direction: row; gap: 6px; padding: 6px var(--a3); border-right: 0; border-bottom: 1px solid var(--linie); }
+  .menue > button { flex: 1; justify-content: center; min-height: 48px; }
+  .menue .punkt { position: absolute; top: 8px; right: 8px; margin: 0; }
+  .info { max-height: min(41dvh, 440px); border-left: 0; border-top: 1px solid var(--linie); }
+  .kacheln { grid-template-columns: minmax(0, 1fr); }
+  .status { flex-wrap: wrap; row-gap: 0; gap: 0 var(--a3); padding-top: 2px; padding-bottom: 2px; }
+  .status .meldung { order: 3; flex-basis: 100%; }
+  .status .modus { display: none; }
+}
+/* Schmale Fenster (iPad hoch, Split View, kleines iPad quer): die Ressourcen rutschen unter die Marke */
+@media (max-width: 1100px) {
+  .leiste { flex-wrap: wrap; row-gap: 6px; padding: var(--a2) var(--a4); }
+  .marke { width: auto; }
+  .ressourcen { order: 3; flex-basis: 100%; justify-content: space-between; }
+  .res { gap: 6px; padding: 4px 6px 4px 4px; }
+  .leiste .trenner { margin: 0 2px; }
+}
+/* Schmales Querformat: nur Symbole im Menü */
+@media (max-width: 900px) and (orientation: landscape) {
+  .app { grid-template-columns: 76px minmax(0, 1fr) 280px; }
+  .app.ohne-info { grid-template-columns: 76px minmax(0, 1fr); }
+  .menue > button { justify-content: center; }
+  .menue > button .txt { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }   /* bleibt für Vorleser da */
+}

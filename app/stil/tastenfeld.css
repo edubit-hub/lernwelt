@@ -1,0 +1,56 @@
+/* app/stil/tastenfeld.css: Zahlenfeld (ui.tastenfeld) und Buchstabentastatur (ui.tastatur), Architektur 5.8.
+   Tasten sind mindestens 44 CSS-Pixel gross (--ziel, iOS 44 pt), nehmen weder Auswahl noch Lupe an und haben touch-action: manipulation.
+   Klassen: eingabe (Hülle für Anzeige und Tasten), tastenfeld, tastenfeld-anzeige (leer), tastatur, tastatur-zeile, tastatur-anzeige (leer),
+   taste (taste-ok, taste-weg, taste-umschalt mit aria-pressed und fest, taste-leer). */
+
+.eingabe { display: flex; flex-direction: column; align-items: center; gap: var(--a2); width: 100%; }
+
+/* Taste */
+.taste {
+  display: flex; align-items: center; justify-content: center;
+  min-width: var(--ziel); min-height: var(--taste-hoehe); margin: 0; padding: 0;
+  border: 1px solid var(--linie); border-radius: var(--radius); background: var(--flaeche); color: var(--tinte);
+  box-shadow: var(--schatten-taste);
+  font: inherit; font-size: 24px; font-weight: 500; line-height: 1;
+  touch-action: manipulation; -webkit-touch-callout: none; -webkit-user-select: none; user-select: none;
+}
+.taste:active { background: var(--akzent-hell); border-color: var(--akzent-mitte); box-shadow: none; }
+.taste-ok { background: var(--akzent); border-color: var(--akzent); color: var(--flaeche); font-size: var(--t-gross); font-weight: 650; }
+.taste-ok:active { background: var(--akzent-dunkel); border-color: var(--akzent-dunkel); }
+.taste:disabled { background: var(--gesperrt); border-color: transparent; box-shadow: none; color: var(--tinte-leise); }
+/* Löschen und Umschalten tragen im Quelltext ein Zeichen (Text für Vorleser und Tests), sichtbar ist das Linien-Icon.
+   button.taste.taste-… ist spezifischer als «.tastenfeld .taste» und «.tastatur .taste», darum bleibt das Zeichen sicher unsichtbar. */
+button.taste.taste-weg, button.taste.taste-umschalt { font-size: 0; }
+.taste-weg::before, .taste-umschalt::before {
+  content: ''; width: 26px; height: 26px; background-color: currentColor;
+  -webkit-mask: var(--ico) center / contain no-repeat; mask: var(--ico) center / contain no-repeat;
+}
+.taste-weg::before { --ico: var(--ico-loeschen); }
+.taste-umschalt::before { --ico: var(--ico-umschalt); }
+.taste-umschalt[aria-pressed="true"] { background: var(--akzent-hell); border-color: var(--akzent); color: var(--akzent-dunkel); }
+.taste-umschalt { position: relative; }
+.taste-umschalt.fest { background: var(--akzent); border-color: var(--akzent); color: var(--flaeche); }
+.taste-umschalt.fest::after { content: ''; position: absolute; bottom: 9px; left: 50%; width: 16px; height: 2px; margin-left: -8px; border-radius: 1px; background: currentColor; }   /* Feststellung: nicht nur Farbe */
+
+/* Anzeige der Eingabe, der Strich am Ende zeigt die Schreibstelle (steht still) */
+.tastenfeld-anzeige, .tastatur-anzeige {
+  display: flex; align-items: center; width: 100%; overflow: hidden; white-space: pre;
+  border: 1px solid var(--linie); border-radius: var(--radius); background: var(--flaeche); color: var(--tinte);
+}
+.tastenfeld-anzeige::after, .tastatur-anzeige::after { content: ''; flex: none; width: 2px; height: 1.1em; margin-left: 3px; background: var(--akzent); }
+.tastenfeld-anzeige { justify-content: flex-end; max-width: 300px; min-height: 64px; padding: 0 18px; font-size: var(--t-anzeige); font-weight: 600; letter-spacing: .02em; }
+.tastatur-anzeige { max-width: 780px; min-height: 60px; padding: 0 18px; font-size: 28px; font-weight: 500; letter-spacing: .02em; }
+
+/* Zahlenfeld: drei Spalten, Minustaste (falls vorhanden) in einer eigenen Zeile */
+.tastenfeld { display: grid; grid-template-columns: repeat(3, minmax(var(--ziel), 1fr)); gap: var(--a2); width: 100%; max-width: 300px; }
+.tastenfeld .taste { font-size: 26px; font-weight: 600; }
+.tastenfeld .taste-ok { font-size: var(--t-gross); }
+.tastenfeld .taste:nth-child(13) { grid-column: 1 / -1; min-height: var(--ziel); }
+
+/* Buchstabentastatur (QWERTZ, Ä Ö Ü, kein Eszett) */
+.tastatur { display: flex; flex-direction: column; gap: var(--a2); width: 100%; max-width: 780px; }
+.tastatur-zeile { display: flex; justify-content: center; gap: 6px; }
+.tastatur .taste { flex: 1 1 0; max-width: 68px; font-size: 22px; }
+.tastatur .taste-umschalt, .tastatur .taste-weg { flex: 1.5 1 0; max-width: 104px; }
+.tastatur .taste-leer { flex: 6 1 0; max-width: 470px; font-size: 14px; font-weight: 500; color: var(--tinte-leise); }
+.tastatur .taste-ok { flex: 2 1 0; max-width: 150px; }

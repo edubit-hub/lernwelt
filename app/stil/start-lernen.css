@@ -1,0 +1,64 @@
+/* app/stil/start-lernen.css: Stil der Startansicht, der Ansicht «Lernen» und des Abschlusses (AP-12). Nur Token aus tokens.css, Raster und Bausteine
+   stehen in bauteile.css und basis.css. Die Insel des Platzhalters («Siedlung folgt») ist flache Isometrie in drei Tönen je Körper (Architektur 7.1):
+   oben die Grundfarbe, links und rechts mit etwas Tinte abgedunkelt. Die erste Zeile je Körper gilt für Browser ohne color-mix. */
+
+/* Gerüst: ein Testprofil bekommt ein auffälliges Band (8.1) */
+.leiste.testprofil { box-shadow: inset 0 4px 0 var(--akzent-warm); }
+
+/* Startansicht und Profil */
+.start-seite { display: grid; gap: var(--a4); max-width: 520px; margin: 3vh auto 0; }
+.start-seite > h1 { font-size: var(--t-anzeige); }
+.start-seite > .unterzeile { margin-top: calc(var(--a2) * -1); color: var(--tinte-leise); font-size: var(--t-gross); }
+.start-seite .insel { width: 200px; height: auto; margin: 0 0 var(--a2); }
+.start-los { width: 100%; }
+.start-punkt { display: inline-block; width: 8px; height: 8px; margin-left: 6px; border-radius: 50%; background: var(--akzent-warm); vertical-align: middle; }
+.start-fuss { display: flex; align-items: center; justify-content: space-between; gap: var(--a3); margin-top: var(--a5); }
+.start-version { text-align: right; }
+.start-update { display: flex; align-items: center; justify-content: space-between; gap: var(--a3); }
+.profil { display: grid; gap: var(--a2); padding: var(--a5); border: 1px solid var(--linie); border-radius: var(--radius); background: var(--flaeche); }
+.profil-etikett { margin-top: var(--a2); font-size: var(--t-klein); font-weight: 650; color: var(--tinte-leise); }
+.profil-feld { width: 100%; min-height: 54px; padding: 0 var(--a4); border: 1px solid var(--linie); border-radius: var(--radius); background: var(--grund); color: var(--tinte); font-size: 18px; }
+.profil-feld:focus { border-color: var(--akzent); background: var(--flaeche); }
+.profil .gross { margin-top: var(--a3); }
+.wahl { display: flex; gap: var(--a2); }
+.wahl .knopf { flex: 1; font-size: var(--t-gross); }
+.wahl .knopf[aria-pressed="true"] { background: var(--akzent); border-color: var(--akzent); color: var(--flaeche); }
+
+/* Lernen */
+.lernen > .unterzeile { margin-bottom: var(--a4); }
+.lernen .kasten { margin-bottom: var(--a3); }
+.lernen .kacheln { margin-bottom: var(--a4); }
+.lernen .kachel p { margin: 0; }
+.lernen-alle { margin-top: var(--a2); }
+.lernen .zusatz { max-width: 440px; margin-top: var(--a4); }
+.lauf-huelle { max-width: 680px; margin: 0 auto; }
+
+/* Abschluss */
+.abschluss { display: grid; gap: var(--a4); max-width: 680px; }
+.abschluss .kasten { margin: 0; }
+.abschluss-neu { font-size: var(--t-gross); }
+.abschluss-siedlung { flex-direction: row; align-items: center; gap: var(--a5); border-style: dashed; background: transparent; }
+.abschluss-siedlung .insel { flex: none; width: 160px; height: auto; }
+.abschluss-siedlung p + p { margin-top: var(--a1); }
+.abschluss-knoepfe { display: flex; flex-wrap: wrap; gap: var(--a3); }
+
+/* Insel aus Code */
+.insel-meer { fill: var(--meer); opacity: .55; }
+.insel-gras { fill: var(--gras); }
+.insel-seite-l, .insel-seite-r { fill: var(--sand); }
+.insel-seite-l { fill: color-mix(in srgb, var(--sand) 84%, var(--tinte)); }
+.insel-seite-r { fill: color-mix(in srgb, var(--sand) 68%, var(--tinte)); }
+.stein-o, .stein-l, .stein-r { fill: var(--stein); }
+.stein-l { fill: color-mix(in srgb, var(--stein) 84%, var(--tinte)); }
+.stein-r { fill: color-mix(in srgb, var(--stein) 68%, var(--tinte)); }
+.holz-o, .holz-l, .holz-r { fill: var(--holz); }
+.holz-o { fill: color-mix(in srgb, var(--holz) 78%, var(--flaeche)); }
+.holz-r { fill: color-mix(in srgb, var(--holz) 74%, var(--tinte)); }
+.kalk-o, .kalk-l, .kalk-r { fill: var(--flaeche); }
+.kalk-l { fill: color-mix(in srgb, var(--flaeche) 84%, var(--tinte)); }
+.kalk-r { fill: color-mix(in srgb, var(--flaeche) 68%, var(--tinte)); }
+
+@media (orientation: portrait) {
+  .start-seite { margin-top: 2vh; }
+  .abschluss-siedlung { flex-direction: column; align-items: flex-start; }
+}
