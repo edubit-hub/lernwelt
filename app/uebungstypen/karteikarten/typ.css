@@ -1,0 +1,46 @@
+/* app/uebungstypen/karteikarten/typ.css: Karte des Typs «karteikarten». Knöpfe gestaltet app/stil/basis.css (.knopf), Farben und Masse kommen aus
+   app/stil/tokens.css. Die Karte ist eine ruhige weisse Fläche mit feinem Rand. Vorder- und Rückseite stehen untereinander, die Rückseite in
+   der Akzentfarbe und durch eine Linie getrennt (nicht nur durch Farbe). */
+.uebung-karte {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--a5);
+  width: 100%;
+  max-width: 640px;
+  margin: 0 auto;
+  color: var(--tinte);
+  touch-action: manipulation;
+}
+.uebung-karte .karte {
+  display: grid;
+  gap: var(--a4);
+  width: 100%;
+  padding: var(--a5);
+  border: 1px solid var(--linie);
+  border-radius: var(--radius);
+  background: var(--flaeche);
+  box-shadow: var(--schatten-leicht);
+  text-align: center;
+}
+.uebung-karte .karte-seite { display: grid; justify-items: center; gap: var(--a3); }
+.uebung-karte .karte-seite + .karte-seite { padding-top: var(--a4); border-top: 1px solid var(--linie); }
+.uebung-karte .karte-text { margin: 0; font-size: var(--t-anzeige); line-height: 1.2; overflow-wrap: anywhere; }
+.uebung-karte .hinten .karte-text { color: var(--akzent-dunkel); }
+.uebung-karte .hinweis { margin: 0; }
+.uebung-karte img {
+  display: block;
+  width: 100%;
+  max-width: 180px;
+  max-height: 140px;
+  height: auto;
+  object-fit: contain;
+  pointer-events: none;
+  -webkit-user-drag: none;
+}
+.uebung-karte .abspielen { min-width: 140px; }
+
+.uebung-karte .selbst { display: grid; justify-items: center; gap: var(--a2); width: 100%; }
+.uebung-karte .selbst .klein { margin: 0; }
+.uebung-karte .selbst-knoepfe { display: flex; flex-wrap: wrap; justify-content: center; gap: var(--a3); }
+.uebung-karte .selbst-knoepfe .knopf { min-width: 120px; min-height: var(--taste-hoehe); }

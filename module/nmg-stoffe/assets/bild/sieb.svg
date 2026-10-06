@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 100 480 250" width="640" height="333">
+<!-- Sieben: Ein Sieb mit Kies über einer Schüssel, der Sand rieselt durch. Keine Schrift im Bild.
+     data-teil und data-box (x y Breite Höhe im viewBox) nennen, was die Punkte in modul.js treffen müssen. test.js liest sie. -->
+<defs>
+  <pattern id="netz" width="10" height="10" patternUnits="userSpaceOnUse"><rect width="10" height="10" fill="#F6F8F9"/><path d="M0 0 H10 M0 0 V10" stroke="#9AAAB4" stroke-width="1.200" fill="none"/></pattern>
+</defs>
+<rect width="480" height="360" fill="#FFFFFF"/>
+<g data-teil="schuessel" data-box="110 257 260 76">
+  <path d="M110 270 Q112 332 240 332 Q368 332 370 270 Z" fill="#C7CDD3" stroke="#5B6B78" stroke-width="3" stroke-linejoin="round"/>
+  <ellipse cx="240" cy="270" rx="130" ry="13" fill="#E6EAED" stroke="#5B6B78" stroke-width="3"/>
+  <path d="M180 272 Q240 232 300 272 Q240 284 180 272 Z" fill="#E8DCB8" stroke="#CDBA86" stroke-width="2" stroke-linejoin="round"/>
+</g>
+<g data-teil="sieb" data-box="112 140 256 74">
+  <path d="M120 152 A120 62 0 0 0 360 152 Z" fill="url(#netz)" stroke="#5B6B78" stroke-width="3" stroke-linejoin="round"/>
+  <rect x="112" y="140" width="256" height="12" rx="6" fill="#B88A5C" stroke="#8B6540" stroke-width="2"/>
+</g>
+<g data-teil="kies" data-box="175 148 150 56">
+  <circle cx="190" cy="176" r="15" fill="#A3AAB3" stroke="#5B6B78" stroke-width="2"/>
+  <circle cx="232" cy="186" r="17" fill="#8E96A0" stroke="#5B6B78" stroke-width="2"/>
+  <circle cx="276" cy="180" r="16" fill="#A3AAB3" stroke="#5B6B78" stroke-width="2"/>
+  <circle cx="310" cy="170" r="13" fill="#8E96A0" stroke="#5B6B78" stroke-width="2"/>
+  <circle cx="222" cy="160" r="12" fill="#8E96A0" stroke="#5B6B78" stroke-width="2"/>
+  <circle cx="258" cy="160" r="12" fill="#A3AAB3" stroke="#5B6B78" stroke-width="2"/>
+</g>
+<g data-teil="sand" data-box="198 218 96 34" fill="#D4B96F">
+  <circle cx="205" cy="228" r="3"/><circle cx="214" cy="240" r="3"/><circle cx="226" cy="226" r="3"/><circle cx="232" cy="246" r="3"/><circle cx="244" cy="232" r="3"/>
+  <circle cx="250" cy="250" r="3"/><circle cx="262" cy="226" r="3"/><circle cx="268" cy="240" r="3"/><circle cx="280" cy="232" r="3"/><circle cx="286" cy="246" r="3"/>
+</g>
+</svg>

@@ -23,13 +23,15 @@
       onclick: () => gehe(e.id) }, ico(e.icon), H('span.txt', e.titel))));
   }
 
-  /** Statusleiste: Stand des Tagesauftrags links, Speicherstatus in der Mitte (dauerhaft, solange etwas nicht gespeichert wird), Testprofil rechts. */
+  /** Statusleiste: Stand des Tagesauftrags links, Speicherstatus in der Mitte (dauerhaft, solange etwas nicht gespeichert wird), Testprofil rechts.
+      Der Stand kommt aus dem Tageslog des Zustands (Lernplan.tagesauftrag), nicht aus dem, was seit dem Start der App geschah, und zieht bei jedem lern:aufgabe nach. */
   function zeichneStatus() {
     const T = L.Texte.lernen, s = L.Zustand.status();
     let heute = '';
     try {
       const t = L.Lernplan.tagesauftrag(), gesamt = t.gemacht.aufgaben + t.aufgaben;
-      heute = t.keinModul ? '' : H('div.heute', t.erledigt ? T.statusErledigt : T.statusOffen(t.aufgaben), H('span.spur', H('i', { style: `width:${gesamt ? Math.round(100 * t.gemacht.aufgaben / gesamt) : 100}%` })));
+      heute = t.keinModul ? '' : t.ferien ? H('div.heute', t.gemacht.aufgaben > 0 ? T.statusFerienGeuebt(t.gemacht.aufgaben) : T.statusFerien)     // in den Ferien nie ein Rückstand
+        : H('div.heute', t.erledigt ? T.statusErledigt : T.statusOffen(t.aufgaben), H('span.spur', H('i', { style: `width:${gesamt ? Math.round(100 * t.gemacht.aufgaben / gesamt) : 100}%` })));
     } catch (fehler) { melde(fehler); }
     z.status.replaceChildren(heute, H('div.meldung', { role: 'status' }, s.ok ? '' : s.text), s.profil ? H('span.modus', L.Texte.start.testprofil(s.profil)) : '');
     z.leiste.classList.toggle('testprofil', !!s.profil);
@@ -73,6 +75,8 @@
     wurzel.replaceChildren(H('div.app.ohne-info', z.leiste, z.menue, H('main.haupt', z.ansicht), z.status));
     if (z.abmelden) z.abmelden();
     z.abmelden = L.Zustand.beiStatus(aktualisiere);
+    if (z.zaehlt) z.zaehlt();
+    z.zaehlt = L.bus && typeof L.bus.on === 'function' ? L.bus.on('lern:aufgabe', () => { if (z.status) zeichneStatus(); }) : null;   // der Tagesstand zählt während der Runde mit
     return { ansicht: z.ansicht };
   }
 

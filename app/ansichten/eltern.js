@@ -5,7 +5,7 @@
    Keine Datei setzt beim Laden eine andere voraus. Geschrieben wird nur über Zustand.aendere.
    opt (alles austauschbar für Tests): onZurueck, entsperrt, zustand, navigator, syn, sprache, fehlerlog, version, dokument, fenster, File,
    heute, zufall, neuLaden, download, faehigkeiten. Der Kontext k trägt die Helfer für die Abschnitte: h, Z, kachel, kasten, werte, meldung, kopiere,
-   datum, zahl, waehle, aktualisiere, neuZeichnen, zurueck, offen. */
+   datum, zahl, waehle, aktualisiere, neuZeichnen, zurueck, offen, beiEnde(fn) (läuft, wenn der Bereich schliesst). */
 (function (g) {
   'use strict';
   const L = (g.Lernwelt = g.Lernwelt || {});
@@ -107,6 +107,8 @@ label.knopf { position: relative; }
     k.kasten = (art, titel, ...kinder) => h(`div.kasten.${art}`, h('b', titel), kinder);
     k.werte = paare => h('dl.eltern-werte', paare.map(([n, w]) => [h('dt', n), h('dd', w)]));
     k.gesperrt = () => { try { return !!k.Z.status().nurLesen; } catch (e) { return false; } };
+    k.enden = [];
+    k.beiEnde = fn => { if (typeof fn === 'function') k.enden.push(fn); };      // räumt auf, wenn der Elternbereich schliesst (AP-13b: eine laufende Probeprüfung abbrechen)
     return k;
   }
 
@@ -176,6 +178,7 @@ label.knopf { position: relative; }
     const ende = () => {
       if (!k.offen) return;
       k.offen = false;
+      for (const fn of k.enden.splice(0)) { try { fn(); } catch (e) { k.log.melde(e, { art: 'fehler', datei: 'eltern.js' }); } }
       try { if (k.sprache && k.sprache.stopp) k.sprache.stopp(); } catch (e) { /* nichts zu stoppen */ }
       huelle.replaceChildren();
     };

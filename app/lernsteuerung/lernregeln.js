@@ -18,18 +18,29 @@
       gefestigtBox: 5, gefestigtAnteil: 0.8          // gefestigt: zusätzlich mindestens 80 % in Box 5 oder höher
     },
     freischaltung: { box: 2, anteil: 0.6 },          // Folgethema öffnet, wenn 60 % des Vorgängers Box 2 erreicht haben
-    sitzung: {                                       // R1, R3, R7
+    sitzung: {                                       // R1 (nachfassenAbstand), R3 (aufwaermen, minAbstandThema), R7 (Dosierung), R8 (ratenMs)
       zielMinuten: 12, maxMinuten: 15, sekProAufgabe: 12,
       mix: { neu: 0.3 },                             // höchstens 30 % neue Aufgaben
-      neuProTagMax: 8,
+      neuProTagMax: 8,                               // je Modul
+      neuProTagGesamt: 12,                           // über alle Module zusammen: so verteilen sich die neuen Aufgaben auf mehrere Module (Neuverteilung)
       quoteFenster: 40, quoteVoll: 0.80, quoteHalb: 0.65,   // Trefferquote der letzten 40 fälligen Abrufe: darunter weniger, ganz darunter kein neuer Stoff
       rueckstauFaktor: 2,                            // mehr als 2 mal Tagesziel fällig: keine neuen Aufgaben
       aufwaermen: 2,                                 // Einstieg mit zwei sicheren Aufgaben
       minAbstandThema: 2,                            // gleiches Thema nie direkt hintereinander (ausser es gibt nur eines)
       nachfassenAbstand: 3,                          // falsche Aufgabe kommt nach 3 anderen Paketen noch einmal
       ratenMs: 1500,                                 // ein Fehler in weniger als 1500 ms gilt als Raten
-      schaetzung: { rueckmeldeSek: 8, min: 6, max: 25 },   // Zeitschätzung je Aufgabe: gleitende Antwortzeit plus Rückmeldezeit, begrenzt (6.4)
+      schaetzung: {                                  // Zeitschätzung je Aufgabe: gleitende Antwortzeit plus Rückmeldezeit, begrenzt (6.4)
+        rueckmeldeSek: 8, min: 6, max: 25,
+        typSek: {                                    // Richtwerte in Sekunden für Aufgaben ohne Messwert, mit Rückmeldung. Annahmen, nach drei Wochen aus den echten Zeiten zu kalibrieren
+          karteikarten: 8, blitzrechnen: 6, 'multiple-choice': 10, eingabe: 14, hoeren: 14, zahlenstrahl: 20, uhr: 20, lueckentext: 20, geld: 22,
+          reihenfolge: 25, beschriften: 25, diktat: 28, zuordnen: 12, freitext: 40
+        }
+      },
       quoteMindest: 15                               // so viele fällige Abrufe braucht die Trefferquote, bevor sie die Bremse steuert
+    },
+    einstufung: {                                    // R7 (AP-23): Vortest-Aufgaben, die schon sitzen, sind kein neuer Stoff
+      anzahl: 20,                                    // Einstufungsrunde beim ersten Kontakt mit einem Modul: bis zu 20 Vortest-Aufgaben quer über die Themen
+      nachschubMax: 30                               // so viele neue Aufgaben rücken je Runde höchstens für schon bekannte nach (die 15 Minuten des Tages gelten weiter)
     },
     pruefung: {                                      // R9: Prüfungsmodus, Tage vor der Prüfung
       festigen: 10, diagnoseVon: 10, diagnoseBis: 7, simulation: 3, abschluss: 2,

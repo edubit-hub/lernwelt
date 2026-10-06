@@ -19,12 +19,13 @@
     satz: i => String(i.text).replace(/[{}]/g, '').replace(/\s*\|\s*/g, ' '),
     auswahl: i => `Antwort: ${i.richtig}`,
     abfolge: i => `Reihenfolge: ${i.schritte.join(', ')}`,
+    beschriftung: i => i.punkte.map((p, n) => `${n + 1} ${p.text}`).join(', '),
     position: i => String(i.zahl),
-    uhrzeit: i => `${i.h}:${String(i.min).padStart(2, '0')} Uhr`,
-    betrag: i => `CHF ${(i.rappen / 100).toFixed(2)}`,
+    uhrzeit: i => `${i.h}.${String(i.min).padStart(2, '0')} Uhr`,          // Schreibweise wie die Typen uhr und geld (V-AP17c-02)
+    betrag: i => [i.rappen >= 100 || !i.rappen ? `${Math.floor(i.rappen / 100)} Fr.` : '', i.rappen % 100 ? `${i.rappen % 100} Rp.` : ''].filter(Boolean).join(' '),
     frei: i => `Musterantwort: ${i.muster}`
   };
-  const FRAGE = { rechnung: i => i.text, wortkarte: i => i.fremd, paar: i => i.links, satz: i => KURZ.satz(i), auswahl: i => i.frage };
+  const FRAGE = { rechnung: i => i.text, wortkarte: i => i.fremd, paar: i => i.links, satz: i => KURZ.satz(i), auswahl: i => i.frage, abfolge: i => i.frage || 'Reihenfolge' };
   const von = (tabelle, a) => { try { return a && a.inhalt && tabelle[a.form] ? tabelle[a.form](a.inhalt) : ''; } catch (fehler) { return ''; } };
   /** Die Lösung einer Aufgabe als kurzer Text («8 · 7 = 56»), leer bei unbekannter Form. */
   const loesungText = a => von(KURZ, a);
@@ -41,9 +42,15 @@
     return text ? ` Ertrag: ${punkt(text)}` : ' Ertrag: keiner.';
   };
 
-  /** Text zum Ende einer Runde. b: Bericht des Laufs, ertrag: Liste { name, menge } oder Text, nur wenn die Ansicht ihn kennt. */
+  /** Am ersten Tag: wann Ertrag entsteht. Der Ertrag kommt, wenn eine Aufgabe an einem späteren Tag sitzt (Welt: Box 2 und höher). */
+  const ertragErklaerung = b => `Ertrag gibt es, wenn eine Aufgabe an einem späteren Tag sitzt. ${b.morgen > 0 ? 'Morgen' : 'Übermorgen'} ist es so weit.`;
+  const ohneErtrag = e => !(Array.isArray(e) ? e.some(x => x.menge) : e && typeof e === 'object' ? Object.values(e).some(Boolean) : e);
+
+  /** Text zum Ende einer Runde. b: Bericht des Laufs, ertrag: Liste { name, menge } oder Text, nur wenn die Ansicht ihn kennt.
+      Am ersten Tag (b.ersterTag, Bericht.ausTageslog) und ohne Ertrag erklärt der Text, wann Ertrag entsteht. */
   function abschluss(b, ertrag) {
-    const n = b.aufgaben || 0, ers = b.ersterVersuch || 0, gewinn = ertragSatz(ertrag);
+    const n = b.aufgaben || 0, ers = b.ersterVersuch || 0;
+    const gewinn = ertragSatz(ertrag) + (b.ersterTag && ertrag !== undefined && ertrag !== null && ohneErtrag(ertrag) ? ` ${ertragErklaerung(b)}` : '');
     const zahlen = `${mz(n, 'Aufgabe', 'Aufgaben')}, ${ers} beim ersten Versuch.`;
     const morgen = b.morgen > 0 ? ` ${b.morgen === 1 ? '1 Aufgabe kommt' : `${b.morgen} Aufgaben kommen`} morgen wieder.` : '';
     if (b.abgebrochen) return n ? `Pause. ${mz(n, 'Aufgabe ist', 'Aufgaben sind')} gespeichert. Der Rest bleibt fällig.` : 'Pause. Es ist noch nichts gespeichert, alles bleibt fällig.';
@@ -103,7 +110,8 @@
     return [t.richtig(a), t.richtigNachSchwaeche(), t.falsch(a), t.mitHilfe(), t.gleichNochEinmal(), t.morgenWieder(), t.zeitNehmen(), t.zusatzHinweis(),
       ...Object.values(STUFEN), t.loesungsweg('Mit Kernaufgaben rechnen'), t.weiter(), t.beenden(), t.beendenBeschriftung(),
       t.fortschritt('runde', 3, 12), t.fortschritt('nachfassen'), t.fortschritt('basis'),
-      abschluss(b, [{ name: 'Stein', menge: 6 }, { name: 'Holz', menge: 2 }]), abschluss({ ...b, art: 'zusatz' }), abschluss({ ...b, abgebrochen: true }),
+      abschluss(b, [{ name: 'Stein', menge: 6 }, { name: 'Holz', menge: 2 }]), abschluss({ ...b, ersterTag: true }, []), abschluss({ ...b, ersterTag: true, morgen: 0 }, []),
+      abschluss({ ...b, art: 'zusatz' }), abschluss({ ...b, abgebrochen: true }),
       abschluss({ ...b, aufgaben: 0, abgebrochen: true }), abschluss({ ...b, zeitdeckel: true }),
       abschluss({ ...b, art: 'expedition', ziel: 0.8, zielErreicht: true }), abschluss({ ...b, art: 'simulation' }), abschluss({ ...b, art: 'herausforderung' }),
       abschluss({ ...b, art: 'vorschau' }),
@@ -129,11 +137,19 @@
     return H(`div.kasten.${art}`, H('b', kopf), i < 0 ? '' : text.slice(i + 1), ...innen);
   }
 
+  /** Das Bild zur Lösung zeigt, was die Aufgabe selbst verdeckte: das Ende des Rechenstrichs und die Zahl unter den Plättchen (V-AP18f-04). */
+  function aufgedeckt(daten) {
+    const d = { ...(daten || {}) };
+    delete d.verdecke;
+    if (d.zeige === 'plaettchen') delete d.zeige;
+    return d;
+  }
+
   function hilfsmittel(H, h) {
     const def = h && L.registry.hilfsmittel.get(h.name);
     if (!def) return '';
     const behaelter = H('div.rm-hilfsmittel');
-    try { def.render(behaelter, h.daten || {}); } catch (fehler) { return ''; }
+    try { def.render(behaelter, aufgedeckt(h.daten)); } catch (fehler) { return ''; }
     return behaelter;
   }
 

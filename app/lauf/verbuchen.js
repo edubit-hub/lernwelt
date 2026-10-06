@@ -45,6 +45,7 @@
     const raten = e.urteil === 'falsch' && Number.isFinite(e.ms) && e.ms < k.mindestMs;   // Fehler ohne Nachdenken
     const korrigiert = !!(z0 && z0.offen && e.urteil === 'richtig' && faellig && !nachfassen);
     const typ = L.registry.typen.get(paket.typ), code = e.urteil === 'falsch' ? diagnose(a, e) : null;
+    const bekannt = L.Einstufung.istBekannt({ neu, nachfassen, urteil: e.urteil, einfuehrung: a.einfuehrung });   // Vortest gleich richtig: kein neuer Stoff (AP-23)
     let z1 = L.Wiederholung.verbuche(z0, { urteil: e.urteil, vortest: !nachfassen && neu && a.einfuehrung === 'vortest', nachfassen, raten }, heute, k.deckel(a));
     z1 = { ...(nachfassen ? z1 : kappe(z1, typ && typ.eigenschaften.maxBox, boxVor, heute)) };
     if (code) z1.fehler = code;
@@ -52,13 +53,13 @@
     const grund = k.modus.grund || (k.eintragVon.get(a.key) || {}).grund || (neu ? 'neu' : 'faellig');
     const ev = { key: a.key, modul: a.modul, aufgabe: a.id, thema: a.thema, bereich: a.bereich, fach: a.fach, urteil: e.urteil, code,
       boxVor, boxNach: z1.box, faellig, nachfassen, korrigiert, ms, grund };
-    k.z.schreibe(a, z1, { ev, code: nachfassen ? null : code });                  // derselbe Fehler zählt je Runde einmal
+    k.z.schreibe(a, z1, { ev, code: nachfassen ? null : code, bekannt, neu: neu && !nachfassen && !bekannt });   // derselbe Fehler zählt je Runde einmal
     if (k.modus.schreibt) L.bus.emit('lern:aufgabe', ev);
 
     let folge = null;
     if (!nachfassen && k.modus.nachfassen && (e.urteil === 'falsch' || e.urteil === 'gezeigt')) {
       if (k.ablauf.nachfassen(a, L.Ablauf.typFuer(a, z1.box, k))) { folge = 'gleich'; b.nachgefasst += 1; }
-    } else if (nachfassen && e.urteil === 'falsch' && k.modus.schreibt) folge = 'morgen';
+    } else if ((nachfassen || k.modus.einstufung) && e.urteil === 'falsch' && k.modus.schreibt) folge = 'morgen';   // die Einstufung fasst nicht nach, die Aufgabe kommt morgen
     if (!nachfassen && code && k.modus.schreibt && k.modus.nachfassen) vorziehen(k, a, code);
     const f = code ? L.Fehler.folge(k.katalog.modul(a.modul), code, a) : null, modul = k.katalog.modul(a.modul);
     const weg = modul && modul.wege && a.hilfe && Object.hasOwn(modul.wege, a.hilfe.weg) ? modul.wege[a.hilfe.weg] : null;
@@ -73,7 +74,25 @@
     b.ms += ms;
     k.gesehen.add(a.key);
     b.ergebnisse.push({ key: a.key, urteil: e.urteil, code, nachfassen, ms });
+    if (bekannt) { b.bekannt += 1; nachruecken(k); }
     return { raten };
+  }
+
+  /** Eine schon bekannte Aufgabe war kein neuer Stoff: plan.nachschub({ offen, nachgerueckt }) nennt die nächste neue, sie kommt hinten in die Warteschlange.
+      Ein Fehler der Ansicht oder eine nicht lesbare Aufgabe stoppt die Runde nicht (AP-23). */
+  function nachruecken(k) {
+    if (typeof k.plan.nachschub !== 'function' || !k.modus.schreibt || !k.modus.nachschub) return;
+    try {
+      const offen = k.ablauf.offen().filter(key => (k.eintragVon.get(key) || {}).grund === 'neu');
+      const e = k.plan.nachschub({ offen, nachgerueckt: k.b.nachgerueckt });
+      if (!e || !e.key || k.gesehen.has(e.key) || k.ablauf.vorgemerkt(e.key)) return;
+      const g = L.Ablauf.bilde([e], { art: k.art, katalog: k.katalog, box: x => (k.z.lies(x) || {}).box || 0 });
+      if (!g.pakete.length) return;
+      g.eintragVon.forEach((v, key) => k.eintragVon.set(key, v));
+      g.pakete.forEach(p => { k.ablauf.anhaengen(p); k.alleAufgaben.push(...p.aufgaben); });
+      k.gesamt += g.pakete.reduce((s, p) => s + p.aufgaben.length, 0);
+      k.b.nachgerueckt += 1;
+    } catch (fehler) { k.b.fehler.push({ typ: 'nachschub', grund: String((fehler && fehler.message) || fehler) }); }
   }
 
   // ---- Themenstand ------------------------------------------------------------------------------------------

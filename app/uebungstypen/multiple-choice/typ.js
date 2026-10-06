@@ -2,7 +2,7 @@
    Es ist die Ersatzform für Typen, die eine Fähigkeit brauchen (zum Beispiel hoeren ohne Ton: Wort lesen und Bild wählen). Weil man raten kann,
    erreicht eine Aufgabe allein mit diesem Typ höchstens Box 4 (maxBox). Falsche Antworten der Form auswahl tragen optional einen Fehlercode,
    der im Ergebnis als code steht. Bei wortkarte und paar stammen die Ablenker aus den Geschwisteraufgaben des Themas (ctx.pool.thema),
-   bei rechnung sind es Zahlen, die nach typischen Fehlern aussehen. Optionen: anzahl (Kacheln, 2 bis 6, Standard 4) und für wortkarte
+   bei rechnung sind es Zahlen, die nach typischen Fehlern aussehen (oder die Liste inhalt.ablenker der Aufgabe). Optionen: anzahl (Kacheln, 2 bis 6, Standard 4) und für wortkarte
    richtung: auto (Bild wählen, wenn es Bilder gibt, sonst fremd-mutter), fremd-mutter oder mutter-fremd. */
 (function (g) {
   'use strict';
@@ -35,8 +35,11 @@
 
   /** Je Form: { kopf, hinweis, richtig, falsche }. Eine Antwort ist { text, bild?, zahl?, code?, aufgabe? }. */
   const MODELLE = {
-    rechnung: (a, ctx, rng, n) => ({ kopf: `${a.inhalt.text} = ?`, hinweis: null, richtig: { text: String(a.inhalt.ergebnis), zahl: a.inhalt.ergebnis },
-      falsche: falscheZahlen(a.inhalt, n, rng).map(z => ({ text: String(z), zahl: z })) }),
+    rechnung: (a, ctx, rng, n) => {                       // inhalt.ablenker (Liste ganzer Zahlen) geht vor den Zahlen, die nach typischen Fehlern aussehen (V-AP07b-03)
+      const eigene = [...new Set((Array.isArray(a.inhalt.ablenker) ? a.inhalt.ablenker : []).filter(z => Number.isInteger(z) && z !== a.inhalt.ergebnis))].slice(0, n);
+      const rest = falscheZahlen(a.inhalt, n, rng).filter(z => !eigene.includes(z)).slice(0, n - eigene.length);
+      return { kopf: `${a.inhalt.text} = ?`, hinweis: null, richtig: { text: String(a.inhalt.ergebnis), zahl: a.inhalt.ergebnis }, falsche: [...eigene, ...rest].map(z => ({ text: String(z), zahl: z })) };
+    },
 
     auswahl: (a, ctx, rng) => ({ kopf: a.inhalt.frage, hinweis: null, richtig: { text: a.inhalt.richtig },
       falsche: rng.mische(a.inhalt.falsch.map(w => w !== null && typeof w === 'object' ? { text: w.text, code: w.code || null } : { text: w, code: null })) }),
@@ -83,6 +86,7 @@
       const w = optionen || {};
       if (!kennt(a && a.form)) f.push(`Form «${a && a.form}» versteht multiple-choice nicht`);
       else if (a.form === 'rechnung' && ![i.a, i.b, i.ergebnis].every(Number.isInteger)) f.push('a, b und ergebnis müssen ganze Zahlen sein');
+      else if (a.form === 'rechnung' && i.ablenker !== undefined && !(Array.isArray(i.ablenker) && i.ablenker.length <= 5 && i.ablenker.every(z => Number.isInteger(z) && z !== i.ergebnis))) f.push('ablenker muss eine Liste von höchstens fünf ganzen Zahlen sein, die nicht das Ergebnis sind');
       else if (a.form === 'auswahl') {
         if (!Array.isArray(i.falsch) || !i.falsch.length) f.push('falsch braucht mindestens eine Antwort');
         else i.falsch.forEach((x, n) => kurz(`falsch[${n}]`, x !== null && typeof x === 'object' ? x.text : x));

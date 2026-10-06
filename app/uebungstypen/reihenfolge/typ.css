@@ -1,0 +1,73 @@
+/* app/uebungstypen/reihenfolge/typ.css: Karten des Typs «reihenfolge». Farben und Masse kommen aus app/stil/tokens.css.
+   Eine Spalte, jede Karte so hoch wie eine Taste. Links steht die Nummer (leerer Ring, solange die Karte nicht getippt ist),
+   nach «Prüfen» tragen die Karten richtig oder falsch (Rand und Zeichen, nicht nur Farbe). */
+.uebung-reihenfolge {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: var(--a5);
+  width: 100%;
+  max-width: 640px;
+  margin: 0 auto;
+  color: var(--tinte);
+  touch-action: manipulation;
+}
+.uebung-reihenfolge .frage { display: grid; gap: var(--a2); text-align: center; }
+.uebung-reihenfolge .aufgabe { margin: 0; font-size: var(--t-titel); }
+.uebung-reihenfolge .hinweis { margin: 0; color: var(--tinte-leise); font-size: var(--t-text); }
+.uebung-reihenfolge .schritte { display: grid; gap: var(--a2); }
+
+.uebung-reihenfolge .schritt {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: var(--a3);
+  width: 100%;
+  min-height: var(--taste-hoehe);
+  padding: var(--a2) var(--a4) var(--a2) var(--a3);
+  border: 1.5px solid var(--stein);
+  border-radius: var(--radius);
+  background: var(--flaeche);
+  box-shadow: var(--schatten-taste);
+  color: var(--tinte);
+  font: inherit;
+  font-size: var(--t-gross);
+  line-height: 1.3;
+  text-align: left;
+  cursor: pointer;
+  touch-action: manipulation;
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+  -webkit-tap-highlight-color: transparent;
+}
+.uebung-reihenfolge .schritt:active { border-color: var(--akzent); background: var(--akzent-hell); }
+.uebung-reihenfolge .schritt .nr {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border: 1.5px dashed var(--stein);
+  border-radius: 50%;
+  font-size: var(--t-text);
+  font-weight: 650;
+  font-variant-numeric: tabular-nums;
+}
+.uebung-reihenfolge .schritt .text { flex: 1; min-width: 0; }
+.uebung-reihenfolge .schritt.gewaehlt { border-color: var(--akzent); background: var(--akzent-hell); }
+.uebung-reihenfolge .schritt.gewaehlt .nr { border: 0; background: var(--akzent); color: var(--flaeche); }
+.uebung-reihenfolge .schritt:disabled { cursor: default; color: var(--tinte); }
+.uebung-reihenfolge .schritt.richtig { border-color: var(--ok); box-shadow: inset 0 0 0 1.5px var(--ok); }
+.uebung-reihenfolge .schritt.falsch { border-color: var(--fehler); box-shadow: inset 0 0 0 1.5px var(--fehler); }
+.uebung-reihenfolge .schritt.richtig .nr,
+.uebung-reihenfolge .schritt.falsch .nr { border: 0; color: var(--flaeche); }
+.uebung-reihenfolge .schritt.richtig .nr { background: var(--ok-text); }
+.uebung-reihenfolge .schritt.falsch .nr { background: var(--fehler-text); }
+.uebung-reihenfolge .schritt.richtig::after,
+.uebung-reihenfolge .schritt.falsch::after { flex: none; font-size: var(--t-text); }
+.uebung-reihenfolge .schritt.richtig::after { content: "\2713"; color: var(--ok-text); }
+.uebung-reihenfolge .schritt.falsch::after { content: "\2717"; color: var(--fehler-text); }
+
+.uebung-reihenfolge .leiste { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: var(--a3); }

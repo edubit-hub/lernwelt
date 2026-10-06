@@ -1,0 +1,72 @@
+/* app/uebungstypen/uhr/typ.css: Anordnung des Typs «uhr». Knöpfe gestaltet app/stil/basis.css (.knopf), das Zahlenfeld app/stil/tastenfeld.css, Farben und
+   Masse kommen aus app/stil/tokens.css. Beim Einstellen nimmt die Uhr Pointer Events an und lässt dafür das Scrollen und Zoomen aus (touch-action: none).
+   Hochformat: Uhr oben, Bedienung darunter. Querformat: Uhr links, Bedienung rechts. */
+.uebung-uhr {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-areas: "uhr" "bedienung" "hilfe";
+  gap: var(--a4) var(--a6);
+  align-items: center;
+  justify-items: center;
+  width: 100%;
+  max-width: 860px;
+  margin: 0 auto;
+  color: var(--tinte);
+}
+.uebung-uhr .uhr-flaeche { grid-area: uhr; display: block; width: 100%; max-width: 380px; height: auto; -webkit-user-select: none; user-select: none; }
+.uebung-uhr .uhr-flaeche.einstellbar { touch-action: none; cursor: grab; }
+.uebung-uhr .uhr-rand { fill: var(--flaeche); stroke: var(--tinte); stroke-width: 4; }
+.uebung-uhr .uhr-strich { stroke: var(--tinte-leise); stroke-width: 2; }
+.uebung-uhr .uhr-strich.gross { stroke: var(--tinte); stroke-width: 4; }
+.uebung-uhr .uhr-zahl { fill: var(--tinte); font-size: 30px; font-weight: 600; text-anchor: middle; }
+.uebung-uhr .uhr-minute { fill: var(--tinte-leise); font-size: 14px; text-anchor: middle; }
+.uebung-uhr .uhr-arm { stroke: var(--tinte); stroke-linecap: round; }
+.uebung-uhr .uhr-zeiger.stunde .uhr-arm { stroke-width: 11; }
+.uebung-uhr .uhr-zeiger.minute .uhr-arm { stroke: var(--akzent-dunkel); stroke-width: 7; }
+.uebung-uhr .uhr-knauf { fill: var(--akzent-warm); stroke: var(--flaeche); stroke-width: 3; }
+.uebung-uhr .uhr-mitte { fill: var(--tinte); }
+.uebung-uhr .uhr-zeiger:focus { outline: none; }
+.uebung-uhr .uhr-zeiger:focus-visible .uhr-knauf { stroke: var(--tinte); }
+
+.uebung-uhr .uhr-bedienung {
+  grid-area: bedienung;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--a4);
+  min-width: 0;
+}
+.uebung-uhr .aufgabe { margin: 0; text-align: center; font-size: var(--t-anzeige); }
+.uebung-uhr .uhr-gruppe { display: flex; align-items: center; gap: var(--a3); }
+.uebung-uhr .uhr-gruppe .klein { min-width: 4.5em; text-align: right; }
+.uebung-uhr .uhr-schritt { min-width: calc(var(--ziel) + var(--a5)); min-height: var(--taste-hoehe); font-size: var(--t-gross); touch-action: manipulation; font-variant-numeric: tabular-nums; }
+.uebung-uhr .uhr-ok { min-height: var(--taste-hoehe); padding: 0 var(--a5); font-size: var(--t-gross); touch-action: manipulation; }
+
+.uebung-uhr .uhr-eingabe { display: flex; align-items: center; gap: var(--a2); font-size: var(--t-anzeige); }
+.uebung-uhr .uhr-feld {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-width: 88px;
+  min-height: 84px;
+  padding: var(--a2) var(--a3);
+  border: 2px solid var(--linie);
+  border-radius: var(--radius);
+  background: var(--flaeche);
+  color: var(--tinte);
+  touch-action: manipulation;
+}
+.uebung-uhr .uhr-feld.aktiv { border-color: var(--akzent); background: var(--akzent-hell); }
+.uebung-uhr .uhr-wert { font-size: var(--t-anzeige); font-variant-numeric: tabular-nums; line-height: 1.1; }
+.uebung-uhr .uhr-punkt { color: var(--tinte-leise); }
+.uebung-uhr .hilfe-bereich { grid-area: hilfe; display: flex; flex-direction: column; align-items: center; gap: var(--a3); }
+.uebung-uhr .hilfe-ort:empty { display: none; }
+
+@media (min-width: 720px) {
+  .uebung-uhr {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    grid-template-areas: "uhr bedienung" "uhr hilfe";
+    align-content: center;
+  }
+}

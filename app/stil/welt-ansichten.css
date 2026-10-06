@@ -1,0 +1,178 @@
+/* app/stil/welt-ansichten.css: Stil der Welt-Ansichten Siedlung, Forschung, Aufträge und Logbuch (Architektur 7.1 und 7.8, Mockup docs/mockup/siedlung.html, AP-16).
+   Nur Token aus tokens.css (Farben nur als var(--...), color-mix nur auf Token), Raster, Karten, Knöpfe und Listen stehen in bauteile.css und basis.css.
+   Gliederung: Rahmen und Siedlung, Informationsfeld, Forschungsbaum, Aufträge, Logbuch, Hochformat. Bewegung gibt es nur in der Karte selbst (render.js). */
+
+/* Rahmen: Leiste, Hinweis und Karte im Gerüst der Hülle */
+.ansicht.welt-ansicht { padding: 0; overflow: hidden; }
+.welt-seite { position: relative; }
+.welt-seite.voll { height: 100%; }
+.welt-seite.eingebettet { display: grid; grid-template-columns: minmax(0, 1fr) var(--info-breite); }
+.welt-seite.eingebettet > .info { grid-area: auto; }
+.welt-leiste { display: contents; }
+.welt-leiste.eigen { display: flex; flex-wrap: wrap; align-items: center; gap: var(--a2); padding: 0 0 var(--a3); }
+.ueben { flex: none; margin-left: var(--a2); }
+.status .ziel { margin-left: auto; }
+.welt-meldung {
+  position: absolute; left: 14px; bottom: 14px; z-index: 3; max-width: min(460px, calc(100% - 28px)); padding: 10px 14px;
+  border: 1px solid var(--linie); border-left: 4px solid var(--akzent); border-radius: var(--radius); background: var(--flaeche); box-shadow: var(--schatten-schwebend); font-size: 14px;
+}
+.welt-meldung:empty { display: none; }
+
+/* Siedlung */
+.welt-karte-huelle { position: absolute; inset: 0; background: var(--meer); }
+.hud-moeglich { cursor: pointer; }
+.welt-legende {
+  position: absolute; right: 14px; bottom: 14px; z-index: 2; display: flex; gap: var(--a4); padding: 6px 12px;
+  border-radius: var(--radius); background: var(--glas-leise); font-size: var(--t-klein); color: var(--tinte-leise);
+}
+.welt-legende > span { display: inline-flex; align-items: center; gap: 6px; }
+
+/* Informationsfeld: Wahl der Gebäude, Veredeln und Tauschen */
+.wahlliste { margin-top: var(--a2); gap: 6px; }
+.wahlzeile {
+  display: flex; align-items: center; justify-content: space-between; gap: var(--a2); width: 100%; min-height: var(--ziel); padding: 0 var(--a3);
+  border: 1px solid var(--linie); border-radius: var(--radius); background: var(--flaeche); text-align: left;
+}
+.wahlzeile[aria-pressed="true"] { border-color: var(--akzent); background: var(--akzent-hell); font-weight: 600; }
+.aktion-zeile { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--a2) var(--a3); padding: var(--a2) 0; border-top: 1px solid var(--linie-leise); }
+.aktion-zeile:first-of-type { border-top: 0; }
+.aktion-text { display: grid; gap: 2px; flex: 1 1 150px; min-width: 0; }
+.info-aktionen { flex-wrap: wrap; }
+.info-aktionen .knopf { flex: 1 1 auto; white-space: nowrap; }
+.info-kopf .stufen { flex-wrap: wrap; }
+.info-kopf .stufen > span { white-space: nowrap; }
+.aktion-knoepfe { display: flex; flex: none; gap: var(--a2); }
+.aktion-knoepfe .knopf { min-height: var(--ziel); padding: 0 14px; }
+.info-inhalt .hinweis { margin-top: var(--a2); }
+.liste .zeile .ico { color: var(--akzent-dunkel); }
+.liste .zeile .ico.ok { color: var(--ok-text); }
+.liste .zeile .ico.fehler { color: var(--fehler-text); }
+.liste .zeile .ico.leise { color: var(--tinte-leise); }
+
+/* Forschungsbaum: SVG mit Klassen, Knoten sind erforscht, bereit, gesperrt oder Horizont */
+.forschung-feld { position: absolute; inset: 0; overflow: auto; padding: 8px 16px 28px; -webkit-overflow-scrolling: touch; }
+.fo-svg { display: block; width: 100%; max-width: 780px; height: auto; margin: 0 auto; }
+.fo-svg text { font-family: inherit; fill: var(--tinte); }
+.fo-band > rect { fill: var(--flaeche); stroke: var(--linie); }
+.fo-band.fo-gesperrt > rect { fill: var(--grund); stroke-dasharray: 5 4; }
+.fo-band.fo-horizont > rect { fill: transparent; stroke-dasharray: 3 6; }
+.fo-band > text { fill: var(--tinte-leise); font-size: 11px; font-weight: 650; letter-spacing: .06em; }
+.fo-spalte text { fill: var(--tinte-leise); font-size: 13px; font-weight: 650; }
+.fo-schloss rect { fill: var(--tinte-leise); stroke: none; }
+.fo-schloss path { fill: none; stroke: var(--tinte-leise); stroke-width: 1.8; stroke-linecap: round; }
+.fo-kante { fill: none; stroke: var(--akzent-mitte); stroke-width: 2; }
+.fo-kante.aktiv { stroke: var(--akzent); }
+.fo-kante.horizont { stroke: var(--linie); stroke-dasharray: 3 5; }
+.fo-knoten { cursor: pointer; outline: none; }
+.fo-aussen { fill: none; stroke: var(--akzent); stroke-width: 2.5; opacity: 0; }
+.fo-knoten.gewaehlt .fo-aussen, .fo-knoten:focus-visible .fo-aussen { opacity: 1; }
+.fo-rahmen { fill: var(--flaeche); stroke: var(--linie); stroke-width: 1.5; }
+.z-erforscht .fo-rahmen { stroke: var(--ok); }
+.z-moeglich .fo-rahmen { fill: var(--akzent-hell); stroke: var(--akzent); stroke-width: 2; }
+.z-gesperrt .fo-rahmen { fill: var(--grund); }
+.z-horizont .fo-rahmen { fill: transparent; stroke-dasharray: 4 5; }
+.fo-name { font-weight: 650; }
+.fo-knoten.z-gesperrt .fo-name, .fo-knoten.z-horizont .fo-name { fill: var(--tinte-leise); }
+.fo-svg text.fo-leise { fill: var(--tinte-leise); font-size: 12px; }
+.fo-svg text.fo-kosten { font-size: 12.5px; font-weight: 650; }
+.fo-spur { fill: var(--spur); }
+.fo-fuell { fill: var(--akzent); }
+.z-erforscht .fo-fuell { fill: var(--ok); }
+.fo-marke { fill: var(--akzent); }
+.z-erforscht .fo-marke { fill: var(--ok); }
+.fo-haken { fill: none; stroke: var(--flaeche); stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.fo-ziel { fill: var(--akzent-warm); }
+
+/* Aufträge */
+.auftraege > .abschnitt-titel { margin: var(--a5) 0 var(--a2); }
+.auftraege > .unterzeile + .abschnitt-titel, .auftraege > .ergebnis + .abschnitt-titel { margin-top: 0; }
+.auftraege .kacheln { margin-bottom: var(--a2); }
+.auftraege .kachel p { margin: 0; }
+.auftraege .lohn { display: grid; gap: var(--a1); }
+.karte-meldung { margin: 0; color: var(--fehler-text); }
+.karte-meldung:empty { display: none; }
+.ergebnis { margin-bottom: var(--a4); }
+.ergebnis > .kachel-fuss { margin-top: var(--a3); }
+
+/* Logbuch: vier Kacheln der Woche, Wissensstand, Bestwerte, Sammlung */
+.logbuch { max-width: 1120px; }
+.logbuch > .kopf { display: flex; align-items: baseline; flex-wrap: wrap; gap: 4px var(--a4); margin-bottom: var(--a3); }
+.logbuch > .kopf span, .leer-hinweis { color: var(--tinte-leise); }
+.leer-hinweis { margin-bottom: var(--a3); }
+.log-raster { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; align-items: start; }   /* zwei Spalten: sieben Säulen brauchen je 44 px zum Antippen */
+.log-raster > .kachel { gap: 0; padding: 14px 16px; }
+.log-raster .kachel h3 { margin: 0; font-size: 13px; font-weight: 600; color: var(--tinte-leise); }
+.stat .kopf2 { display: flex; justify-content: space-between; align-items: baseline; gap: var(--a2); min-height: 20px; }
+.stat .ablesung { font-size: 12.5px; color: var(--tinte); text-align: right; }
+.stat .gross { margin-top: 4px; font-size: 34px; font-weight: 650; line-height: 1.1; letter-spacing: -.01em; }
+.stat .gross small { margin-left: 3px; font-size: 15px; font-weight: 600; letter-spacing: 0; color: var(--tinte-leise); }
+.stat .vgl { font-size: 12.5px; color: var(--tinte-leise); }
+.stat .diagramm svg { width: 100%; max-width: 340px; height: auto; margin-top: 4px; overflow: visible; }
+.lg-svg text { font-family: inherit; fill: var(--tinte-leise); font-size: 10.5px; }
+.lg-svg text.heute { fill: var(--tinte); font-weight: 650; }
+.lg-svg text.wert { fill: var(--tinte); font-size: 11.5px; font-weight: 650; }
+.lg-achse { stroke: var(--linie); }
+.lg-flaeche { fill: transparent; }
+.saeule { outline: none; cursor: pointer; }
+.saeule .s { fill: var(--akzent-mitte); }
+.saeule.heute .s { fill: var(--akzent); }
+.saeule:focus-visible .s { fill: var(--akzent-dunkel); }
+.lg-flaeche-linie { fill: var(--akzent); fill-opacity: .1; }
+.lg-linie { fill: none; stroke: var(--akzent); stroke-width: 2; stroke-linejoin: round; stroke-linecap: round; }
+.lg-punkt { fill: var(--akzent); stroke: var(--flaeche); stroke-width: 2; }
+.log-raster > .wissen, .log-raster > .best, .log-raster > .sammlung { grid-column: 1 / -1; }
+.kachel .titel { display: flex; align-items: baseline; justify-content: space-between; gap: var(--a2); margin-bottom: var(--a2); }
+.log-raster .kachel .titel h3 { font-size: var(--t-fein); font-weight: 650; letter-spacing: .07em; text-transform: uppercase; }
+.kachel .titel span { font-size: 12.5px; color: var(--tinte-leise); text-align: right; }
+.stand-block { border-top: 1px solid var(--linie); }
+.stand-block:first-of-type { border-top: 0; }
+.stand-gruppe { display: flex; justify-content: space-between; align-items: center; gap: var(--a3); min-height: var(--ziel); padding: 6px 0; cursor: pointer; list-style: none; }
+.stand-gruppe::-webkit-details-marker { display: none; }
+.stand-gruppe::after { content: ''; flex: none; width: 8px; height: 8px; margin: 0 4px 3px var(--a2); border-right: 2px solid var(--tinte-leise); border-bottom: 2px solid var(--tinte-leise); transform: rotate(45deg); }
+.stand-block[open] > .stand-gruppe::after { margin-bottom: -3px; transform: rotate(-135deg); }
+.stand-gruppe .klein { margin-left: auto; text-align: right; }
+.stand-zeile { display: grid; grid-template-columns: minmax(0, 1.5fr) 140px minmax(0, 1fr); gap: 14px; align-items: center; min-height: 38px; padding: 3px 0; border-top: 1px solid var(--linie-leise); }
+.stand-gruppe + .stand-zeile { border-top: 1px solid var(--linie-leise); }
+.stand-zeile .n { font-weight: 600; line-height: 1.25; }
+.stand-zeile small { display: block; font-size: 12.5px; font-weight: 500; color: var(--tinte-leise); }
+.stand-zeile .z { font-size: 13.5px; text-align: right; line-height: 1.25; }
+.skala { display: flex; gap: 3px; }
+.skala i { flex: 1; height: 10px; border-radius: 3px; background: var(--spur); }
+.skala i.s1 { background: var(--akzent-hell); }
+.skala i.s2 { background: var(--akzent-mitte); }
+.skala i.s3 { background: var(--akzent-mitte); background: color-mix(in srgb, var(--akzent) 55%, var(--akzent-mitte)); }
+.skala i.s4 { background: var(--akzent); }
+.skala i.s5 { background: var(--akzent-dunkel); }
+.log-raster > .best { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); column-gap: var(--a5); }
+.best .titel, .best > p { grid-column: 1 / -1; }
+.best .eintrag { padding: 9px 0; border-top: 1px solid var(--linie-leise); }
+.best .w { font-size: 22px; font-weight: 650; line-height: 1.15; }
+.best .w small { font-size: 13px; font-weight: 600; color: var(--tinte-leise); }
+.best .b { display: flex; justify-content: space-between; align-items: baseline; gap: var(--a2); font-size: 13px; color: var(--tinte-leise); }
+.best .neu { font-weight: 600; color: var(--akzent-dunkel); white-space: nowrap; }
+.plaketten { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+.plakette { display: flex; align-items: center; gap: 12px; padding: 10px 12px; border: 1px solid var(--linie); border-radius: var(--radius); background: var(--flaeche); }
+.plakette.leer { border-style: dashed; background: transparent; color: var(--tinte-leise); }
+.plakette .t { font-size: 13.5px; line-height: 1.3; }
+.plakette .t small { display: block; margin-top: 2px; font-size: 12.5px; color: var(--tinte-leise); }
+.abzeichen, .abzeichen svg { flex: none; width: 44px; height: 44px; }
+.pl-rand { stroke: var(--tinte); stroke-opacity: .5; stroke-width: 1.5; }
+.pl-sicher { fill: var(--stein); }
+.pl-gefestigt { fill: var(--sand); }
+.pl-fund { fill: var(--meer); }
+.pl-leer { fill: none; stroke: var(--tinte-leise); stroke-dasharray: 4 4; }
+.pl-innen { fill: none; stroke: var(--tinte); stroke-opacity: .3; stroke-width: 1.5; }
+.pl-haken { fill: none; stroke: var(--tinte); stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+
+/* Hochformat und schmale Fenster: Leiste in Reihenfolge, Bestwerte und Plaketten in zwei statt drei Spalten */
+@media (max-width: 1100px) {
+  .welt-leiste .epoche { order: 1; }
+  .welt-leiste .ueben { order: 2; margin-left: 0; }
+}
+@media (orientation: portrait), (max-width: 900px) {
+  .log-raster > .best { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .plaketten { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .stand-zeile { grid-template-columns: minmax(0, 1.4fr) 110px minmax(0, 1fr); }
+  .welt-legende { display: none; }
+}
+@media (max-width: 640px) { .log-raster { grid-template-columns: minmax(0, 1fr); } }

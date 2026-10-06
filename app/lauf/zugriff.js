@@ -63,7 +63,8 @@
         return m && m.aufgaben ? m.aufgaben[a.id] : undefined;
       },
       /** Schreibt den Zustand z der Aufgabe a. extra.ev (Ereignis lern:aufgabe) führt Tageslog und Fenster der Abrufe nach Statistik.tag und
-          Statistik.abruf (V-AP02-02), extra.code zählt den Fehlercode im Modul. Alles in einem aendere-Aufruf. */
+          Statistik.abruf (V-AP02-02), extra.code zählt den Fehlercode im Modul. extra.bekannt (Vortest gleich richtig, AP-23) zählt im Tageslog
+          `bekannt`, extra.neu merkt die Aufgabe als neuen Stoff von heute (meta.neuHeute). Alles in einem aendere-Aufruf. */
       schreibe(a, z, extra = {}) {
         if (!schreibt) { kopie.set(a.key, z); return; }
         Z().aendere(d => {
@@ -73,9 +74,16 @@
           if (extra.ev) {
             d.tage = d.tage || {};
             d.tage[heute] = L.Statistik.tag(d.tage[heute], extra.ev);
+            if (extra.bekannt) d.tage[heute].bekannt = (d.tage[heute].bekannt || 0) + 1;
             if (d.meta) d.meta.abrufe = L.Statistik.abruf(alsText(d.meta.abrufe), extra.ev);
           }
+          if (extra.neu && d.meta) d.meta.neuHeute = L.Einstufung.zaehle(d.meta, heute, a.key);
         });
+      },
+      /** Merkt die Einstufung eines Moduls im Modulzustand: module[id].einstufung = { tag, aufgaben, bekannt }. */
+      trageEinstufungEin(modulId, daten) {
+        if (!schreibt) return;
+        Z().aendere(() => { Z().modul(modulId).einstufung = daten; });
       },
       /** Zählt aktive Minuten in den Tageslog (nur beim Schreiben). */
       minuten(m) {

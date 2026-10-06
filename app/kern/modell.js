@@ -49,7 +49,7 @@
     const optionen = { ...modul.optionen, ...S.optionen, ...th.optionen };
     for (const [pfad, v] of Object.entries(a)) if (pfad.startsWith('optionen.')) optionen[pfad.slice(9)] = v;
     return {
-      aktiv: a[`themen.${th.id}.aktiv`] !== false,
+      aktiv: `themen.${th.id}.aktiv` in a ? a[`themen.${th.id}.aktiv`] !== false : th.aktiv !== false,   // Eltern-Einstellung gewinnt, sonst das Feld des Themas (V-AP20-02)
       einfuehrung: wert('einfuehrung', 'vortest'),
       leiter: wert('leiter', []),
       optionen,

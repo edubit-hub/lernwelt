@@ -20,6 +20,10 @@
       naechstes: () => q.shift() ?? null,
       rest: () => q.length,
       vorgemerkt,
+      /** Schlüssel der Aufgaben in noch wartenden Paketen der Runde (ohne Nachfassen und Voraussetzungen). */
+      offen: () => q.filter(p => p.art === 'runde').flatMap(p => p.aufgaben.map(a => a.key)),
+      /** Stellt ein Paket hinten an (eine nachrückende neue Aufgabe). */
+      anhaengen: paket => { q.push(paket); },
       nachfassen: (aufgabe, typ) => reihe('nachfassen', aufgabe, typ, abstand),
       einreihen: (aufgabe, typ) => reihe('basis', aufgabe, typ, abstand)
     };

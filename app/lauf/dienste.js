@@ -107,8 +107,11 @@
         return L.Sprache.sprich(text, { ...o, ...(wunsch ? { wunsch } : {}), audio: o.audio ? url(o.audio) : null, signal: o.signal || opt.signal });
       }
     };
+    const modulSprache = (() => { try { const m = a0 && L.registry.module.get(a0.modul); return m && m.sprache ? m.sprache : null; } catch (fehler) { return null; } })();
+    const sprachen = {};                                               // ctx.sprachen: die Sprachcodes des Moduls der ersten Aufgabe, leer ohne Angabe (V-AP17a-02)
+    for (const k of ['fremd', 'mutter']) if (modulSprache && typeof modulSprache[k] === 'string' && modulSprache[k]) sprachen[k] = modulSprache[k];
     return {
-      buehne: opt.buehne, aufgaben: paket.aufgaben, optionen, modus, signal: opt.signal,
+      buehne: opt.buehne, aufgaben: paket.aufgaben, optionen, modus, signal: opt.signal, sprachen,
       dienste: { zeit: opt.zeit || D.neueZeit(), sprache, bild: { url } },
       pool: { thema: id => (a0 ? kat.aufgabenVon(a0.modul, id) : []) },
       hilfe: {

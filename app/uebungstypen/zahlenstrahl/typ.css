@@ -1,0 +1,62 @@
+/* app/uebungstypen/zahlenstrahl/typ.css: Anordnung des Typs «zahlenstrahl». Knöpfe gestaltet app/stil/basis.css (.knopf), Farben und Masse kommen aus
+   app/stil/tokens.css. Die Fläche mit dem Strahl nimmt Pointer Events an und lässt dafür das Scrollen und Zoomen des Browsers aus (touch-action: none),
+   sonst zieht der Finger die Seite statt der Marke. Die Schritt-Knöpfe sind die Bedienung ohne Ziehen. */
+.uebung-zahlenstrahl {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--a4);
+  width: 100%;
+  max-width: 920px;
+  margin: 0 auto;
+  color: var(--tinte);
+}
+.uebung-zahlenstrahl .aufgabe {
+  margin: 0;
+  text-align: center;
+  font-size: var(--t-anzeige);
+  font-variant-numeric: tabular-nums;
+}
+.uebung-zahlenstrahl .zs-flaeche {
+  display: block;
+  width: 100%;
+  height: auto;
+  padding: var(--a2) 0;
+  border: 1px solid var(--linie);
+  border-radius: var(--radius);
+  background: var(--flaeche);
+  touch-action: none;                       /* Pointer Events statt Scrollen und Zoomen */
+  -webkit-user-select: none;
+  user-select: none;
+  cursor: ew-resize;
+}
+.uebung-zahlenstrahl .zs-achse { stroke: var(--tinte); stroke-width: 3; stroke-linecap: round; }
+.uebung-zahlenstrahl .zs-fein { stroke: var(--tinte-leise); stroke-width: 2; fill: none; }
+.uebung-zahlenstrahl .zs-grob { stroke: var(--tinte); stroke-width: 3; fill: none; }
+.uebung-zahlenstrahl .zs-zahl { fill: var(--tinte); font-size: 30px; text-anchor: middle; font-variant-numeric: tabular-nums; }
+.uebung-zahlenstrahl .zs-marke { outline: none; }
+.uebung-zahlenstrahl .zs-marke.aus { visibility: hidden; }
+.uebung-zahlenstrahl .zs-stiel { stroke: var(--akzent-warm); stroke-width: 4; stroke-linecap: round; }
+.uebung-zahlenstrahl .zs-kopf { fill: var(--akzent-warm); stroke: var(--flaeche); stroke-width: 3; }
+.uebung-zahlenstrahl .zs-marke:focus-visible .zs-kopf { stroke: var(--tinte); }
+.uebung-zahlenstrahl .zs-schritte {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--a3);
+}
+.uebung-zahlenstrahl .zs-schritt {
+  min-width: calc(var(--ziel) + var(--a5));
+  min-height: var(--taste-hoehe);
+  font-size: var(--t-gross);
+  font-variant-numeric: tabular-nums;
+  touch-action: manipulation;
+}
+.uebung-zahlenstrahl .zs-ok {
+  min-height: var(--taste-hoehe);
+  padding: 0 var(--a5);
+  font-size: var(--t-gross);
+  touch-action: manipulation;
+}
+.uebung-zahlenstrahl .hilfe-bereich { display: flex; flex-direction: column; align-items: center; gap: var(--a3); }
+.uebung-zahlenstrahl .hilfe-ort:empty { display: none; }

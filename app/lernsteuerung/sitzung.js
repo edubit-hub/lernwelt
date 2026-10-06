@@ -11,10 +11,11 @@
   /** Tagesziel in Aufgaben: Zielminuten durch Sekunden je Aufgabe (12 Minuten bei 12 Sekunden sind 60 Aufgaben als Obergrenze). */
   const zielAufgaben = (R = L.lernregeln.sitzung) => Math.round(R.zielMinuten * 60 / R.sekProAufgabe);
 
-  /** Geschätzte Dauer einer Aufgabe in Sekunden: gleitender Wert `ms` plus Rückmeldezeit, begrenzt. Ohne `ms` gilt `sekProAufgabe`. */
-  function schaetzeSekunden(z, R = L.lernregeln.sitzung) {
+  /** Geschätzte Dauer einer Aufgabe in Sekunden: gleitender Wert `ms` plus Rückmeldezeit, begrenzt. Ohne `ms` gilt der Richtwert des Übungstyps
+      (`schaetzung.typSek`, ein Diktat dauert länger als eine Auswahl), ohne Typ `sekProAufgabe`. */
+  function schaetzeSekunden(z, R = L.lernregeln.sitzung, typ = null) {
     const S = R.schaetzung ?? L.lernregeln.sitzung.schaetzung;
-    if (!z || !(z.ms > 0)) return R.sekProAufgabe;
+    if (!z || !(z.ms > 0)) return (S.typSek && typ && S.typSek[typ]) || R.sekProAufgabe;
     return Math.min(S.max, Math.max(S.min, z.ms / 1000 + S.rueckmeldeSek));
   }
 
@@ -70,15 +71,46 @@
   }
 
   /**
+   * Die neuen Aufgaben des Tages: höchstens `max` insgesamt und `jeModul` je Modul, verteilt nach Neuverteilung (jedes Modul mit offenem Stoff kommt reihum dran, Module mit
+   * Prüfungsdruck zuerst). Innerhalb eines Moduls gilt die Reihenfolge der Kandidaten, je Thema höchstens `neuProTag`. Kandidaten ohne `modul` bilden eine einzige Gruppe.
+   */
+  function waehleNeu(kand, max, jeModul, tagesnummer, gewichte) {
+    const schlange = new Map();
+    for (const k of kand) { const m = k.modul ?? ''; if (!schlange.has(m)) schlange.set(m, []); schlange.get(m).push(k); }
+    /** Wie viele neue Aufgaben das Modul heute hergibt: je Thema höchstens `neuProTag`. */
+    const frei = liste => {
+      const je = new Map();
+      for (const k of liste) { const e = je.get(k.thema) || { n: 0, max: Number.isFinite(k.neuProTag) ? k.neuProTag : Infinity }; e.n += 1; je.set(k.thema, e); }
+      return [...je.values()].reduce((s, e) => s + Math.min(e.n, e.max), 0);
+    };
+    const gruppen = [...schlange].map(([id, liste]) => ({ id, gewicht: gewichte[id], frei: frei(liste) }));
+    const anzahl = L.Neuverteilung.verteile(gruppen, max, tagesnummer, jeModul), proThema = new Map(), neu = [];
+    for (const [id, n] of anzahl) {
+      let genommen = 0;
+      for (const k of schlange.get(id)) {
+        if (genommen >= n) break;
+        if (Number.isFinite(k.neuProTag) && (proThema.get(k.thema) || 0) >= k.neuProTag) continue;
+        proThema.set(k.thema, (proThema.get(k.thema) || 0) + 1);
+        genommen += 1;
+        neu.push({ ...k, grund: 'neu' });
+      }
+    }
+    return neu;
+  }
+
+  /**
    * Tagesauftrag: die Kandidaten in der Reihenfolge, in der sie drankommen, je mit `grund` ('faellig' | 'neu' | 'pruefung').
    * @param ziel     Tagesziel in Aufgaben (Standard: zielAufgaben)
    * @param quote    Trefferquote der letzten fälligen Abrufe (Statistik.quote) oder null. Sie bremst das Neue, solange Fälliges wackelt
-   * @param pruefung null oder { themen, tageBis, neuErlaubt? } (Pruefungsplan.fuerHeute): Stoff ausserhalb des Umfangs rückt zurück
+   * @param pruefung null oder { themen, tageBis, neuErlaubt?, module?, neuGesperrt? } (Pruefungsplan.fuerHeute, Lernplan.lagen): Stoff ausserhalb des Umfangs rückt zurück.
+   *                 `module` sind die Module mit Prüfung (nur sie tragen den Grund 'pruefung'), `neuGesperrt` die, deren Prüfung keinen neuen Stoff mehr zulässt
+   * @param gewichte optional: Modul-ID → Bedarf an neuen Aufgaben je Tag (aus dem Prüfungsplan). Module mit Gewicht über 1 kommen bei den neuen Aufgaben zuerst
+   *                 und bekommen mehr (waehleNeu). Ohne Angabe bekommt jedes Modul mit offenem Stoff reihum seine neuen Aufgaben.
    * @param gruppe   optional: Funktion Kandidat → Schlüssel (zum Beispiel das Fach). Ausgewählt wird gemeinsam, gemischt aber je Gruppe, und die
    *                 Gruppen stehen hintereinander. So bleibt jede wählbare Runde der Ansicht «Lernen» in sich gemischt.
    * @param rng      Zufall mit Startwert, sonst einer aus Datum und Schlüsseln, damit «Sitzung neu laden» dieselbe Reihenfolge liefert
    */
-  function plane({ kandidaten, heute, rng, ziel, quote = null, pruefung = null, regeln, gruppe = null }) {
+  function plane({ kandidaten, heute, rng, ziel, quote = null, pruefung = null, regeln, gruppe = null, gewichte = {} }) {
     const R = regeln || L.lernregeln.sitzung, P = L.Pruefungsplan, Tag = L.Tag;
     ziel = ziel == null ? zielAufgaben(R) : ziel;
     rng = rng || L.Zufall.aus(['sitzung', heute, ...kandidaten.map(k => k.key)].join('|'));
@@ -88,21 +120,16 @@
 
     const prio = k => Math.max(0, Tag.diff(heute, k.faellig)) + (k.letzteFalsch ? 5 : 0) + Math.max(0, 6 - k.box) - (imUmfang(k) ? 0 : 4);
     const faellig = kandidaten.filter(k => !k.neu && k.faellig <= heute).map(k => ({ k, p: prio(k) })).sort((a, b) => b.p - a.p)
-      .map(({ k }) => ({ ...k, grund: pruefung && imUmfang(k) ? 'pruefung' : 'faellig' }));
+      .map(({ k }) => ({ ...k, grund: pruefung && imUmfang(k) && (!pruefung.module || pruefung.module.has(k.modul)) ? 'pruefung' : 'faellig' }));
 
     const rueckstau = faellig.length > R.rueckstauFaktor * ziel;
     const bremse = quote == null || quote >= R.quoteVoll ? 1 : quote >= R.quoteHalb ? 0.5 : 0;
     const neuOk = !pruefung || (pruefung.neuErlaubt !== undefined ? !!pruefung.neuErlaubt : P.neuErlaubt(pruefung.tageBis));
-    const neuMax = rueckstau || !neuOk ? 0
-      : Math.floor(bremse * Math.min(R.neuProTagMax, Math.max(0, ziel - faellig.length), Math.ceil(ziel * R.mix.neu)));
-    const neu = [], proThema = new Map();
-    for (const k of kandidaten) {
-      if (neu.length >= neuMax) break;
-      if (!k.neu || !k.bereit || !basisOk(k) || !imUmfang(k)) continue;
-      if (Number.isFinite(k.neuProTag) && (proThema.get(k.thema) || 0) >= k.neuProTag) continue;
-      proThema.set(k.thema, (proThema.get(k.thema) || 0) + 1);
-      neu.push({ ...k, grund: 'neu' });
-    }
+    const grenze = Math.min(Math.max(0, ziel - faellig.length), Math.ceil(ziel * R.mix.neu));
+    const neuMax = rueckstau || !neuOk ? 0 : Math.floor(bremse * Math.min(R.neuProTagGesamt ?? R.neuProTagMax, grenze));
+    const jeModul = rueckstau || !neuOk ? 0 : Math.floor(bremse * Math.min(R.neuProTagMax, grenze));
+    const gesperrt = k => !!pruefung && !!pruefung.neuGesperrt && pruefung.neuGesperrt.has(k.modul);        // die Prüfung des Moduls lässt keinen neuen Stoff mehr zu
+    const neu = waehleNeu(kandidaten.filter(k => k.neu && k.bereit && basisOk(k) && imUmfang(k) && !gesperrt(k)), neuMax, jeModul, Tag.gueltig(heute) ? Tag.diff(heute, '2026-01-01') : 0, gewichte);
 
     const wiederholen = faellig.slice(0, Math.max(0, ziel - neu.length));
     const gruppeVon = typeof gruppe === 'function' ? gruppe : () => '';

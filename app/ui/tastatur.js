@@ -1,7 +1,8 @@
 /* app/ui/tastatur.js: eigene Buchstabentastatur statt eines nativen Eingabefelds (Architektur 5.8). Die Bildschirmtastatur des iPad
    verschiebt das Layout, zoomt beim Fokussieren und ihre Vorschlagsleiste könnte Antworten vorsagen (Diktat, Lückentext, Wortschatz).
-   tastatur({ layout, zahlen, satzzeichen, leerzeichen, maxLaenge, hardware, onOk, onZeichen, onAenderung }) → { anzeige, el, wert, setze, leere, schliesse }
+   tastatur({ layout, buchstaben, zahlen, satzzeichen, leerzeichen, maxLaenge, hardware, onOk, onZeichen, onAenderung }) → { anzeige, el, wert, setze, leere, schliesse }
      layout       'de-ch' (QWERTZ mit Ä Ö Ü, ohne Eszett). Ein unbekanntes Layout wirft einen Fehler.
+     buchstaben   false: nur die Ziffernreihe, Löschen und OK (für Lücken, in die nur Zahlen gehören; Standard true). Dann gilt zahlen immer.
      zahlen       Ziffernreihe oben (Standard false).   satzzeichen   Zeichen für eine Reihe neben dem Leerzeichen, zum Beispiel '.,?' (Standard keine).
      leerzeichen  Leertaste (Standard true).            maxLaenge     höchstens so viele Zeichen (Standard 80).
      hardware     nimmt am PC zusätzlich die Tastatur an (Standard true). Nur Zeichen, die es auch auf dem Bildschirm gibt.
@@ -20,10 +21,10 @@
   const istBuchstabe = z => z.toLowerCase() !== z.toUpperCase();
   const FELDER = /^(input|textarea|select)$/i;
 
-  function tastatur({ layout = 'de-ch', zahlen = false, satzzeichen = '', leerzeichen = true, maxLaenge = 80, hardware = true, onOk, onZeichen, onAenderung } = {}) {
+  function tastatur({ layout = 'de-ch', buchstaben: mitBuchstaben = true, zahlen = false, satzzeichen = '', leerzeichen = true, maxLaenge = 80, hardware = true, onOk, onZeichen, onAenderung } = {}) {
     const def = LAYOUTS[layout];
     if (!def) throw new Error(`tastatur: unbekanntes Layout «${layout}»`);
-    const h = ui.h;
+    const h = ui.h, nurZahlen = mitBuchstaben === false;
     let wert = '', umschalt = 0;                                      // umschalt: 0 aus, 1 nächster Buchstabe, 2 festgehalten
     const buchstaben = [], erlaubt = new Set(leerzeichen ? [' '] : []);
     const anzeige = h('div.tastatur-anzeige.leer', { role: 'status', 'aria-live': 'polite' });
@@ -68,15 +69,14 @@
     const weg = h('button.taste.taste-weg', { type: 'button', 'aria-label': 'Löschen', onclick: loesche }, '⌫');
     const leer = leerzeichen ? h('button.taste.taste-leer', { type: 'button', 'aria-label': 'Leerzeichen', onclick: () => tippe(' ') }, 'Leerzeichen') : '';
 
+    const reihen = nurZahlen
+      ? [zeile([...def.zahlen].map(zeichenTaste)), zeile([...satzzeichen].map(zeichenTaste), weg, leer, ok)]
+      : [zahlen ? zeile([...def.zahlen].map(zeichenTaste)) : '', zeile([...def.zeilen[0]].map(zeichenTaste)), zeile([...def.zeilen[1]].map(zeichenTaste)),
+        zeile(shift, [...def.zeilen[2]].map(zeichenTaste), weg), zeile([...satzzeichen].map(zeichenTaste), leer, ok)];
     const el = h('div.tastatur', {
-      role: 'group', 'aria-label': 'Buchstabentastatur',
+      role: 'group', 'aria-label': nurZahlen ? 'Zahlentastatur' : 'Buchstabentastatur',
       onmousedown: e => { if (e.preventDefault) e.preventDefault(); }       // ein angeklickter Knopf behält den Fokus nicht (sonst löst die Leertaste ihn nochmals aus)
-    },
-      zahlen ? zeile([...def.zahlen].map(zeichenTaste)) : '',
-      zeile([...def.zeilen[0]].map(zeichenTaste)),
-      zeile([...def.zeilen[1]].map(zeichenTaste)),
-      zeile(shift, [...def.zeilen[2]].map(zeichenTaste), weg),
-      zeile([...satzzeichen].map(zeichenTaste), leer, ok));
+    }, reihen);
 
     // Hardware-Tastatur am PC
     let gesehen = false;

@@ -1,0 +1,38 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 100 480 260" width="640" height="347">
+<!-- Altsteinzeit: Zelt aus Fellen, Feuerstelle, Speer, Rentier und ein Feuerstein. Selbst gezeichnet und vereinfacht, keine Schrift im Bild.
+     data-teil und data-box (x y Breite Höhe im viewBox) nennen, was die Punkte in modul.js treffen müssen. test.js liest sie. -->
+<rect width="480" height="360" fill="#FBF8F0"/>
+<rect x="0" y="290" width="480" height="70" fill="#E8DCB8"/>
+<line x1="0" y1="290" x2="480" y2="290" stroke="#CDBA86" stroke-width="2"/>
+<g data-teil="zelt" data-box="52 140 136 150">
+  <polygon points="56,290 120,168 184,290" fill="#B88A5C" stroke="#8B6540" stroke-width="3" stroke-linejoin="round"/>
+  <polygon points="104,290 120,240 136,290" fill="#6E4F31"/>
+  <path d="M120 168 L108 140 M120 168 L134 142" stroke="#8B6540" stroke-width="5" stroke-linecap="round" fill="none"/>
+  <path d="M86 236 L100 224 M146 244 L158 258" stroke="#8B6540" stroke-width="3" stroke-linecap="round" fill="none"/>
+</g>
+<g data-teil="feuer" data-box="190 234 80 62">
+  <ellipse cx="200" cy="286" rx="9" ry="6" fill="#A3AAB3" stroke="#5B6B78" stroke-width="2"/>
+  <ellipse cx="222" cy="292" rx="9" ry="6" fill="#A3AAB3" stroke="#5B6B78" stroke-width="2"/>
+  <ellipse cx="246" cy="292" rx="9" ry="6" fill="#A3AAB3" stroke="#5B6B78" stroke-width="2"/>
+  <ellipse cx="268" cy="286" rx="9" ry="6" fill="#A3AAB3" stroke="#5B6B78" stroke-width="2"/>
+  <path d="M210 284 L256 270 M256 284 L212 270" stroke="#8B6540" stroke-width="6" stroke-linecap="round" fill="none"/>
+  <path d="M233 272 C 220 262 226 246 233 234 C 236 246 250 250 244 266 C 241 272 237 274 233 272 Z" fill="#D9962B"/>
+  <path d="M233 270 C 228 264 231 256 234 250 C 238 258 241 262 237 268 Z" fill="#F2C25B"/>
+</g>
+<g data-teil="speer" data-box="288 126 36 166">
+  <line x1="294" y1="292" x2="314" y2="150" stroke="#8B6540" stroke-width="5" stroke-linecap="round"/>
+  <polygon points="316,126 308,152 322,150" fill="#8E96A0" stroke="#5B6B78" stroke-width="2" stroke-linejoin="round"/>
+</g>
+<g data-teil="rentier" data-box="334 150 124 142">
+  <path d="M352 254 L350 290 M366 256 L366 290 M394 256 L396 290 M408 254 L410 290" stroke="#6E4F31" stroke-width="6" stroke-linecap="round" fill="none"/>
+  <ellipse cx="380" cy="238" rx="42" ry="24" fill="#A88460" stroke="#6E4F31" stroke-width="2.500"/>
+  <ellipse cx="338" cy="230" rx="6" ry="5" fill="#F3EFE6"/>
+  <polygon points="410,226 424,196 436,204 424,240" fill="#A88460"/>
+  <ellipse cx="442" cy="200" rx="15" ry="9" fill="#A88460" stroke="#6E4F31" stroke-width="2"/>
+  <path d="M434 190 L428 168 M428 168 L420 156 M428 168 L432 152 M434 190 L444 172 M444 172 L452 160 M444 172 L440 156" stroke="#6E4F31" stroke-width="3.500" stroke-linecap="round" fill="none"/>
+</g>
+<g data-teil="silex" data-box="92 306 60 42">
+  <polygon points="92,330 112,308 146,318 152,336 124,348" fill="#8E96A0" stroke="#5B6B78" stroke-width="2.500" stroke-linejoin="round"/>
+  <path d="M112 308 L124 348 M130 322 L146 318" stroke="#C7CDD3" stroke-width="2" stroke-linecap="round" fill="none"/>
+</g>
+</svg>

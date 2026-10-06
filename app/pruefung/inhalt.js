@@ -113,6 +113,12 @@
       if (ids.has(id)) k.fehler('themen', ort, 'ID doppelt');
       ids.add(id);
       if (!text(roh.titel)) k.fehler('themen', ort, 'titel fehlt');
+      if (!fehlt(roh.aktiv) && typeof roh.aktiv !== 'boolean') k.fehler('themen', `${ort}.aktiv`, 'Wahrheitswert erwartet');
+      if (!fehlt(roh.geltung) && !text(roh.geltung)) k.fehler('geltung', `${ort}.geltung`, 'Text erwartet (ein bis zwei Sätze: wo der Stoff gilt, wen man fragt)');
+      if (roh.aktiv === false) {                        // Thema standardmässig aus (V-AP20-02, R44): der Elternbereich muss es einschalten können und sagen, wo es gilt
+        if (!text(roh.geltung)) k.fehler('geltung', ort, 'aktiv: false braucht geltung (ein bis zwei Sätze: wo der Stoff gilt, wen man fragt)');
+        if (!objekt(m.anpassbar) || !(`themen.${id}.aktiv` in m.anpassbar || 'themen.*.aktiv' in m.anpassbar)) k.warnung('geltung', ort, `aktiv: false, aber themen.${id}.aktiv fehlt in anpassbar: der Elternbereich kann das Thema nicht einschalten`);
+      }
       if (!listeVon(roh.ziele, text)) k.fehler('themen', ort, 'ziele: Liste von Lernziel-IDs erwartet');
       else for (const z of roh.ziele) { if (ziele.has(z)) gedeckt.add(z); else k.fehler('themen', `${ort}.ziele`, `Lernziel «${z}» fehlt in lernziele`); }
       if (!fehlt(roh.voraussetzung) && !listeVon(roh.voraussetzung, text)) k.fehler('themen', ort, 'voraussetzung: Liste von Thema-IDs erwartet');
@@ -188,7 +194,7 @@
     for (const [code, c] of Object.entries(objekt(m.fehlerCodes) ? m.fehlerCodes : {})) if (objekt(c)) ton.push(...P.texteIn({ kind: c.kind, eltern: c.eltern }, `fehlerCodes.${code}`));
     ton.push(...P.texteIn(m.begleitung, 'begleitung'));
     for (const t of k.themen) {
-      ton.push(...P.texteIn(objekt(t.roh.hilfe) ? t.roh.hilfe.schritte : null, `${t.ort}.hilfe.schritte`));
+      ton.push(...P.texteIn(objekt(t.roh.hilfe) ? t.roh.hilfe.schritte : null, `${t.ort}.hilfe.schritte`), ...P.texteIn(text(t.roh.geltung) ? [t.roh.geltung] : null, `${t.ort}.geltung`));
       for (const a of t.alle) {
         if (objekt(a.hilfe) && a.hilfe !== t.roh.hilfe) ton.push(...P.texteIn(a.hilfe.schritte, `${t.id}/${a.id}.hilfe.schritte`));   // eigene Hilfe der Aufgabe
         if (t.roh.generator) alle.push(...P.texteIn({ inhalt: a.inhalt, hilfe: a.hilfe }, `${t.id}/${a.id}`));      // erzeugte Aufgaben stehen nicht im Modul

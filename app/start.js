@@ -1,7 +1,8 @@
 /* app/start.js: Startablauf und Verdrahtung der Schichten (Architektur 2.2, 8.5, 8.8, F-AP03-01). index.html bindet diese Datei als letzte ein, der Lader
    fügt danach alle anderen Dateien ein. Ablauf: Kern laden, Fehlerprotokoll, Startcheck, Zustand laden und migrieren, aktive Module und Welt-Thema laden,
    Welt-Verbindung am Bus, Service Worker, Gerüst und Startansicht. Nur diese Datei verbindet Lernen und Welt (Kopplungsregel 4).
-   Nachgeladen wird nur beim Start (und beim Anlegen des Profils, bevor die erste Runde läuft), nie mitten in einer Sitzung. */
+   Nachgeladen wird nur beim Start (und beim Anlegen des Profils, bevor die erste Runde läuft), nie mitten in einer Sitzung. Einzige Ausnahme ist der
+   Baustein der eigenen Wortlisten (AP-22), wenn der Elternbereich die erste Liste anlegt: eine Datei, ohne Wirkung auf eine laufende Runde. */
 (function (g) {
   'use strict';
   const L = (g.Lernwelt = g.Lernwelt || {});
@@ -15,8 +16,12 @@
   const statusErlaubt = () => (entwicklung() ? ['freigegeben', 'entwurf'] : ['freigegeben']);
   const sicher = f => { try { return f(); } catch (e) { return undefined; } };
 
+  /** In der Entwicklungsfassung beschränkt ?module=<id>,<id> die Wahl auf die genannten Module (zum Prüfen eines einzelnen Moduls und für die Abnahmeläufe).
+      Die veröffentlichte Fassung (https) ignoriert den Parameter. */
+  const nurModule = () => { const ort = ((S.fenster || g).location) || {}, m = entwicklung() && /[?&]module=([a-z0-9,_-]+)/.exec(ort.search || ''); return m ? m[1].split(',') : null; };
+
   /** Die Module, die zur Klasse passen und im Manifest stehen (IDs). */
-  S.modulWahl = klasse => (L.katalog || []).filter(k => L.manifest && L.manifest.module[k.id] && statusErlaubt().includes(k.status) && (!k.stufen || k.stufen.includes(klasse))).map(k => k.id);
+  S.modulWahl = klasse => { const nur = nurModule(); return (L.katalog || []).filter(k => L.manifest && L.manifest.module[k.id] && statusErlaubt().includes(k.status) && (!k.stufen || k.stufen.includes(klasse)) && (!nur || nur.includes(k.id))).map(k => k.id); };
 
   /** Welt-Thema: ?welt=<id> (Entwicklung), sonst die Einstellung, sonst das erste Thema ausser «test». Nur was im Manifest steht, sonst keines. */
   function waehleWelt(manifest, einstellungen, suche) {
@@ -35,6 +40,67 @@
     const alt = ids.filter(id => L.registry.module.has(id) && doc.module[id].version !== L.registry.module.get(id).version);
     if (alt.length) L.Zustand.aendere(z => alt.forEach(id => L.Migration.modulMigration(z, L.registry.module.get(id))));
     return bericht;
+  };
+
+  /** Eigene Wortlisten (AP-22, V-AP22-01): zustand.listen trägt die Listen aus dem Elternbereich, der Baustein module/_gemeinsam/wortliste.js baut daraus je
+      Liste ein Modul, das hier wie ein Manifest-Modul angemeldet und aktiviert wird. Der Baustein steht nicht im Manifest (kein Modul nennt ihn unter braucht)
+      und wird darum nur geladen, wenn es eine Liste gibt oder der Elternbereich eine anlegt. Abgelaufene Listen (gueltig bis) fehlen in der Registry,
+      ihr Fortschritt bleibt im Lernstand. */
+  const LISTEN_BAUSTEIN = '_gemeinsam/wortliste', LISTEN_DATEI = 'module/_gemeinsam/wortliste.js';
+  S.listenIds = new Set();
+
+  S.ladeListen = async function ladeListen() {
+    if (L.registry.bausteine.has(LISTEN_BAUSTEIN)) return true;
+    try { await (S.lader || L.Lader).laden({ module: { _wortlisten: [LISTEN_DATEI] } }, { welt: null, module: ['_wortlisten'] }); } catch (fehler) { sicher(() => L.Fehlerlog.melde(fehler)); }
+    return L.registry.bausteine.has(LISTEN_BAUSTEIN);
+  };
+
+  /** Meldet die Listen des Lernstands als Module an (synchron, der Baustein muss geladen sein). Gelöschte und abgelaufene Listen verlassen die Registry,
+      die übrigen werden neu gebaut (nach einer Änderung im Elternbereich) und im Lernstand aktiviert. → { angemeldet, ausgeblendet, fehler } (IDs und Texte). */
+  S.meldeListen = function meldeListen(opt = {}) {         // opt: { heute, zustand } (für Tests und den Elternbereich)
+    const W = L.registry.bausteine.get(LISTEN_BAUSTEIN), Z = opt.zustand || L.Zustand, doc = Z.hole(), listen = Array.isArray(doc.listen) ? doc.listen : [];
+    const heute = opt.heute || (L.Lernplan && L.Lernplan.heute ? L.Lernplan.heute(doc) : L.Tag.heute()), bericht = { angemeldet: [], ausgeblendet: [], fehler: [] }, ids = new Set();
+    for (const liste of listen) {
+      const id = liste && liste.id;
+      if (typeof id !== 'string') continue;
+      if (L.registry.module.has(id) && !S.listenIds.has(id)) { bericht.fehler.push(`«${id}» gehört schon einem Modul`); continue; }
+      ids.add(id);
+      if (W.abgelaufen(liste, heute)) { L.registry.module.delete(id); bericht.ausgeblendet.push(id); continue; }
+      try { L.registry.module.set(id, W.baue(liste)); bericht.angemeldet.push(id); } catch (fehler) { bericht.fehler.push(`«${id}»: ${fehler.message}`); sicher(() => L.Fehlerlog.melde(fehler)); }
+    }
+    for (const id of S.listenIds) if (!ids.has(id)) L.registry.module.delete(id);
+    S.listenIds = ids;
+    const neu = bericht.angemeldet.filter(id => { const m = doc.module && doc.module[id]; return !m || m.aktiv !== true || m.version !== W.VERSION; });
+    if (neu.length) Z.aendere(z => neu.forEach(id => { const m = Z.modul(id); m.aktiv = true; m.version = W.VERSION; }));
+    return bericht;
+  };
+
+  /** Beim Start: gibt es Listen, wird der Baustein geladen und die Listen angemeldet. Ohne Listen geschieht nichts (kein zusätzlicher Ladevorgang). Wirft nie. */
+  S.registriereListen = async function registriereListen() {
+    try {
+      const doc = L.Zustand.hole();
+      if (!(Array.isArray(doc.listen) && doc.listen.length)) return { angemeldet: [], ausgeblendet: [], fehler: [] };
+      if (!(await S.ladeListen())) return { angemeldet: [], ausgeblendet: [], fehler: ['Der Baustein für Wortlisten lässt sich nicht laden'] };
+      return S.meldeListen();
+    } catch (fehler) {
+      sicher(() => L.Fehlerlog.melde(fehler));
+      return { angemeldet: [], ausgeblendet: [], fehler: [String((fehler && fehler.message) || fehler)] };
+    }
+  };
+
+  /** Schreibt den Ertrag, den die Welt-Verbindung `ab` sammelt, in den Tageslog (zustand.tage[heute].ertrag = { fach: n }), damit der Tagesbericht auch nach
+      einem Neustart und über mehrere Runden stimmt (AP-23). Läuft nach der Welt-Verbindung am selben Bus, ihr Hörer ist dann schon durch. Gibt die Abmeldung zurück. */
+  S.merkeErtrag = function merkeErtrag(bus, ab, zustand = L.Zustand) {
+    let schon = {};
+    return bus.on('lern:aufgabe', () => {
+      const jetzt = ab.zuwachs().ertrag, neu = Object.entries(jetzt).map(([f, n]) => [f, n - (schon[f] || 0)]).filter(([, n]) => n > 0);
+      schon = jetzt;
+      if (!neu.length) return;
+      sicher(() => zustand.aendere(z => {
+        const tag = L.Lernplan.heute(z), t = ((z.tage = z.tage || {})[tag] = z.tage[tag] || {}), e = (t.ertrag = { ...t.ertrag });
+        for (const [fach, n] of neu) e[fach] = (e[fach] || 0) + n;
+      }));
+    });
   };
 
   /** In derselben Berührung wie der Tipp auf «Start» aufrufen: iOS gibt Sprache und Audio nur aus einer Berührung frei (5.7). */
@@ -88,6 +154,8 @@
     try {
       await S.lader.laden(L.manifest, { welt: null, module: [] });               // Kern, Typen, Hilfsmittel. Module und Welt hängen vom Zustand ab
       L.Fehlerlog.installiere(w); L.Fehlerlog.verbindeLader(S.lader);
+      if (L.ElternListen) sicher(() => L.ElternListen.anmelden());               // der Reiter «Wortlisten» (AP-22) meldet sich erst hier an, nicht beim Laden der Datei
+      for (const n of ['ElternModule', 'ElternPruefung', 'ElternSchwaechen', 'ElternGespraech']) if (L[n]) sicher(() => L[n].anmelden());   // ebenso die Reiter von AP-13b
       const check = L.Startcheck.pruefe({ g: w, lader: S.lader });                // im Browser ist w das globale Objekt, Tests geben ein Fenster vor
       S.faehigkeiten = check.faehigkeiten;
       if (!check.ok) { L.Startcheck.zeige(wurzel, check, d); L.gestartet = true; return S; }
@@ -95,9 +163,12 @@
       S.ergebnis = L.Zustand.starte(opt.zustand || {});
       if (!S.ergebnis.fehler) {
         await S.ladeModule();
+        await S.registriereListen();                                             // eigene Wortlisten (AP-22), vor dem Warten auf die Stimmen
         if ((L.Lernplan.aktive(L.Zustand.hole()).some(id => L.registry.module.get(id).sprache)) && L.Sprache) await L.Sprache.bereit();   // iOS lädt die Stimmen verzögert (5.7)
         const ab = L.Welt.verbinde(L.bus);
         S.zuwachs = () => ab.zuwachs();
+        if (S.ertragAb) S.ertragAb();
+        S.ertragAb = S.merkeErtrag(L.bus, ab);
         S.persistenz = L.Speicher.persistenz(w.navigator, !!check.faehigkeiten.standalone);
       }
       S.sw = registriereSw(w);

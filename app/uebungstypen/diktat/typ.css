@@ -1,0 +1,42 @@
+/* app/uebungstypen/diktat/typ.css: Anordnung des Typs «diktat». Tastatur und Anzeige gestaltet app/stil/tastenfeld.css, Knöpfe app/stil/basis.css.
+   Farben und Masse kommen aus app/stil/tokens.css. Oben der Knopf «Wiederholen» mit dem Stand, darunter Anzeige und Tastatur. Am Ende steht die Liste
+   der Abschnitte mit Rand und Zeichen (nicht nur Farbe), die Rückmeldung des Laufs zeigt daneben den richtigen Text. */
+.uebung-diktat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--a4);
+  width: 100%;
+  max-width: 780px;
+  margin: 0 auto;
+  color: var(--tinte);
+  touch-action: manipulation;
+}
+.uebung-diktat .diktat-kopf { display: grid; justify-items: center; gap: var(--a2); text-align: center; }
+.uebung-diktat .abspielen { min-width: 170px; min-height: var(--taste-hoehe); }
+.uebung-diktat .diktat-stand { margin: 0; }
+.uebung-diktat .diktat-hinweis { margin: 0; font-size: var(--t-text); }
+.uebung-diktat .diktat-hinweis:empty { display: none; }
+.uebung-diktat .diktat-hinweis b { font-size: var(--t-gross); color: var(--tinte); }
+
+.uebung-diktat .diktat-ergebnis { display: grid; gap: var(--a2); width: 100%; margin: 0; padding: 0; list-style: none; }
+.uebung-diktat .diktat-ergebnis li {
+  display: flex;
+  align-items: center;
+  gap: var(--a3);
+  min-height: var(--taste-hoehe);
+  padding: var(--a2) var(--a4);
+  border: 1px solid var(--linie);
+  border-left-width: 4px;
+  border-radius: var(--radius);
+  background: var(--flaeche);
+  font-size: var(--t-gross);
+  -webkit-user-select: none;
+  user-select: none;
+}
+.uebung-diktat .diktat-ergebnis li.richtig { border-left-color: var(--ok); }
+.uebung-diktat .diktat-ergebnis li.falsch { border-left-color: var(--fehler); }
+.uebung-diktat .diktat-ergebnis .zeichen { flex: none; width: 1.2em; text-align: center; font-weight: 650; }
+.uebung-diktat .diktat-ergebnis .richtig .zeichen { color: var(--ok-text); }
+.uebung-diktat .diktat-ergebnis .falsch .zeichen { color: var(--fehler-text); }
+.uebung-diktat .diktat-ergebnis .eingabe-text { min-width: 0; overflow-wrap: anywhere; white-space: pre-wrap; }

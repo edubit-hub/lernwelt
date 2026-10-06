@@ -1,10 +1,10 @@
-/* app/lauf/bericht.js: der Bericht einer Runde (was Lauf.start zurückgibt), das Zusammenfassen mehrerer Berichte und die Auswertung einer
-   Probeprüfung (Architektur 6.6). Der Text zum Ende steht in Rueckmeldung.texte.abschluss, hier stehen nur Zahlen. */
+/* app/lauf/bericht.js: der Bericht einer Runde (was Lauf.start zurückgibt), das Zusammenfassen mehrerer Berichte, der Tagesbericht aus dem Tageslog
+   und die Auswertung einer Probeprüfung (Architektur 6.6). Der Text zum Ende steht in Rueckmeldung.texte.abschluss, hier stehen nur Zahlen. */
 (function (g) {
   'use strict';
   const L = (g.Lernwelt = g.Lernwelt || {});
 
-  const ZAEHLER = ['aufgaben', 'ersterVersuch', 'hilfe', 'falsch', 'gezeigt', 'neu', 'korrigiert', 'nachgefasst', 'morgen', 'minuten', 'pakete', 'ms'];
+  const ZAEHLER = ['aufgaben', 'ersterVersuch', 'hilfe', 'falsch', 'gezeigt', 'neu', 'bekannt', 'nachgerueckt', 'korrigiert', 'nachgefasst', 'morgen', 'minuten', 'pakete', 'ms'];
   const LISTEN = ['uebersprungen', 'fehler', 'vorgezogen', 'ergebnisse'];
 
   /** Leerer Bericht. aufgaben zählt jede Aufgabe einmal je Runde (Nachfassen nicht), ersterVersuch davon die selbständig richtigen,
@@ -31,6 +31,27 @@
     return summe;
   }
 
+  /** Wahr, wenn vor `heute` noch kein Tag mit Aufgaben im Tageslog steht: der erste Tag. */
+  const ersterTag = (doc, heute) => !Object.entries((doc && doc.tage) || {}).some(([tag, log]) => tag < heute && log && log.aufgaben > 0);
+
+  /** Wie viele Aufgaben von heute morgen oder früher wieder fällig sind (aus den Aufgabenzuständen aller Module, ohne Lauf). */
+  function morgenFaellig(doc, heute) {
+    const morgen = L.Tag.plus(heute, 1);
+    return Object.values((doc && doc.module) || {}).reduce((n, m) => n + Object.values((m && m.aufgaben) || {}).filter(z => z && z.zuletzt === heute && z.faellig <= morgen).length, 0);
+  }
+
+  /** Der Tagesbericht aus dem Tageslog des Zustands (zustand.tage[heute]) und nicht aus den Runden seit dem Start der App (AP-23): er stimmt auch
+      nach einem Neustart und zählt jede Runde des Tages mit. `neu` ohne die schon bekannten Aufgaben. Die Themenstufen kennt der Log nicht (opt.stufen). */
+  function ausTageslog(doc, heute, opt = {}) {
+    const log = (doc && doc.tage && doc.tage[heute]) || {}, b = neu('tagesauftrag', heute);
+    return Object.assign(b, { aufgaben: log.aufgaben || 0, ersterVersuch: log.richtig || 0, hilfe: log.hilfe || 0, falsch: log.falsch || 0, bekannt: log.bekannt || 0,
+      neu: Math.max(0, (log.neu || 0) - (log.bekannt || 0)), minuten: Math.round(log.min || 0), morgen: morgenFaellig(doc, heute), stufen: opt.stufen || [],
+      ersterTag: ersterTag(doc, heute) });
+  }
+
+  /** Der Ertrag von heute aus dem Tageslog als Tabelle { fach: n }. */
+  const ertragVon = (doc, heute) => ({ ...((doc && doc.tage && doc.tage[heute] && doc.tage[heute].ertrag) || {}) });
+
   /** Wertet eine Probeprüfung aus (Pruefungsplan.auswerte, V-AP02-02). Es zählt der erste Versuch, nur «richtig» gibt Punkte. k: Zustand der Runde,
       titelVon(themaId) gibt den Titel eines Themas. Gibt { modul, art, punkte, max, proTeil, proThema, fehler, text } zurück. */
   function wertePruefung(k, titelVon) {
@@ -43,5 +64,5 @@
       text: L.Rueckmeldung.texte.pruefung({ punkte: r.punkte, max: r.max, themen }) };
   }
 
-  L.Bericht = { neu, summiere, wertePruefung };
+  L.Bericht = { neu, summiere, wertePruefung, ausTageslog, ertragVon, ersterTag, morgenFaellig };
 })(globalThis);

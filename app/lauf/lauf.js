@@ -5,8 +5,9 @@
   'use strict';
   const L = (g.Lernwelt = g.Lernwelt || {});
 
-  const MODI = {                                         // schreibt: Lernstand und Ereignisse. sammelt: Rückmeldung erst am Ende
-    tagesauftrag:    { modus: 'ueben',           schreibt: true,  nachfassen: true, deckel: true },
+  const MODI = {                                         // schreibt: Lernstand und Ereignisse. sammelt: Rückmeldung erst am Ende. nachschub: rückt Neues nach (AP-23)
+    tagesauftrag:    { modus: 'ueben',           schreibt: true,  nachfassen: true, deckel: true, nachschub: true },
+    einstufung:      { modus: 'ueben',           schreibt: true,  nachfassen: false, deckel: true, einstufung: true },
     zusatz:          { modus: 'ueben',           schreibt: true,  nachfassen: true, grund: 'extra' },
     expedition:      { modus: 'ueben',           schreibt: true,  nachfassen: true },
     simulation:      { modus: 'simulation',      schreibt: true,  nachfassen: false, sammelt: true },
@@ -45,7 +46,7 @@
 
   function pruefeVoraussetzungen(modus) {
     const noetig = { Wiederholung: L.Wiederholung, Stand: L.Stand, Fehler: L.Fehler, Statistik: L.Statistik, Modell: L.Modell, ui: L.ui, Dienste: L.Dienste,
-      Ablauf: L.Ablauf, Verbuchen: L.Verbuchen, Schleife: L.Schleife, Bericht: L.Bericht, Rueckmeldung: L.Rueckmeldung };
+      Ablauf: L.Ablauf, Verbuchen: L.Verbuchen, Schleife: L.Schleife, Bericht: L.Bericht, Rueckmeldung: L.Rueckmeldung, Einstufung: L.Einstufung };
     if (modus.schreibt) noetig.Zustand = L.Zustand;
     for (const [name, wert] of Object.entries(noetig)) if (!wert) throw new Error(`Lauf: Lernwelt.${name} ist nicht geladen`);
   }
@@ -56,8 +57,9 @@
     if (mitSprache && L.Sprache && typeof L.Sprache.bereit === 'function') await Promise.resolve(L.Sprache.bereit()).catch(() => false);
   }
 
-  /** Führt eine Runde durch. art: tagesauftrag, zusatz, expedition, herausforderung, simulation oder vorschau.
-      plan: { heute, eintraege: [{ key, grund?, typ?, teil?, punkte? }], deckel?, maxMinuten?, ziel?, pruefung?: { modul, art } }.
+  /** Führt eine Runde durch. art: tagesauftrag, einstufung, zusatz, expedition, herausforderung, simulation oder vorschau.
+      plan: { heute, eintraege: [{ key, grund?, typ?, teil?, punkte? }], deckel?, maxMinuten?, ziel?, pruefung?: { modul, art }, modul? (einstufung),
+      nachschub?: ({ offen, nachgerueckt }) → Eintrag | null (tagesauftrag: nächste neue Aufgabe für eine schon bekannte, AP-23) }.
       huelle: DOM-Element, in dem die Runde erscheint. signal: optionaler AbortSignal von aussen. Gibt ein Promise mit dem Bericht zurück. */
   async function start({ art, plan, huelle, signal: extern } = {}) {
     const modus = MODI[art];
@@ -108,6 +110,7 @@
       if (modus.schreibt) {
         const morgen = L.Tag.plus(plan.heute, 1);
         b.morgen = [...k.verbucht.values()].filter(a => { const z = k.z.lies(a); return z && z.faellig <= morgen; }).length;
+        if (art === 'einstufung' && plan.modul && b.aufgaben > 0) k.z.trageEinstufungEin(plan.modul, { tag: plan.heute, aufgaben: b.aufgaben, bekannt: b.bekannt });
         if (b.aufgaben > 0) L.bus.emit('lern:sitzung', { art, minuten: b.minuten, aufgaben: b.aufgaben, ersterVersuch: b.ersterVersuch, neu: b.neu, korrigiert: b.korrigiert });
       }
       if (plan.ziel) { b.ziel = plan.ziel; b.zielErreicht = b.aufgaben > 0 && b.ersterVersuch / b.aufgaben >= plan.ziel; }

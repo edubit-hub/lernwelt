@@ -1,0 +1,36 @@
+/* app/welten/archipel/archipel.css: Töne und Hintergrund des Welt-Themas «Archipel» (Architektur 7.1, 7.5 und 7.7, Mockup AP-19).
+   Die Palette aus tokens.css bleibt unberührt, hier stehen nur Ergänzungen für Gebäude und Landschaft (anmutungstest.md 7.2).
+   Der Bausatz (app/welt/iso.js) liest jede Variable als --<name> aus :root und bildet daraus drei Töne je Körper: oben 26 % Weiss, links der Ton selbst,
+   rechts 22 % Tinte. Ein Gebäude im Thema nennt sie als farbe: 'kalk'. Fehlt eine Variable, zeichnet der Bausatz in Stein. Regeln für Auswahl, Bewegung
+   und Fokus der Karte bringt render.js selbst mit, damit jedes Thema ohne eigene CSS-Datei funktioniert. */
+:root {
+  /* Gebäude und Landschaft */
+  --kalk: #EEE8D8;        /* helle Wände */
+  --ziegel: #B7694F;      /* Dächer, Schornstein, Ziegelstapel */
+  --schiefer: #6C7F8E;    /* Dächer von Rathaus und Werkstatt */
+  --dachholz: #94704C;    /* Dach des Sägewerks, Tresen */
+  --brett: #D5B78F;       /* helle Bretterwände */
+  --tuer: #7A5A3E;        /* Türen, wenn die Form keine Farbe nennt */
+  --tor: #5A4635;         /* dunkle Tore */
+  --erde: #B9A47B;        /* Klippe der Insel */
+  --tanne: #7BA384;       /* Tannen */
+  --laub: #93BA83;        /* Laubbäume und Büsche */
+  --fenster: #587383;     /* Fenster, die rechte Seite um 20 % dunkler */
+  --papier: #F6F2E8;      /* Zifferblatt, Segel, Schlossfläche */
+  /* Boden und Wasser */
+  --platte: #CDD0CB;      /* Platte unter einem Gebäude */
+  --weg: #D6D7CF;         /* Wege zwischen den Bauplätzen */
+  --flachwasser: #D3E9ED; /* eine Zelle Wasser um das Land */
+  --meer-hell: #CDE6EB;   /* Mitte des Meeres */
+  --meer-tief: #B4D4DB;   /* Rand des Meeres */
+}
+
+/* Hintergrund der Karte: etwas Tiefe im Meer. div.welt-karte, damit die Regel gegen die Grundregel in render.js gewinnt. */
+div.welt-karte {
+  background: radial-gradient(ellipse 70% 62% at 50% 50%, var(--meer-hell) 0%, var(--meer) 62%, var(--meer-tief) 100%);
+}
+.welt text { font-family: inherit; }
+
+/* Symbole der Rohstoffe und Güter (Iso.symbol): Linien 1,5 Pixel, unabhängig von der Grösse */
+.iso-symbol { flex: none; color: var(--tinte); }
+.iso-symbol * { vector-effect: non-scaling-stroke; }

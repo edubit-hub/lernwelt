@@ -1,0 +1,39 @@
+/* app/uebungstypen/blitzrechnen/typ.css: Anordnung des Typs «blitzrechnen». Zahlenfeld und Tasten gestaltet app/stil/tastenfeld.css, Knöpfe und Karten
+   app/stil/basis.css, Farben und Masse kommen aus app/stil/tokens.css. Absichtlich ruhig: keine Zeitanzeige, kein Balken, der leerläuft, keine Farbwechsel
+   bei einer Antwort. Hochformat: Stand, Aufgabe, Zahlenfeld untereinander. Querformat: links Aufgabe, rechts das Zahlenfeld. */
+.uebung-blitz {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-areas: "stand" "aufgabe" "eingabe" "fuss";
+  gap: var(--a4) var(--a6);
+  align-items: start;
+  justify-items: center;
+  width: 100%;
+  max-width: 760px;
+  margin: 0 auto;
+  color: var(--tinte);
+  touch-action: manipulation;
+}
+.uebung-blitz .bl-stand { grid-area: stand; margin: 0; }
+.uebung-blitz .aufgabe {
+  grid-area: aufgabe;
+  align-self: center;
+  margin: 0;
+  text-align: center;
+  font-size: var(--t-anzeige);
+  font-variant-numeric: tabular-nums;
+}
+.uebung-blitz .eingabe { grid-area: eingabe; justify-self: center; width: auto; gap: var(--a3); }
+.uebung-blitz .bl-fuss { grid-area: fuss; }
+.uebung-blitz .bl-karte { grid-column: 1 / -1; grid-row: 1 / -1; width: 100%; max-width: 480px; align-items: stretch; text-align: left; }
+.uebung-blitz .bl-karte p { margin: 0; }
+.uebung-blitz .bl-karte .kachel-fuss { flex-wrap: wrap; align-items: center; margin-top: var(--a3); }
+
+@media (min-width: 640px) {
+  .uebung-blitz {
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-rows: auto 1fr auto;
+    grid-template-areas: "stand eingabe" "aufgabe eingabe" "fuss eingabe";
+  }
+  .uebung-blitz .aufgabe { font-size: calc(var(--t-anzeige) * 1.5); }
+}

@@ -45,39 +45,47 @@
    * @param davonNeu     davon noch nie gesehen
    * @param tagesMinuten Zeit je Lerntag, @param lerntage erlaubte Wochentage (0 = Montag), @param sek Sekunden je Aufgabe
    * @param simulation, diagnose  Zahl der Aufgaben von Simulation und Diagnose-Probelauf (siehe groesse), @param format optional für `vorrang`
+   * @param neuMax  neue Aufgaben je Tag, die der Tagesauftrag dem Modul im Mittel gibt (Lernplan.verteilung). Ohne Angabe gilt lernregeln.sitzung.neuProTagMax, also ein Modul allein.
+   * @param anteil  Anteil des Moduls an der Übungszeit von 0 bis 1 (mit mehreren Modulen teilen sie sich die Tageszeit). Ohne Angabe 1.
+   * @param freieTage  Tage «JJJJ-MM-TT», an denen kein Lernen verlangt wird (Ferienmodus). Sie zählen nicht als Lerntage, auch nicht für Diagnose und Probeprüfung.
    */
-  function plan({ heute, datum, offen, davonNeu, tagesMinuten = 12, lerntage = [0, 1, 2, 3, 4, 5, 6], sek = 12, simulation = 30, diagnose = 20, format = null }) {
-    const R = L.lernregeln.pruefung, S = L.lernregeln.sitzung, E = einstellung(), Tag = L.Tag;
-    const tage = [];
+  function plan({ heute, datum, offen, davonNeu, tagesMinuten = 12, lerntage = [0, 1, 2, 3, 4, 5, 6], sek = 12, simulation = 30, diagnose = 20, format = null, neuMax = null, anteil = 1, freieTage = [] }) {
+    const R = L.lernregeln.pruefung, S = L.lernregeln.sitzung, E = einstellung(), Tag = L.Tag, grenze = neuMax === null ? S.neuProTagMax : neuMax;
+    anteil = anteil > 0 ? Math.min(1, anteil) : 1;
+    const tage = [], frei = new Set(freieTage);                          // freie Tage (Ferienmodus) sind keine Lerntage: der Tagesauftrag verlangt dann nichts
     for (let d = heute; Tag.diff(datum, d) > 0; d = Tag.plus(d, 1)) {
-      if (!lerntage.includes(Tag.wochentag(d))) continue;
+      if (!lerntage.includes(Tag.wochentag(d)) || frei.has(d)) continue;
       const bis = Tag.diff(datum, d);
       tage.push({ datum: d, bis, phase: phaseVon(bis, R), neuErlaubt: neuErlaubt(bis, R) });
     }
     const proTag = Math.floor(tagesMinuten * 60 / sek), angelernt = Math.max(0, offen - davonNeu);
     const bedarf = davonNeu * E.beruehrungenNeu + angelernt * E.beruehrungenAngelernt + simulation + diagnose;   // Berührungen bis «sicher»
-    const kapazitaet = tage.length * proTag, auslastung = kapazitaet ? bedarf / kapazitaet : Infinity;
+    const kapazitaet = Math.round(tage.length * proTag * anteil), auslastung = kapazitaet ? bedarf / kapazitaet : Infinity;
     const neuTage = tage.filter(t => t.neuErlaubt).length;
     const neuProTag = neuTage ? Math.ceil(davonNeu / neuTage) : davonNeu;
-    const neuMoeglich = neuTage * S.neuProTagMax;                      // so viel Neues passt höchstens noch hinein
+    const neuMoeglich = Math.floor(neuTage * grenze);                  // so viel Neues passt höchstens noch hinein
     const ampel = auslastung >= E.rot || davonNeu > neuMoeglich ? 'rot'
-      : auslastung >= E.gelb || neuProTag > E.neuAnteilGelb * S.neuProTagMax ? 'gelb' : 'gruen';
+      : auslastung >= E.gelb || neuProTag > E.neuAnteilGelb * grenze ? 'gelb' : 'gruen';
+    const zahl = x => String(Math.round(x * 10) / 10).replace('.', ',');
 
     const risiken = [];
     if (!tage.length) risiken.push('Bis zur Prüfung bleibt kein Lerntag.');
     else if (davonNeu && !neuTage) risiken.push('Es bleibt keine Zeit mehr für neuen Stoff.');
-    else if (neuProTag > S.neuProTagMax) risiken.push(`Neuer Stoff: ${neuProTag} Aufgaben pro Tag nötig, empfohlen höchstens ${S.neuProTagMax}.`);
+    else if (neuProTag > grenze) risiken.push(neuMax === null ? `Neuer Stoff: ${neuProTag} Aufgaben pro Tag nötig, empfohlen höchstens ${S.neuProTagMax}.`
+      : `Neuer Stoff: ${neuProTag} Aufgaben pro Tag nötig, der Tagesauftrag gibt diesem Modul im Mittel ${zahl(neuMax)}.`);
     if (tage.length && auslastung >= E.rot) risiken.push(`Der Bedarf von etwa ${bedarf} Berührungen übersteigt die ${kapazitaet}, die in der verfügbaren Zeit Platz haben.`);
 
     let empfehlung = null;
+    const minuten = tage.length ? Math.ceil(bedarf / (tage.length * anteil) * sek / 60) : null;      // Tageszeit, mit der die Berührungen Platz hätten
     if (ampel === 'rot') {
       if (!tage.length) empfehlung = { art: 'kein-lerntag' };
       else if (davonNeu > neuMoeglich) empfehlung = { art: 'umfang-kuerzen', neueAufgabenHoechstens: neuMoeglich, ...(format ? { vorrang: vorrang(format).map(x => x.thema) } : {}) };
-      else empfehlung = { art: 'mehr-minuten', minuten: Math.ceil(bedarf / tage.length * sek / 60) };
+      else empfehlung = { art: 'mehr-minuten', minuten };
     }
     const diagnoseAm = (tage.find(t => t.bis <= R.diagnoseVon && t.bis >= R.diagnoseBis) || tage.find(t => t.bis < R.diagnoseBis && t.bis > R.simulation) || {}).datum || null;
     const simulationAm = ([...tage].reverse().find(t => t.bis >= R.simulation) || {}).datum || null;
-    return { tage, kapazitaet, bedarf, auslastung, neuProTag, ampel, empfehlung, diagnoseAm, simulationAm, risiken };
+    const freie = [...frei].filter(d => Tag.gueltig(d) && Tag.diff(d, heute) >= 0 && Tag.diff(datum, d) > 0).length;
+    return { tage, kapazitaet, bedarf, auslastung, neuProTag, neuMax: grenze, anteil, minuten, freieTage: freie, ampel, empfehlung, diagnoseAm, simulationAm, risiken };
   }
 
   /**

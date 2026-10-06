@@ -19,8 +19,10 @@
       heuteOffen: (n, m) => `Heute: ${mz(n, 'Aufgabe', 'Aufgaben')}, etwa ${min(m)}.`,
       heuteErledigt: 'Heute ist alles Fällige erledigt.',
       heuteNichts: 'Heute ist nichts fällig.',
-      keinModul: 'Noch kein Lernmodul aktiv. Eine Sicherung mit aktivem Modul lässt sich im Elternbereich unter «Daten» einspielen.',
-      los: 'Start', eltern: 'Eltern', elternBeschriftung: 'Elternbereich öffnen', elternMitHinweis: 'Elternbereich öffnen. Es gibt einen Hinweis.', elternHinweis: 'Hinweis: Eine Sicherung ist fällig.',
+      heuteFerien: name => `${name}: Heute gibt es keinen Tagesauftrag.`,
+      heuteFerienGeuebt: n => `Heute geübt: ${mz(n, 'Aufgabe', 'Aufgaben')}.`,
+      keinModul: 'Hier ist noch nichts eingerichtet. Frag deine Eltern.', zuDenEltern: 'Zu den Eltern',
+      los: 'Start', losFerien: 'Trotzdem üben', eltern: 'Eltern', elternBeschriftung: 'Elternbereich öffnen', elternMitHinweis: 'Elternbereich öffnen. Es gibt einen Hinweis.', elternHinweis: 'Hinweis: Eine Sicherung ist fällig.',
       elternFehlt: 'Der Elternbereich ist in dieser Version noch nicht verfügbar.',
       neueVersion: 'Neue Version bereit.', neueVersionKnopf: 'Jetzt laden',
       version: v => `Version ${v}`, testprofil: p => `Testprofil «${p}»`,
@@ -38,10 +40,12 @@
       nichtsFaellig: 'Heute ist nichts fällig. Morgen geht es weiter.',
       zusatz: 'Zusatzrunde', zusatzStarten: 'Zusatzrunde starten',
       zusatzFrei: 'Eine Zusatzrunde ist freiwillig und bringt keinen Ertrag.',
-      keinModul: 'Es ist noch kein Lernmodul aktiv.',
+      keinModul: 'Hier ist noch nichts eingerichtet. Frag deine Eltern.',
+      ferien: name => `${name}: Heute gibt es keinen Tagesauftrag.`, ferienFrei: 'Wenn du trotzdem üben möchtest, stehen die Runden bereit.',
+      ferienGeuebt: n => `Heute geübt: ${mz(n, 'Aufgabe', 'Aufgaben')}.`, weitere: 'Weitere Möglichkeiten',
       modulFehler: grund => `Ein Modul lässt sich nicht lesen: ${grund}`,
       statusOffen: n => `Heute: Tagesauftrag noch ${mz(n, 'Aufgabe', 'Aufgaben')}`,
-      statusErledigt: 'Heute: Tagesauftrag erledigt'
+      statusErledigt: 'Heute: Tagesauftrag erledigt', statusFerien: 'Heute: Ferien, kein Tagesauftrag', statusFerienGeuebt: n => `Heute: Ferien, ${mz(n, 'Aufgabe', 'Aufgaben')} geübt`
     },
     abschluss: {
       /** Text, wenn eine Runde fertig ist, der Tagesauftrag aber noch nicht (sonst gilt Rueckmeldung.texte.abschluss). */

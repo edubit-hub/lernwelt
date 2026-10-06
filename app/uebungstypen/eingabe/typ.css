@@ -20,6 +20,8 @@
   text-align: center;
   font-size: var(--t-anzeige);
   font-variant-numeric: tabular-nums;
+  overflow-wrap: break-word;               /* ein langes Zahlwort läuft nicht unter das Zahlenfeld, ein weiches Trennzeichen (U+00AD) bleibt die bevorzugte Bruchstelle (V-AP18b-04) */
+  hyphens: manual;
 }
 .uebung-eingabe .eingabe {                /* Hülle für Anzeige und Tasten, Grundform in app/stil/tastenfeld.css */
   grid-area: eingabe;

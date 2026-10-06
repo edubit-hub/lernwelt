@@ -89,7 +89,7 @@
   .menue { flex-direction: row; gap: 6px; padding: 6px var(--a3); border-right: 0; border-bottom: 1px solid var(--linie); }
   .menue > button { flex: 1; justify-content: center; min-height: 48px; }
   .menue .punkt { position: absolute; top: 8px; right: 8px; margin: 0; }
-  .info { max-height: min(41dvh, 440px); border-left: 0; border-top: 1px solid var(--linie); }
+  .info { max-height: min(52dvh, 620px);          /* M2/M3: bei 41 % verschwand die Voraussetzung unter der Aktionsleiste, das Kind musste scrollen, um zu lesen, was fehlt */ border-left: 0; border-top: 1px solid var(--linie); }
   .kacheln { grid-template-columns: minmax(0, 1fr); }
   .status { flex-wrap: wrap; row-gap: 0; gap: 0 var(--a3); padding-top: 2px; padding-bottom: 2px; }
   .status .meldung { order: 3; flex-basis: 100%; }

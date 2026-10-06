@@ -1,6 +1,9 @@
 /* module/mathe-einmaleins/generator.js: Aufgabenbestand und Fehlerdiagnose, nur für dieses Modul (Architektur 4.3).
-   Kernaufgaben-Strategie: a · b gehört zur Reihe b und wird über die Kernaufgaben 1·, 2·, 5· und 10· derselben Reihe abgeleitet.
-   Reine Berechnung: kein Zustand, keine Oberfläche, kein Zufall, keine Uhr. Gleiche Parameter ergeben denselben Bestand. */
+   Kernaufgaben-Strategie: a · b gehört zur Reihe b und wird über die Kernaufgaben 1·, 2·, 5· und 10· derselben Reihe abgeleitet
+   (Zahlenbuch: Merkaufgaben, Mathwelt: Kernaufgaben, die Zerlegungen unten sind gegen das Lehrmittel der Klasse abzugleichen).
+   Die Generatoren der übrigen Themen stehen in generator-verstehen.js, generator-ableiten.js, generator-teilen.js und generator-zehner.js.
+   Reine Berechnung: kein Zustand, keine Oberfläche, kein Zufall, keine Uhr. Gleiche Parameter ergeben denselben Bestand.
+   Die IDs `<a>x<b>` und `<a>d<b>` gehören zu bestehenden Aufgaben und ändern sich nie (ids.lock.json). */
 (function (g) {
   'use strict';
   const L = g.Lernwelt;
@@ -68,6 +71,7 @@
       if (!Number.isInteger(z)) return 'sonstige';
       if (z === (a - 1) * b || z === (a + 1) * b) return 'eine-gruppe-daneben';
       if (ab && ab.op === '-' && z === (ab.teile[0] + ab.teile[1]) * b) return 'ableiten-vorzeichen';
+      if (z === a + b) return 'mal-plus-verwechselt';         // 3 · 4 als 7: addiert statt malgenommen
       if (B.ziffernVertauscht(z, c)) return 'ziffern-vertauscht';
       if (B.zehnerDaneben(z, c)) return 'zehner-daneben';
       return 'sonstige';
@@ -77,8 +81,14 @@
   L.generator('mathe-einmaleins/teilaufgaben', {
     pool: params => alle('mathe-einmaleins/teilaufgaben', params, teilaufgabe),
     diagnose(auf, antwort) {
-      const z = antwort && antwort.zahl, q = auf.inhalt.ergebnis;
-      return z === q ? null : Number.isInteger(z) && Math.abs(z - q) === 1 ? 'eine-gruppe-daneben' : 'sonstige';
+      const z = antwort && antwort.zahl, { a, b, ergebnis: q } = auf.inhalt;
+      if (z === q) return null;
+      if (!Number.isInteger(z)) return 'sonstige';
+      if (Math.abs(z - q) === 1) return 'eine-gruppe-daneben';
+      if (z === a - b) return 'teilen-minus-verwechselt';     // 28 : 7 als 21: abgezogen statt geteilt
+      if (z === a * b) return 'teilen-mal-verwechselt';       // 28 : 7 als 196: malgenommen statt geteilt
+      if (z === b) return 'teiler-genannt';                   // 28 : 7 als 7: den Teiler hingeschrieben
+      return 'sonstige';
     }
   });
 })(globalThis);

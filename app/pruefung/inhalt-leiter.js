@@ -66,7 +66,12 @@
 
     const grenze = L.lernregeln.mastery.gefestigtBox;   // ab dieser Box heisst ein Thema «gefestigt»: Typen mit tieferem maxBox lassen Raten zu
     const aktiv = [3, 4, 5, 6].map(b => { try { return typen.get(L.Modell.typFuer(th.t, b).typ) || null; } catch (e) { return null; } });
-    if (aktiv.every(d => d && eig(d).maxBox < grenze)) k.warnung('leiter-raten', ort, `ab Box 3 nur Typen, bei denen Raten möglich ist (maxBox unter ${grenze}): die Aufgaben erreichen den Stand «gefestigt» nicht`);
+    if (aktiv.every(d => d && eig(d).maxBox < grenze)) {
+      const grund = th.t.leiterRatenVerzicht;           // begründete Abweichung (V-AP18d-02): bleibt eine Warnung, auch im Freigabemodus, und nennt den Grund
+      if (th.t.leiterRatenVerzicht !== undefined && !k.text(grund)) k.fehler('leiter-raten', `${th.ort}.leiterRatenVerzicht`, 'leiterRatenVerzicht braucht einen Text: warum Raten hier kein Problem ist');
+      else if (k.text(grund)) k.warnung('leiter-raten', ort, `Raten ist möglich, begründet vom Modul: ${grund}`, true);
+      else k.warnung('leiter-raten', ort, `ab Box 3 nur Typen, bei denen Raten möglich ist (maxBox unter ${grenze}): die Aufgaben erreichen den Stand «gefestigt» nicht`);
+    } else if (th.t.leiterRatenVerzicht !== undefined) k.warnung('leiter-raten', `${th.ort}.leiterRatenVerzicht`, 'leiterRatenVerzicht ist überflüssig: die Leiter enthält einen Typ ohne Rateweg');
   }
 
   /** Prüfungsformat nach modul-schema 3.8: Themen, Anzahl, Typ, Punkte. */

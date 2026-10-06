@@ -62,9 +62,15 @@
       H('div.start-fuss', eltern(ctx)));
   }
 
-  /** Zusammenfassung des Tages in einem Satz. */
+  /** Der grosse Knopf «Zu den Eltern»: Ist noch nichts eingerichtet, ist das für das Kind der einzige Weg (die Module schaltet der Elternbereich ein). */
+  const zuDenEltern = ctx => H('button.knopf.primaer.gross.start-zu-eltern', { type: 'button', onclick: () => {
+    if (elternAnsicht()) ctx.gehe('eltern'); else L.ui.dialog.meldung(T().elternFehlt);
+  } }, T().zuDenEltern);
+
+  /** Zusammenfassung des Tages in einem Satz. In den Ferien steht, dass es keinen Tagesauftrag gibt, und nie ein Rückstand. */
   function heute(t) {
     if (t.keinModul) return '';
+    if (t.ferien) return `${T().heuteFerien(t.ferien.name)}${t.gemacht.aufgaben > 0 ? ` ${T().heuteFerienGeuebt(t.gemacht.aufgaben)}` : ''}`;
     if (t.aufgaben > 0) return T().heuteOffen(t.aufgaben, t.minuten);
     return t.gemacht.aufgaben > 0 ? T().heuteErledigt : T().heuteNichts;
   }
@@ -78,12 +84,13 @@
     if (!doc.profil || !String(doc.profil.vorname || '').trim()) { huelle.replaceChildren(profil(ctx)); return; }
     let t = null;
     try { t = L.Lernplan.tagesauftrag(); } catch (fehler) { melde(fehler); }
-    const los = t && !t.keinModul ? H('button.knopf.primaer.gross.start-los', { type: 'button', onclick: () => { if (S().entsperre) S().entsperre(); ctx.gehe('lernen'); } }, T().los) : '';
+    const los = t && !t.keinModul ? H('button.knopf.primaer.gross.start-los', { type: 'button', onclick: () => { if (S().entsperre) S().entsperre(); ctx.gehe('lernen'); } }, t.ferien ? T().losFerien : T().los) : '';
+    // Die Versionsnummer steht im Elternbereich unter «Diagnose», nicht hier.
     huelle.replaceChildren(H('div.start-seite', L.Abschluss && L.Abschluss.insel ? L.Abschluss.insel() : '', H('h1', T().hallo(doc.profil.vorname)),
-      H('p.unterzeile', t ? heute(t) : ''), t && t.keinModul ? H('div.kasten.hilfe', T().keinModul) : '', update(), hinweise(), los,
-      H('div.start-fuss', eltern(ctx, elternHinweis()), H('span.klein.start-version', T().version((L.version && L.version.app) || 'dev')))));
+      H('p.unterzeile', t ? heute(t) : ''), t && t.keinModul ? H('div.kein-modul', H('p', T().keinModul), zuDenEltern(ctx)) : '', update(), hinweise(), los,
+      H('div.start-fuss', eltern(ctx, elternHinweis()))));
   }
 
   // titel als Getter: texte.js lädt nach dieser Datei (alphabetisch), gelesen wird erst beim Aufruf
-  L.Ansichten.start = { id: 'start', get titel() { return L.Texte.menue.start; }, icon: 'pfeil', menue: 10, zeige };
+  L.Ansichten.start = { id: 'start', get titel() { return L.Texte.menue.start; }, icon: 'pfeil', menue: 10, zeige, zuDenEltern };
 })(globalThis);
