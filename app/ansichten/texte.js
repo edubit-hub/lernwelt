@@ -19,7 +19,7 @@
       heuteOffen: (n, m) => `Heute: ${mz(n, 'Aufgabe', 'Aufgaben')}, etwa ${min(m)}.`,
       heuteErledigt: 'Heute ist alles Fällige erledigt.',
       heuteNichts: 'Heute ist nichts fällig.',
-      keinModul: 'Noch kein Lernmodul aktiv. Im Elternbereich lassen sich Module aktivieren.',
+      keinModul: 'Noch kein Lernmodul aktiv. Eine Sicherung mit aktivem Modul lässt sich im Elternbereich unter «Daten» einspielen.',
       los: 'Start', eltern: 'Eltern', elternBeschriftung: 'Elternbereich öffnen', elternMitHinweis: 'Elternbereich öffnen. Es gibt einen Hinweis.', elternHinweis: 'Hinweis: Eine Sicherung ist fällig.',
       elternFehlt: 'Der Elternbereich ist in dieser Version noch nicht verfügbar.',
       neueVersion: 'Neue Version bereit.', neueVersionKnopf: 'Jetzt laden',

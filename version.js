@@ -9,9 +9,9 @@
   const L = (g.Lernwelt = g.Lernwelt || {});
 
   L.version = {
-    app: "2026.10.06-2",
-    build: "20261006-bb22362a",
-    stand: "2026-10-06T14:55:20+02:00",
+    app: "2026.10.06-3",
+    build: "20261006-36b5203c",
+    stand: "2026-10-06T14:58:49+02:00",
     dateien: [
       { p: "app/ansichten/abschluss.js", h: "49e19e75c1252901" },
       { p: "app/ansichten/eltern-daten.js", h: "7f60adb241c5f67f" },
@@ -23,7 +23,7 @@
       { p: "app/ansichten/lernen.js", h: "ff917a8b2f789341" },
       { p: "app/ansichten/lernplan.js", h: "37afb06f04dae8cf" },
       { p: "app/ansichten/start.js", h: "b2a2aa0e738f7623" },
-      { p: "app/ansichten/texte.js", h: "33441386468788b4" },
+      { p: "app/ansichten/texte.js", h: "481fc2fe5e38e82c" },
       { p: "app/hilfsmittel/punktefeld.js", h: "240a358391f58cb0" },
       { p: "app/kern/ereignisse.js", h: "add71a2e9136ae90" },
       { p: "app/kern/fehlerlog.js", h: "ca1aa11cd3262ce8" },
