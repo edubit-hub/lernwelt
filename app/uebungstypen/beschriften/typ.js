@@ -78,7 +78,7 @@
           ueberlagerung.replaceChildren(...punkte.map((_, i) => punkt(i)));
           labels.replaceChildren(...reihe.map(label));
           const alle = !belegung.includes(null);
-          hinweis.textContent = bewertet ? '' : gewaehlt !== null ? 'Tippe jetzt die passende Beschriftung an.' : alle ? 'Alle Punkte sind beschriftet. Tippe auf «Prüfen» oder ändere eine Beschriftung.' : 'Tippe einen Punkt im Bild an.';
+          hinweis.textContent = bewertet ? '' : gewaehlt !== null ? 'Tippe jetzt die passende Beschriftung an.' : alle ? 'Alle Punkte sind beschriftet. Tippe auf «Prüfen» oder ändere eine Beschriftung.' : 'Tippe einen Punkt im Bild an, dann das passende Wort.';
           loesung.textContent = bewertet && markiert && !bewertet.every(Boolean) ? `Richtig wäre: ${punkte.map((p, i) => `${i + 1} ${p.text}`).join(', ')}.` : '';
           pruefen.disabled = !!bewertet || !alle;
         }

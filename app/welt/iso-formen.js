@@ -1,7 +1,7 @@
 /* app/welt/iso-formen.js: weitere Formen und Symbole des Bausatzes (Architektur 7.7), Teil von iso.js. Die Formen melden sich in Iso.formen an,
    Iso.bild() findet sie dort: zylinder, kuppel, kegel, kugel, uhr, fahne, schale, rauch, linie. Kein DOM, keine Gesichter.
    Radien r von zylinder, kuppel und kegel stehen in Rasterzellen, der Radius einer kugel in Pixeln.
-   Iso.symbol(name) liefert ein Linien-Symbol (24 x 24, Strich 1,5) für Rohstoffe und Güter: stein, holz, handelsgut, proben, ziegel, balken, wuerfel.
+   Iso.symbol(name) liefert ein Linien-Symbol (24 x 24, Strich 1,5) für Rohstoffe und Güter: stein, holz (ein Stamm mit Jahresringen), handelsgut, proben, ziegel, balken, wuerfel.
    Die Füllungen nehmen die Farben des Themas über CSS-Variablen (tokens.css), ein unbekannter Name ergibt den Würfel. */
 (function (g) {
   'use strict';
@@ -65,7 +65,8 @@
   const fuell = (n, ersatz, offen) => `style="fill:var(--${n}${ersatz ? `, var(--${ersatz})` : ''})${offen ? `;fill-opacity:${offen}` : ''}"`;
   const SYMBOLE = {
     stein: () => `<path d="M4 15.5 6.8 8.2 12.6 5l6.8 3.6.6 7.2-6.6 3.7z" ${fuell('stein')}/><path d="M6.8 8.2 12 11.6l7.4-3M12 11.6l1.4 7.9"/>`,
-    holz: () => `<path d="M6 7.5h12.2a1.8 1.8 0 0 1 1.8 1.8v6.4a1.8 1.8 0 0 1-1.8 1.8H6z" ${fuell('holz')}/><ellipse cx="6" cy="12.5" rx="2.8" ry="5" ${fuell('sand')}/><path d="M6 10.6a.9 1.9 0 1 0 0 3.8M10.5 10.5h6.5"/>`,
+    holz: () => `<path d="M7 7h11.5a2.8 5 0 0 1 0 10H7z" ${fuell('holz')}/><path d="M11 9.6h6.2M12.5 14.4h4.5"/>` +    // Stamm: Rinde mit Fugen, vorne die Schnittfläche
+      `<ellipse cx="7" cy="12" rx="3.4" ry="5" ${fuell('sand')}/><ellipse cx="7" cy="12" rx="1.7" ry="2.6"/><path d="M7 11.4v1.2"/>`,
     handelsgut: () => `<path d="M4 8.2 12 4.5l8 3.7v8.1L12 20l-8-3.7z" ${fuell('sand')}/><path d="M4 8.2 12 12l8-3.8M12 12v8"/>`,
     proben: () => `<path d="M10 4h4M10.6 4v5.4L5.6 17.8a1.8 1.8 0 0 0 1.6 2.7h9.6a1.8 1.8 0 0 0 1.6-2.7l-5-8.4V4" ${fuell('meer')}/><path d="M8 15.2h8"/>`,
     ziegel: () => `<path d="M3.5 11 12 7l8.5 4v3.6L12 18.5l-8.5-3.9z" ${fuell('ziegel', 'holz', .7)}/><path d="M3.5 11 12 15l8.5-4M12 15v3.5"/>`,

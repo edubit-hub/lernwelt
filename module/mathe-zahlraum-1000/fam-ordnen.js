@@ -38,11 +38,20 @@
     ordnen('or-h-gleich', 2, true, rng => { const h = zw(rng, 1, 9); return verschiedene(rng, 4, r => stellenZahl(h, r.int(10), r.int(10)), l => new Set(l.map(n => Math.floor(n / 10))).size === 4); }),
     ordnen('or-hz-gleich', 3, true, rng => { const h = zw(rng, 1, 9), z = zw(rng, 0, 9); return verschiedene(rng, 4, r => stellenZahl(h, z, r.int(10))); }),
     ordnen('or-ziffern-auf', 3, true, ziffernVier), ordnen('or-ziffern-ab', 3, false, ziffernVier),
-    ordnen('or-null', 3, true, mitNull)
+    ordnen('or-null', 3, true, mitNull),
+    /* ab 0.2.0: fünf und sechs Zahlen, auch nahe beieinander um einen vollen Hunderter (der Typ reihenfolge trägt bis acht Karten) */
+    ordnen('or-auf-5', 2, true, rng => verschiedene(rng, 5, r => r.int(900) + 100, l => verschiedeneH(l) >= 3)),
+    ordnen('or-auf-6', 3, true, rng => verschiedene(rng, 6, r => r.int(900) + 100, l => verschiedeneH(l) >= 3)),
+    ordnen('or-ab-6', 3, false, rng => verschiedene(rng, 6, r => r.int(900) + 100, l => verschiedeneH(l) >= 3)),
+    ordnen('or-nah-6', 3, true, rng => {
+      const m = zw(rng, 2, 9) * 100;                                     // sechs Zahlen höchstens 69 neben der Marke, mindestens zwei darunter und zwei darüber
+      return verschiedene(rng, 6, r => m - 69 + r.int(139), l => l.filter(x => x < m).length >= 2 && l.filter(x => x > m).length >= 2);
+    })
   ];
 
   const zuerstO = { 'or-ab-3': ['or-auf-3'], 'or-auf-4': ['or-auf-3'], 'or-ab-4': ['or-ab-3', 'or-auf-4'], 'or-h-gleich': ['or-auf-4'], 'or-hz-gleich': ['or-h-gleich'],
-    'or-ziffern-auf': ['or-h-gleich'], 'or-ziffern-ab': ['or-ziffern-auf'], 'or-null': ['or-ziffern-auf'] };
+    'or-ziffern-auf': ['or-h-gleich'], 'or-ziffern-ab': ['or-ziffern-auf'], 'or-null': ['or-ziffern-auf'],
+    'or-auf-5': ['or-auf-4'], 'or-auf-6': ['or-auf-5'], 'or-ab-6': ['or-auf-6', 'or-ab-4'], 'or-nah-6': ['or-auf-6', 'or-h-gleich'] };
   L.generator('mathe-zahlraum-1000/ordnen', F.bauen('mathe-zahlraum-1000/ordnen', geordnet, (auf, antwort) => {
     const folge = antwort && antwort.folge, n = auf.inhalt.schritte.length;
     if (!Array.isArray(folge) || folge.length !== n) return 'sonstige';

@@ -52,7 +52,7 @@
     const n = b.aufgaben || 0, ers = b.ersterVersuch || 0;
     const gewinn = ertragSatz(ertrag) + (b.ersterTag && ertrag !== undefined && ertrag !== null && ohneErtrag(ertrag) ? ` ${ertragErklaerung(b)}` : '');
     const zahlen = `${mz(n, 'Aufgabe', 'Aufgaben')}, ${ers} beim ersten Versuch.`;
-    const morgen = b.morgen > 0 ? ` ${b.morgen === 1 ? '1 Aufgabe kommt' : `${b.morgen} Aufgaben kommen`} morgen wieder.` : '';
+    const morgen = b.morgen > 0 ? ` ${b.morgen === 1 ? '1 Aufgabe übst' : `${b.morgen} Aufgaben übst`} du morgen zum Festigen.` : '';
     if (b.abgebrochen) return n ? `Pause. ${mz(n, 'Aufgabe ist', 'Aufgaben sind')} gespeichert. Der Rest bleibt fällig.` : 'Pause. Es ist noch nichts gespeichert, alles bleibt fällig.';
     if (b.zeitdeckel) return `Die Zeit für heute ist um: ${zahlen} Der Rest bleibt fällig.${gewinn}`;
     switch (b.art) {
@@ -98,6 +98,9 @@
     weiter: () => 'Weiter',
     beenden: () => 'Beenden',
     beendenBeschriftung: () => 'Runde beenden',
+    beendenFrage: () => 'Runde beenden? Was du gelöst hast, bleibt gespeichert.',
+    beendenJa: () => 'Ja, beenden',
+    weiterUeben: () => 'Weiterüben',
     fortschritt: (art, nr, gesamt) => (art === 'nachfassen' ? 'Noch einmal' : art === 'basis' ? 'Zur Sicherheit' : `Aufgabe ${nr} von ${gesamt}`),
     abschluss, themaStufe, pruefung
   };
@@ -108,7 +111,7 @@
     const b = { art: 'tagesauftrag', aufgaben: 22, ersterVersuch: 19, morgen: 3 };
     const t = texte;
     return [t.richtig(a), t.richtigNachSchwaeche(), t.falsch(a), t.mitHilfe(), t.gleichNochEinmal(), t.morgenWieder(), t.zeitNehmen(), t.zusatzHinweis(),
-      ...Object.values(STUFEN), t.loesungsweg('Mit Kernaufgaben rechnen'), t.weiter(), t.beenden(), t.beendenBeschriftung(),
+      ...Object.values(STUFEN), t.loesungsweg('Mit Kernaufgaben rechnen'), t.weiter(), t.beenden(), t.beendenBeschriftung(), t.beendenFrage(), t.beendenJa(), t.weiterUeben(),
       t.fortschritt('runde', 3, 12), t.fortschritt('nachfassen'), t.fortschritt('basis'),
       abschluss(b, [{ name: 'Stein', menge: 6 }, { name: 'Holz', menge: 2 }]), abschluss({ ...b, ersterTag: true }, []), abschluss({ ...b, ersterTag: true, morgen: 0 }, []),
       abschluss({ ...b, art: 'zusatz' }), abschluss({ ...b, abgebrochen: true }),
@@ -120,21 +123,42 @@
   }
 
   // ---- Anzeige ----------------------------------------------------------------------------------------------
-  const STIL = [
-    '.rueckmeldung{display:grid;gap:var(--a3)}',
-    '.rm-eintrag{display:grid;gap:var(--a2)}',
-    '.rm-weg{margin-top:var(--a2)}',
-    '.rm-weg-titel{font-weight:600}',
-    '.rm-schritte{margin:var(--a1) 0 0;padding-left:22px}',
-    '.rm-hilfsmittel{margin-top:var(--a2)}',
-    '.rm-code,.rm-folge{margin-top:var(--a2)}',
-    '.rm-weiter{justify-self:end}'
-  ].join('');
+  // Grundform, falls aufgabe.css fehlt (Probe im Elternbereich, Tests). Das Aussehen im Aufgabenrahmen steht in app/stil/aufgabe.css.
+  const STIL = ['.rueckmeldung{display:grid;gap:var(--a3)}', '.rm-eintrag{display:grid;gap:var(--a2)}', '.rm-weg{margin-top:var(--a2)}', '.rm-weg-titel{font-weight:600}',
+    '.rm-schritte{margin:var(--a1) 0 0;padding-left:22px}', '.rm-hilfsmittel{margin-top:var(--a2)}', '.rm-code,.rm-folge{margin-top:var(--a2)}', '.rm-weiter{justify-self:end}'].join('');
 
-  /** Kasten der Rückmeldung (Klassen aus basis.css): der erste Satz fett, danach der Rest des Textes und die weiteren Teile. art: ok, fehler, hilfe. */
+  /** Kasten der Rückmeldung (Klassen aus basis.css): der erste Satz fett, danach der Rest des Textes und die weiteren Teile. art: ok, fehler, hilfe.
+      Ein Kasten «ok» trägt vorn den Ort für das Häkchen (span.rm-haken), das sich beim Erscheinen zeichnet. */
   function kasten(H, art, text, ...innen) {
     const i = text.indexOf('. '), kopf = i < 0 ? text : text.slice(0, i + 1);
-    return H(`div.kasten.${art}`, H('b', kopf), i < 0 ? '' : text.slice(i + 1), ...innen);
+    return H(`div.kasten.${art}`, art === 'ok' ? H('span.rm-haken', { 'aria-hidden': 'true' }) : '', H('b', kopf), i < 0 ? '' : text.slice(i + 1), ...innen);
+  }
+
+  // ---- Effekte (E-18): richtig leuchtet die Antwort kurz auf und ein Häkchen zeichnet sich, falsch wackelt sie sanft und der Lösungsweg blendet
+  // ruhig ein. Klang «richtig» oder «hinweis». Alles geschützt: fehlen Effekte, Klang oder Animation, steht sofort der Endzustand. Nichts blockiert.
+  const ANTWORT = { richtig: ['richtig', 'tastenfeld-anzeige', 'tastatur-anzeige'], falsch: ['falsch', 'tastenfeld-anzeige', 'tastatur-anzeige'] };
+  const hat = (n, k) => !!n && n.nodeType === 1 && String((n.getAttribute && n.getAttribute('class')) || '').split(/\s+/).includes(k);
+  const suche = (w, k) => (!w ? null : typeof w.finde === 'function' ? w.finde(n => hat(n, k)) || null : typeof w.querySelector === 'function' ? w.querySelector(`.${k}`) : null);
+  const leise = f => { try { f(); } catch (fehler) { /* ein Effekt ist Zugabe */ } };
+  /** Das Element der Antwort in der Bühne: markierte Kachel, sonst die Anzeige der Eingabe, sonst die Übung selbst. */
+  const antwortIn = (buehne, art) => ANTWORT[art].map(k => suche(buehne, k)).find(Boolean) || (buehne && buehne.children && buehne.children[0]) || null;
+
+  function effekte(el, buehne, urteil) {
+    const E = L.Effekte, K = L.Klang, ziel = antwortIn(buehne, urteil);
+    if (buehne && buehne.setAttribute) buehne.setAttribute('data-urteil', urteil);     // aufgabe.css und typ.css markieren die Antwort (falsch: neutral)
+    if (urteil === 'falsch') {
+      leise(() => E && ziel && E.wackle(ziel));
+      leise(() => K && K.spiele('hinweis'));
+      const wenig = !!(E && typeof E.wenig === 'function' && E.wenig());
+      if (!wenig && typeof el.animate === 'function') {                              // ruhiger Wechsel zum Lösungsweg, nach dem Wackeln
+        leise(() => el.animate([{ opacity: 0, transform: 'translateY(10px)' }, { opacity: 1, transform: 'none' }], { duration: 340, delay: 260, easing: 'cubic-bezier(.2,.8,.2,1)', fill: 'backwards' }));
+      }
+      return;
+    }
+    leise(() => E && ziel && E.leuchte(ziel, { art: 'ok' }));
+    const haken = suche(el, 'rm-haken');
+    leise(() => { if (E && haken) Promise.resolve(E.haken(haken)).catch(() => {}); });
+    leise(() => K && K.spiele('richtig'));
   }
 
   /** Das Bild zur Lösung zeigt, was die Aufgabe selbst verdeckte: das Ende des Rechenstrichs und die Zahl unter den Plättchen (V-AP18f-04). */
@@ -153,12 +177,17 @@
     return behaelter;
   }
 
+  /** Farbe je Schritt passend zum Punktefeld: zwei Teilrechnungen (oberer Teil im Akzent, unterer warm) und ihre Summe in beiden Tönen. Sonst ohne Farbe. */
+  function toene(hilfe, n) {
+    const h = hilfe.hilfsmittel, d = (h && h.daten) || {};
+    return h && h.name === 'punktefeld' && n === 3 && d.trenne > 0 && d.trenne < d.zeilen && !d.wegnehmen ? ['teil1', 'teil2', 'beide'] : [];
+  }
   function weg(H, hilfe, info) {
-    const schritte = hilfe.schritte || [];
+    const schritte = hilfe.schritte || [], ton = toene(hilfe, schritte.length);
     if (!info.wegTitel && !schritte.length && !hilfe.hilfsmittel) return '';
     return H('div.rm-weg',
       info.wegTitel ? H('p.rm-weg-titel', texte.loesungsweg(info.wegTitel)) : '',
-      schritte.length ? H('ol.rm-schritte', schritte.map(s => H('li', s))) : '',
+      schritte.length ? H('ol.rm-schritte', schritte.map((s, i) => H('li', ton[i] ? { class: ton[i] } : {}, s))) : '',
       hilfsmittel(H, hilfe.hilfsmittel));
   }
 
@@ -174,7 +203,8 @@
   }
 
   /** Zeigt die Rückmeldung in `huelle` und wartet auf «Weiter». Eingeführte Karten (urteil 'gezeigt') brauchen keine Rückmeldung.
-      optionen: { hinweisZeitNehmen, info: { [aufgabeKey]: { korrigiert, kind, wegTitel, folge: 'gleich'|'morgen'|null } }, kopf, weiter, signal }.
+      optionen: { hinweisZeitNehmen, info: { [aufgabeKey]: { korrigiert, kind, wegTitel, folge: 'gleich'|'morgen'|null } }, kopf, weiter, signal,
+      buehne (die Bühne des Laufs: dort leuchtet oder wackelt die Antwort und steht data-urteil für die Markierung) }.
       Bei Abbruch über signal endet das Warten sofort. Gibt ein Promise zurück, die Hülle ist danach leer. */
   function zeige(huelle, paket, ergebnisse, optionen = {}) {
     const H = L.ui.h, info = optionen.info || {}, signal = optionen.signal;
@@ -182,14 +212,20 @@
     if (!gewertet.length && !optionen.hinweisZeitNehmen) return Promise.resolve();
     if (L.Dienste && L.Dienste.stil) L.Dienste.stil('lauf-rueckmeldung-stil', STIL);
     return new Promise(fertig => {
-      const ende = () => { if (signal) signal.removeEventListener('abort', ende); huelle.replaceChildren(); fertig(); };
+      const ende = () => {
+        if (signal) signal.removeEventListener('abort', ende);
+        leise(() => L.Effekte && typeof L.Effekte.beende === 'function' && L.Effekte.beende('leuchten'));   // kein Aufleuchten über der nächsten Aufgabe oder dem Abschluss
+        huelle.replaceChildren(); fertig();
+      };
       const weiter = H('button.knopf.primaer.rm-weiter', { type: 'button', onclick: ende }, optionen.weiter || texte.weiter());
       const mehrere = paket.aufgaben.length > 1;
-      huelle.replaceChildren(H('div.rueckmeldung', { role: 'status', 'aria-live': 'polite' },
+      const el = H('div.rueckmeldung', { role: 'status', 'aria-live': 'polite' },
         optionen.kopf ? kasten(H, 'rm-ergebnis', optionen.kopf) : '',
         gewertet.map(e => eintrag(H, paket.aufgaben.find(x => x.key === e.aufgabeKey), e, info[e.aufgabeKey] || {}, mehrere)),
         optionen.hinweisZeitNehmen ? kasten(H, 'hilfe.rm-zeit', texte.zeitNehmen()) : '',
-        weiter));
+        weiter);
+      huelle.replaceChildren(el);
+      if (gewertet.length) effekte(el, optionen.buehne, gewertet.some(e => e.urteil === 'falsch') ? 'falsch' : 'richtig');
       if (typeof weiter.focus === 'function') weiter.focus();
       if (signal && signal.aborted) ende(); else if (signal) signal.addEventListener('abort', ende, { once: true });
     });

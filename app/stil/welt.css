@@ -1,0 +1,74 @@
+/* app/stil/welt.css: Gemeinsames der Welt-Ansichten Siedlung, Forschung, Aufträge und Logbuch (Architektur 7.1 und 7.8, AP-16, aufgeteilt aus welt-ansichten.css)
+   und die Bausteine des neuen Rahmens: Weg statt Sperrtext (.weg), Kosten mit «du hast» (.kosten), Lampen (.lampen) und Rohstoff-Objekte (.objekt)
+   (docs/gestaltung-umbau.md 2.1 und 3.8, Vorbild docs/mockup/richtung-a/a-tafeln.css). Nur Token aus tokens.css, color-mix nur auf Token.
+   Die Ansichten haben je eine eigene Datei: siedlung.css, forschung.css, auftraege.css, logbuch.css. */
+
+/* Rahmen: Seite und Meldung über dem Dock */
+.welt-seite { position: relative; }
+.welt-seite.voll { height: 100%; }
+.welt-seite.eingebettet { display: grid; grid-template-columns: minmax(0, 1fr) var(--tafel-breite); gap: var(--a3); }
+/* Die Meldung schwebt oben im freien Teil der Bühne (über der Baustelle), nie über Tafel, Fussknöpfen oder Dock */
+.welt-meldung {
+  position: absolute; z-index: 40; left: 0; right: 0; top: calc(var(--hud-raum) + 6px); width: max-content; max-width: min(520px, calc(100% - 2 * var(--rand))); margin: 0 auto;
+  padding: 10px 16px; border-radius: 18px; background: var(--papierweiss); box-shadow: var(--schatten-karte), inset 4px 0 0 var(--akzent); font-size: 14px;
+}
+.welt-meldung:empty { display: none; }
+@media (orientation: portrait) { .app > .welt-meldung { top: calc(var(--hud-raum) + 62px); } }   /* unter dem Hinweis der Siedlung */
+@media (orientation: landscape) {
+  .app.mit-tafel > .welt-meldung { right: calc(env(safe-area-inset-right) + var(--tafel-breite) + 2 * var(--rand)); max-width: min(520px, calc(100% - var(--tafel-breite) - 4 * var(--rand))); }
+  /* neben der breiten Karte der Forschung bleibt nur links Platz: die Meldung steht dort, nicht über dem Titel der Tafel */
+  .app:has(.tafel-karte:not(.eingeklappt)) > .welt-meldung { left: calc(env(safe-area-inset-left) + var(--rand)); right: auto; margin: 0; max-width: 260px; }
+}
+.welt-seite > .welt-meldung { bottom: 14px; }
+
+/* Listen der Tafel: Symbole in Zeilen */
+.liste .zeile .ico { color: var(--akzent-dunkel); }
+.liste .zeile .ico.ok { color: var(--ok-text); }
+.liste .zeile .ico.fehler { color: var(--fehler-text); }
+.liste .zeile .ico.leise { color: var(--tinte-leise); }
+.info-inhalt .hinweis { margin-top: var(--a2); }
+.info-kopf .stufen { flex-wrap: wrap; }
+.info-kopf .stufen > span { white-space: nowrap; }
+
+/* Rohstoff als Objekt */
+.objekt {
+  display: inline-grid; place-items: center; flex: none; width: 30px; height: 30px; border-radius: 50%;
+  background: radial-gradient(120% 120% at 35% 25%, var(--flaeche) 0%, var(--tint, var(--akzent-hell)) 62%); box-shadow: inset 0 0 0 1px var(--tinte-a08);
+}
+.objekt > svg { width: 24px; height: 24px; }
+
+/* Kosten mit «du hast»: was fehlt, steht warm und nicht rot */
+.kosten { display: grid; gap: 6px; margin: 0; padding: 0; list-style: none; }
+.kosten-zeile { display: flex; align-items: center; gap: 10px; min-height: 40px; padding: 4px 12px 4px 5px; border-radius: 20px; background: var(--flaeche); box-shadow: inset 0 0 0 1px var(--tinte-a08); }
+.kosten-zeile .menge { font: 800 15px var(--schrift-rund); }
+.kosten-zeile .du-hast { margin-left: auto; font: 650 14px var(--schrift-rund); color: var(--tinte-leise); }
+.kosten-zeile .ico.ok { width: 18px; height: 18px; color: var(--ok-text); }
+.kosten-zeile.fehlt { background: var(--warm-flaeche); box-shadow: inset 0 0 0 1.5px var(--warm-kante); }
+.kosten-zeile.fehlt .du-hast { color: var(--warm-tinte); }
+
+/* Wissen «x von y»: überall dasselbe Zeichen, die Raute (HUD, Start, Forschung, Abschluss, Weg) */
+.lampen { display: inline-flex; flex-wrap: wrap; align-items: center; gap: 7px; padding-left: 2px; }
+.lampen > i { width: 10px; height: 10px; border-radius: 2px; background: var(--akzent-warm); transform: rotate(45deg); box-shadow: 0 0 0 2px var(--warm-a30); }
+.lampen > i.aus { background: var(--lampe-aus); box-shadow: none; }
+.lampen > .spur { min-width: 80px; }
+.lampen > em { margin-left: 6px; font: 600 14px var(--schrift-rund); font-style: normal; color: var(--tinte-leise); }
+
+/* Weg statt Sperrtext: höchstens drei Schritte und ein Handlungsknopf */
+.weg { display: grid; gap: 10px; padding: 14px 16px; border-radius: 20px; background: var(--warm-flaeche); box-shadow: inset 0 0 0 1px var(--warm-linie); }
+.weg-titel { display: flex; align-items: center; gap: 10px; font: 750 16px/1.3 var(--schrift-rund); color: var(--warm-text); }
+.weg-titel .ico { color: var(--warm-icon); }
+.weg-stand { margin-left: auto; font: 650 14px var(--schrift-rund); color: var(--warm-tinte); white-space: nowrap; }
+.weg-balken { display: block; height: 8px; overflow: hidden; border-radius: 4px; background: var(--warm-linie); }
+.weg-balken > i { display: block; height: 100%; border-radius: 4px; background: var(--akzent-warm); }
+.weg-schritte { display: grid; margin: 0; padding: 0; list-style: none; }
+.weg-schritte > li { position: relative; display: grid; grid-template-columns: 30px minmax(0, 1fr); align-items: start; gap: 10px; padding-bottom: 12px; font-size: 15px; line-height: 1.35; }
+.weg-schritte > li:last-child { padding-bottom: 0; }
+.weg-schritte > li::before { content: ''; position: absolute; left: 14px; top: 30px; bottom: 0; width: 2px; background: repeating-linear-gradient(var(--warm-kante) 0 4px, transparent 4px 8px); }
+.weg-schritte > li:last-child::before { display: none; }
+.weg-punkt { display: grid; place-items: center; width: 30px; height: 30px; border-radius: 50%; background: var(--flaeche); box-shadow: inset 0 0 0 2px var(--warm-kante); font: 800 14px var(--schrift-rund); color: var(--warm-tinte); }
+.weg-schritte > li.erledigt .weg-punkt { background: var(--ok); box-shadow: none; color: var(--flaeche); }
+.weg-schritte > li.erledigt .weg-punkt .ico { color: var(--flaeche); }   /* der Haken hell auf Grün (Nachbesserung 2: er war dunkel und kaum sichtbar) */
+.weg-schritte > li.jetzt .weg-punkt { background: var(--akzent-warm); box-shadow: 0 0 0 4px var(--warm-a30); color: var(--flaeche); }
+.weg-text b { font-family: var(--schrift-rund); }
+.weg-schritte > li.erledigt .weg-text b { color: var(--tinte-leise); }
+.weg-text small { display: block; font-size: 14px; color: var(--tinte-leise); }.weg-knopf { width: 100%; margin-top: 2px; }

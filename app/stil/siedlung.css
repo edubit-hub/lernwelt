@@ -1,0 +1,63 @@
+/* app/stil/siedlung.css: Stil der Ansicht «Siedlung» (docs/gestaltung-umbau.md 2.9, Architektur 7.8): auf der Bühne (.siedlung-buehne) ist die Seite
+   durchsichtig und lässt Tipps zur Insel durch, nur die Hinweise oben und die Legende unten liegen darüber. Ohne Bühne die Karte in der Seite.
+   Dazu der Inhalt der Bauplatz-Tafel: Gebäude zur Wahl als Segmente, Veredeln und Tauschen als Zeilen. Nur Token aus tokens.css. */
+
+/* Bühne: die Seite trägt nur Hinweise und Legende, die Insel bleibt antippbar */
+.app[data-modus="welt"] .ansicht.welt-ansicht.siedlung-buehne { background: transparent; box-shadow: none; border-radius: 0; pointer-events: none; }
+.siedlung-buehne .welt-seite, .welt-karte-huelle.auf-buehne { pointer-events: none; background: transparent; }
+.welt-karte-huelle.auf-buehne > .hud > *, .welt-karte-huelle.auf-buehne .hud-moeglich { pointer-events: auto; }
+.welt-karte-huelle.auf-buehne > .hud { left: 0; top: 2px; max-width: min(600px, 100%); }
+.welt-karte-huelle.auf-buehne > .hud .chip { background: var(--glas-hud); box-shadow: var(--schatten-hud); border: 0; }
+.welt-karte-huelle.auf-buehne > .welt-legende { left: 0; right: auto; bottom: 8px; background: var(--glas-hud); box-shadow: var(--schatten-hud); border-radius: 999px; }
+.welt-legende .leg-frei, .welt-legende .leg-siegel { display: inline-block; flex: none; width: 16px; height: 16px; border-radius: 4px; transform: rotate(45deg) scale(.8); }
+.welt-legende .leg-frei { background: var(--flaeche); box-shadow: inset 0 0 0 2px var(--akzent); }
+.welt-legende .leg-siegel { border-radius: 50%; transform: none; background: var(--warm-hell); box-shadow: 0 0 0 3px var(--warm-a30); }
+
+/* Karte und Hinweise ohne Bühne */
+.welt-karte-huelle { position: absolute; inset: 0; background: var(--meer); }
+.welt-karte-huelle > .hud { position: absolute; left: 14px; top: 14px; z-index: 2; display: flex; flex-direction: column; align-items: flex-start; gap: var(--a2); max-width: calc(100% - 28px); }
+.hud-moeglich { cursor: pointer; }
+/* Nachbesserung 2: «Jetzt möglich» als Ortsschild (Pille mit Miniatur, Pfeil am Ende, Kante wie ein Knopf) */
+.chip.hud-moeglich { min-height: var(--ziel); padding: 4px 14px 4px 4px; gap: 10px; border-radius: 999px; box-shadow: inset 0 -3px 0 var(--tinte-a08), var(--schatten-marke, var(--schatten-hud)); }
+.chip.hud-moeglich:active { transform: translateY(2px); box-shadow: var(--schatten-marke, var(--schatten-hud)); }
+.hm-bild { display: grid; place-items: center; flex: none; width: 40px; height: 40px; border-radius: 50%; background: var(--warm-hell); overflow: hidden; }
+.hm-bild > svg { width: 36px; height: 36px; }
+.hud-moeglich .hm-pfeil { flex: none; color: var(--akzent-dunkel); }
+.app:has(.hud-moeglich) > .hud .ziel { display: none; }   /* höchstens ein schwebender Hinweis: in der Siedlung geht der Schritt hier vor dem Ziel der Forschung */
+.app:has(> .welt-meldung:not(:empty)) .hud-moeglich { visibility: hidden; }   /* höchstens ein schwebender Hinweis: die Meldung geht vor */
+.welt-legende {
+  position: absolute; right: 14px; bottom: 14px; z-index: 2; display: flex; gap: var(--a4); padding: 6px 12px;
+  border-radius: var(--radius); background: var(--glas-leise); font-size: var(--t-klein); color: var(--tinte-leise);
+}
+.welt-legende > span { display: inline-flex; align-items: center; gap: 6px; }
+
+/* Tafel: Gebäude zur Wahl als Segmente (Vorbild C), Veredeln und Tauschen */
+.wahlliste { display: flex; flex-wrap: wrap; gap: 6px; margin-top: var(--a2); padding: 4px; border-radius: 18px; background: var(--tinte-a04); }
+.wahlzeile {
+  display: flex; flex: 1 1 110px; flex-direction: column; align-items: center; justify-content: center; gap: 1px; min-height: 52px; padding: 4px 10px;
+  border: 0; border-radius: 14px; background: transparent; color: var(--tinte-leise); text-align: center; font-family: var(--schrift-rund);
+}
+.wahlzeile b { font-size: 15px; font-weight: 700; }
+.wahlzeile small { font-size: 13px; font-weight: 600; }
+.wahlzeile.baubar small { color: var(--ok-text); }
+.wahlzeile[aria-pressed="true"] { background: var(--flaeche); color: var(--tinte); box-shadow: var(--schatten-hud); }
+.aktion-zeile { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--a2) var(--a3); padding: var(--a2) 0; border-top: 1px solid var(--linie-leise); }
+.aktion-zeile:first-of-type { border-top: 0; }
+.aktion-text { display: grid; gap: 2px; flex: 1 1 110px; min-width: 0; }
+.aktion-knoepfe { display: flex; flex: none; gap: var(--a2); }
+.aktion-knoepfe .knopf { min-height: var(--ziel); padding: 0 12px; }
+/* Die Tafel eines Gebäudes bleibt kompakt: Veredeln und die Kosten des Ausbaus stehen ohne Scrollen da */
+.tafel.info .info-inhalt > .abschnitt { margin-top: 4px; padding: 10px 0 6px; }
+.warm-text { color: var(--warm-tinte); }
+.tafel.info .abschnitt .weg { margin-top: 6px; }
+
+@media (orientation: portrait), (max-width: 900px) {
+  .welt-legende { display: none; }
+  .welt-karte-huelle.auf-buehne .hud-moeglich { max-width: 100%; }
+  .welt-karte-huelle.auf-buehne .hud-moeglich > span { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }   /* eine Zeile, die Plaketten der Pillen bleiben frei */
+}
+
+/* Schlussprüfung: der Weg zum Ausbau eines gebauten Gebäudes steht vor den Kosten; erledigte Schritte nennt der Stand «2 von 3», sichtbar bleibt der
+   nummerierte offene Schritt, damit Weg und Kostenzeilen beim Öffnen ganz im Blatt liegen */
+.weg.kompakt { gap: 8px; padding: 10px 14px 12px; }
+.weg.kompakt .weg-schritte > li.erledigt { display: none; }

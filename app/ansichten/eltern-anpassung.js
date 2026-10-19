@@ -11,17 +11,7 @@
     'standard.neuProTag': 'Neue Aufgaben pro Tag (höchstens)', 'standard.maxSchwierigkeit': 'Höchste Schwierigkeit (1 bis 3)',
     'tempo.themen': 'Themen der Tempo-Runde', 'optionen.schreiben': 'Wörter auch schreiben lassen (Diktat in der höchsten Stufe)'
   };
-  /* Ein gedrückter Schalter (aria-pressed) ist im Elternbereich sonst nicht zu erkennen. Die Regel gilt für alle Schalter der Reiter Module, Prüfung und Ferien. */
-  const SCHALTER = '.eltern-tafel .knopf.schalter[aria-pressed="true"] { background: var(--akzent); border-color: var(--akzent); color: var(--flaeche); font-weight: 600; }';
-  /** Legt die Regel für gedrückte Schalter einmal im Dokument an. */
-  function schalterStil(k) {
-    const d = k.dok;
-    if (!d || !d.head || (d.getElementById && d.getElementById('eltern-schalter-stil'))) return;
-    const s = d.createElement('style');
-    s.setAttribute('id', 'eltern-schalter-stil');
-    s.textContent = SCHALTER;
-    d.head.append(s);
-  }
+  /* Gedrückte Schalter (aria-pressed) setzt app/stil/eltern.css sichtbar ab (.eltern .knopf.schalter[aria-pressed="true"]), für die Reiter Module, Prüfung und Ferien. */
   const THEMA_AKTIV = /^themen\.[^.]+\.aktiv$/;
   const etikett = (pfad, b) => (b && b.titel) || NAMEN[pfad] || (pfad.startsWith('optionen.') ? `Option «${pfad.slice(9)}»` : pfad);
 
@@ -92,5 +82,5 @@
     return zeilen.length ? k.h('div.anp', k.h('h4', 'Einstellungen'), zeilen) : '';
   }
 
-  L.ElternAnpassung = { NAMEN, etikett, angenommen, darfThema, schreibe, schalteThema, felder, schalterStil };
+  L.ElternAnpassung = { NAMEN, etikett, angenommen, darfThema, schreibe, schalteThema, felder };
 })(globalThis);

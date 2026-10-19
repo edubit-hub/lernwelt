@@ -1,5 +1,5 @@
 /* app/stil/basis.css: Grundlage aller Ansichten (Architektur 5.8 und 7.1). Farben, Masse und Schrift kommen aus tokens.css.
-   Hier stehen Rücksetzung, Schrift, Bedienelemente und kleine Bausteine. Das Raster der Ansichten steht in bauteile.css.
+   Hier stehen Rücksetzung, Schrift, Bedienelemente und kleine Bausteine. Der Rahmen steht in huelle.css, die Tafel in tafel.css, Bauteile in bauteile.css.
    Wörter der Klassen: knopf (primaer, leise, gesperrt, gross, gefahr), chip, etikett (grau), spur, stufen, kachel (gesperrt), kacheln,
    kasten (ok, fehler, hilfe = Rückmeldung), liste und zeile, klein, hinweis, abschnitt, zahl, nur-vorlesen, auswahl. */
 
@@ -19,6 +19,7 @@ body {
 }
 
 h1, h2, h3, h4, p { margin: 0; }
+h1, h2, h3 { font-family: var(--schrift-rund); }
 h1 { font-size: var(--t-seite); font-weight: 650; line-height: 1.2; }
 h2 { font-size: var(--t-titel); font-weight: 650; line-height: 1.15; }
 h3 { font-size: var(--t-gross); font-weight: 650; line-height: 1.25; }
@@ -54,25 +55,23 @@ input, textarea, select { font: inherit; font-size: 16px; color: inherit; }   /*
 .ok-text { color: var(--ok-text); }
 .fehler-text { color: var(--fehler-text); }
 
-/* Knöpfe */
+/* Knöpfe: plastisch mit Kante unten. Kante und Druck (3D) für bedienbare Knöpfe stehen in effekte.css, hier nur Form, Ton und die flachen Zustände. */
 .knopf {
   display: inline-flex; align-items: center; justify-content: center; gap: var(--a2);
-  min-height: var(--knopf-hoehe); min-width: var(--ziel); padding: 0 18px;
-  border: 1px solid var(--linie); border-radius: var(--radius);
-  background: var(--flaeche); color: var(--tinte); font-weight: 600; line-height: 1.2; text-align: center;
+  min-height: var(--knopf-hoehe); min-width: var(--ziel); margin-bottom: 4px; padding: 0 18px;
+  border: 0; border-radius: 16px;
+  background: linear-gradient(var(--flaeche), var(--taste-oben)); color: var(--tinte); font-family: var(--schrift-rund); font-weight: 700; line-height: 1.2; text-align: center;
 }
-.knopf:active { background: var(--grund); }
-.knopf.primaer { background: var(--akzent); border-color: var(--akzent); color: var(--flaeche); }
-.knopf.primaer:active { background: var(--akzent-dunkel); border-color: var(--akzent-dunkel); }
-.knopf.leise { min-height: var(--ziel); padding: 0 10px; border-color: transparent; background: transparent; color: var(--akzent-dunkel); }
-.knopf.leise:active { background: var(--akzent-hell); }
-.knopf.gross { min-height: 54px; padding: 0 26px; font-size: var(--t-gross); }
-.knopf.gefahr { color: var(--fehler-text); border-color: var(--fehler); }
-.knopf:disabled, .knopf.gesperrt { background: var(--gesperrt); border-color: transparent; color: var(--tinte-leise); }
+.knopf.primaer { background: linear-gradient(180deg, var(--akzent-hoch), var(--akzent) 70%); color: var(--flaeche); }
+.knopf.leise { min-height: var(--ziel); margin-bottom: 0; padding: 0 10px; background: transparent; color: var(--akzent-dunkel); box-shadow: none; }
+.knopf.leise:active { transform: none; background: var(--akzent-hell); box-shadow: none; }
+.knopf.gross { min-height: 56px; padding: 0 26px; border-radius: 20px; font-size: var(--t-gross); }
+.knopf.gefahr { color: var(--fehler-text); }
+.knopf:disabled, .knopf.gesperrt { background: var(--gesperrt); color: var(--tinte-leise); box-shadow: 0 3px 0 var(--kante-weiss); }
 .knopf.gesperrt { cursor: pointer; }                        /* bleibt antippbar, die Meldung nennt, was fehlt */
 .knopf .unter { display: block; font-size: var(--t-fein); font-weight: 500; opacity: .85; }
 .knopf .ico { margin: 0 -2px; }
-@media (hover: hover) { .knopf:not(:disabled):not(.primaer):hover { background: var(--grund); } .knopf.primaer:hover { background: var(--akzent-dunkel); } }
+@media (hover: hover) { .knopf:not(:disabled):not(.primaer):not(.leise):hover { background: var(--flaeche); } .knopf.primaer:hover { background: var(--akzent); } }
 
 /* Hinweisfläche, Etikett, Fortschrittsspur, Stufenanzeige */
 .chip {
@@ -91,13 +90,13 @@ input, textarea, select { font: inherit; font-size: 16px; color: inherit; }   /*
 .stufen > i.an { background: var(--akzent); }
 
 /* Flächen: Karte (kachel), Kasten, Listen */
-.kachel { display: flex; flex-direction: column; gap: 10px; min-width: 0; padding: 16px 18px; border: 1px solid var(--linie); border-radius: var(--radius); background: var(--flaeche); }
+.kachel { display: flex; flex-direction: column; gap: 10px; min-width: 0; padding: 16px 18px; border: 1px solid var(--tinte-a08); border-radius: 20px; background: var(--flaeche); }
 .kachel > h3 { font-size: var(--t-gross); }
 .kachel.gesperrt { border-style: dashed; background: transparent; color: var(--tinte-leise); }
 .kachel-kopf { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
 .kachel-fuss { display: flex; gap: var(--a2); margin-top: auto; }
 .kacheln { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--a4); }
-.kasten { padding: 10px 12px; border-radius: var(--radius); background: var(--grund); font-size: 13.5px; }
+.kasten { padding: 10px 12px; border-radius: 14px; background: var(--grund); font-size: 13.5px; }
 .kasten.ok, .kasten.fehler, .kasten.hilfe {                /* Rückmeldung: ruhig, ein farbiger Rand statt einer farbigen Fläche */
   padding: 12px 16px; border: 1px solid var(--linie); border-left-width: 4px; background: var(--flaeche); font-size: var(--t-text);
 }

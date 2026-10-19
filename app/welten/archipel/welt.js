@@ -149,9 +149,50 @@
     ],
 
     sammlung: [
-      { id: 'kompass',      name: 'Kompass vom Strand' },
-      { id: 'seekarte',    name: 'Seekarte der Südküste' },
-      { id: 'flaschenpost', name: 'Flaschenpost von der Nachbarinsel' }
-    ]
+      { id: 'kompass',      name: 'Kompass vom Strand',
+        bild: [['zylinder', { cx: 0, cy: 0, r: .42, h: .12, farbe: 'messing' }], ['zylinder', { cx: 0, cy: 0, r: .36, z: .12, h: .02, farbe: 'papier' }]] },
+      { id: 'seekarte',    name: 'Seekarte der Südküste',
+        bild: [['quader', { x: -.55, y: -.4, b: 1.1, t: .8, h: .03, farbe: 'papier' }], ['zylinder', { cx: -.55, cy: -.4, r: .07, h: .16, farbe: 'brett' }], ['zylinder', { cx: -.55, cy: .4, r: .07, h: .16, farbe: 'brett' }]] },
+      { id: 'flaschenpost', name: 'Flaschenpost von der Nachbarinsel',
+        bild: [['zylinder', { cx: 0, cy: 0, r: .2, h: .55, farbe: 'see-lagune' }], ['zylinder', { cx: 0, cy: 0, r: .08, z: .55, h: .2, farbe: 'see-lagune' }], ['zylinder', { cx: 0, cy: 0, r: .085, z: .75, h: .08, farbe: 'holz' }]] }
+    ],
+
+    // Gestaltung der Bühne (Architektur 7.7, Umbauplan 3.3), nur Bilddaten. lage: Himmelsrichtung im Raster (Norden oben rechts, Osten unten rechts).
+    orte: {
+      forschung: { name: 'Forschung', lage: 'nordwest', bild: [
+        ['quader', { x: 0, y: 0, b: 1.2, t: 1.2, h: .26, farbe: 'stein' }], ['zylinder', { cx: .6, cy: .6, r: .4, z: .26, h: 1.3, farbe: 'kalk' }],
+        ['zylinder', { cx: .6, cy: .6, r: .43, z: .86, h: .06, farbe: 'schiefer' }], ['zylinder', { cx: .6, cy: .6, r: .52, z: 1.56, h: .08, farbe: 'schiefer' }],
+        ['kuppel', { cx: .6, cy: .6, r: .4, z: 1.64, h: .44, farbe: 'akzent-mitte' }], ['fahne', { x: .6, y: .6, z: 2.06, h: .42, farbe: 'akzent' }],
+        ['quader', { x: 1.25, y: .15, b: .62, t: .8, h: .48, farbe: 'kalk' }], ['fenster', { an: 'r', s: .25, z: .16, w: .26, h: .22, kreuz: 'kalk' }],
+        ['dach', { h: .3, farbe: 'schiefer', achse: 'x', giebel: 'kalk' }]] },
+      hafen: { name: 'Hafen', lage: 'sued', bild: [
+        ['quader', { x: 0, y: 0, b: .95, t: .75, h: .58, farbe: 'brett', rillen: 3 }], ['tuer', { an: 'l', s: .3, z: 0, w: .26, h: .4 }],
+        ['fenster', { an: 'r', s: .22, z: .24, w: .26, h: .2, kreuz: 'brett' }], ['dach', { h: .34, farbe: 'ziegel', achse: 'x', giebel: 'brett' }],
+        ['quader', { x: .65, y: .18, b: .14, t: .14, z: .7, h: .3, farbe: 'stein' }],
+        ['quader', { x: 1.3, y: .1, b: .3, t: .3, h: .26, farbe: 'rs-handel', rillen: 2 }], ['quader', { x: 1.64, y: .15, b: .24, t: .24, h: .2, farbe: 'sand' }],
+        ['quader', { x: 1.35, y: .14, z: .26, b: .2, t: .2, h: .18, farbe: 'sand' }]] },
+      tor: { name: 'Tor', lage: 'nordost', bild: [
+        ['quader', { x: .03, y: .04, b: .4, t: .4, h: .08, farbe: 'stein' }], ['quader', { x: .03, y: 1.28, b: .4, t: .4, h: .08, farbe: 'stein' }],
+        ['quader', { x: .05, y: .06, b: .34, t: .34, h: 1.2, farbe: 'kalk' }], ['quader', { x: .15, y: .4, b: .1, t: .44, h: .92, farbe: 'dachholz', rillen: 4 }],
+        ['quader', { x: .15, y: .88, b: .1, t: .44, h: .92, farbe: 'dachholz', rillen: 4 }], ['quader', { x: .05, y: 1.32, b: .34, t: .34, h: 1.2, farbe: 'kalk' }],
+        ['quader', { x: 0, y: 0, z: 1.2, b: .44, t: 1.72, h: .26, farbe: 'stein' }], ['quader', { x: .07, y: .16, z: 1.46, b: .3, t: 1.4, h: .1, farbe: 'kalk' }]] },
+      lager: { name: 'Lager', lage: 'ost', bild: [
+        ['quader', { x: 0, y: 0, b: .62, t: .18, h: .17, farbe: 'holz', rillen: 1 }], ['quader', { x: 0, y: .2, b: .62, t: .18, h: .17, farbe: 'brett', rillen: 1 }],
+        ['quader', { x: 0, y: .4, b: .62, t: .18, h: .17, farbe: 'holz', rillen: 1 }], ['quader', { x: 0, y: .1, z: .17, b: .62, t: .18, h: .17, farbe: 'holz', rillen: 1 }],
+        ['quader', { x: 0, y: .3, z: .17, b: .62, t: .18, h: .17, farbe: 'brett', rillen: 1 }], ['quader', { x: 0, y: .2, z: .34, b: .62, t: .18, h: .17, farbe: 'holz', rillen: 1 }],
+        ['quader', { x: .74, y: .05, b: .24, t: .24, h: .22, farbe: 'stein' }], ['quader', { x: 1.01, y: .05, b: .24, t: .24, h: .22, farbe: 'stein' }],
+        ['quader', { x: .74, y: .32, b: .24, t: .24, h: .22, farbe: 'stein' }], ['quader', { x: 1.01, y: .32, b: .24, t: .24, h: .22, farbe: 'stein' }],
+        ['quader', { x: .86, y: .17, z: .22, b: .24, t: .24, h: .22, farbe: 'stein' }]] }
+    },
+    // Kamera je Ansicht: [Ziel, Faktor zur Totale (höchstens 1,8), Anker x und y im freien Bereich], Werte aus docs/mockup/richtung-a/a-kamera.js
+    kamera: {
+      start:     { quer: ['insel', .84, .5, .5],      hoch: ['insel', .98, .5, .5] },
+      siedlung:  { quer: ['siedlung', 1.28, .5, .5],  hoch: ['siedlung', 1.3, .5, .5] },
+      forschung: { quer: ['forschung', 1.8, .5, .52], hoch: ['forschung', 1.75, .5, .6] },
+      hafen:     { quer: ['hafen', .72, .5, .5],      hoch: ['hafen', .86, .5, .55] },
+      logbuch:   { quer: ['insel', 1.0, .5, .5],      hoch: ['insel', 1.0, .5, .42] },
+      aufgabe:   { quer: ['insel', 1.25, .5, .5],     hoch: ['insel', 1.25, .5, .5] }
+    },
+    leben: { boote: 2, wolken: 4, voegel: 3 }
   });
 })(globalThis);

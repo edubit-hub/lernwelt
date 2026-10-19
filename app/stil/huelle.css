@@ -1,0 +1,176 @@
+/* app/stil/huelle.css: der Rahmen der App über der Bühne (docs/gestaltung-umbau.md 2.1 und 3.1, Vorbild docs/mockup/richtung-a/a-stil.css und a-hoch.css).
+   Gerüst: .app[data-modus=welt|aufgabe|eltern][data-hud=voll|knapp|aus][data-dock=an|aus] > .buehne-ebene, header.hud, main.haupt > section.ansicht, nav.dock,
+           .flug-ebene, .status-meldung. Die Bühne füllt alles, HUD und Dock schweben darüber, die Ansicht liegt als Glas zwischen ihnen.
+   HUD:    .hud-links (.hud-medaille, button.ziel), .hud-pillen > .pille.res (.res-objekt, .res-zahl, .res-name, .res-plus), .modus, .hud-klang, .hud-eltern.
+   Dock:   .dock > .dock-reihe > button.dock-knopf (.dock-mini, .txt) und button.dock-haupt (.haupt-ring, .haupt-text, .haupt-info), darüber .heute.
+   Farben, Masse, Schatten und Dauern nur aus tokens.css. Bewegt wird nur über transform und opacity. */
+
+.app {
+  position: fixed; inset: 0; overflow: hidden; height: 100vh; height: 100dvh; background: var(--meer);
+  --rand: 16px;
+  --oben: calc(env(safe-area-inset-top) + 14px);
+  --hud-raum: calc(var(--oben) + var(--hud-hoehe) + 16px);
+  --dock-raum: calc(env(safe-area-inset-bottom) + var(--dock-hoehe) + 42px);
+}
+
+/* Bühne: ohne Bühne (kein Thema) ein ruhiger Grund */
+.buehne-ebene { position: absolute; inset: 0; z-index: 0; overflow: hidden; background: radial-gradient(130% 95% at 46% 44%, var(--akzent-hell) 0%, var(--meer) 60%, var(--akzent-mitte) 100%); }
+.flug-ebene { position: absolute; inset: 0; z-index: 50; pointer-events: none; overflow: hidden; }
+
+/* ---- HUD oben ------------------------------------------------------------------------------------------------- */
+.app > .hud {
+  position: absolute; z-index: 30; top: var(--oben); left: calc(env(safe-area-inset-left) + var(--rand)); right: calc(env(safe-area-inset-right) + var(--rand));
+  display: flex; align-items: flex-start; gap: 10px; pointer-events: none;
+  transition: opacity var(--dauer-tafel) var(--kurve-raus), transform var(--dauer-tafel) var(--kurve-raus);
+}
+.app > .hud > * { pointer-events: auto; }
+.hud-links { display: grid; justify-items: start; gap: 8px; margin-right: auto; min-width: 0; }
+.hud-medaille { display: flex; align-items: center; gap: 10px; height: var(--hud-hoehe); padding: 7px 20px 7px 7px; border: 0; border-radius: 999px; background: var(--glas-hud); box-shadow: var(--schatten-hud);
+  color: var(--tinte); text-align: left; font: inherit; cursor: pointer; transition: transform var(--dauer) var(--kurve); }
+.hud-medaille:active { transform: translateY(2px) scale(.97); box-shadow: var(--schatten-marke, var(--schatten-hud)); }
+/* Nachbesserung 2: ausserhalb des Starts ist die Medaille sichtbar der Weg zurück: «‹ Insel» vor dem Ring */
+.medaille-zurueck { display: inline-flex; align-items: center; gap: 4px; height: 34px; padding: 0 10px 0 6px; border-radius: 999px; background: var(--akzent-hell); color: var(--akzent-dunkel); font: 800 var(--t-klein) var(--schrift-rund); }
+.medaille-zurueck > .ico { transform: scaleX(-1); }
+.app:has(.ansicht[data-ansicht="start"]) .medaille-zurueck { display: none; }
+.app:has(.ansicht[data-ansicht="start"]) .hud-medaille { cursor: default; }
+.medaille-ring { position: relative; display: grid; place-items: center; flex: none; width: 50px; height: 50px; border-radius: 50%; background: var(--flaeche); }
+.medaille-ring > svg { position: absolute; inset: 0; width: 50px; height: 50px; }
+.ring-spur { fill: none; stroke: var(--lampe-aus); stroke-width: 4; opacity: .45; }
+.ring-wert { fill: none; stroke: var(--akzent-warm); stroke-width: 4; stroke-linecap: round; }
+.medaille-nr { position: relative; font: 800 19px var(--schrift-rund); }
+.medaille-text { display: flex; flex-direction: column; min-width: 0; line-height: 1.12; }
+.medaille-text small { font: 700 12.5px var(--schrift-rund); letter-spacing: .06em; text-transform: uppercase; color: var(--tinte-leise); }
+.medaille-text b { font: 800 19px var(--schrift-rund); white-space: nowrap; }
+.medaille-text em { font: 600 14px var(--schrift-rund); font-style: normal; color: var(--warm-tinte); white-space: nowrap; }
+.medaille-text em[data-zustand="wissen"]::before { content: ''; display: inline-block; width: 8px; height: 8px; margin: 0 7px 1px 2px; border-radius: 1.5px; background: var(--akzent-warm); transform: rotate(45deg); }   /* Wissen: dieselbe Raute wie überall */
+.medaille-text em[data-zustand="bereit"] { color: var(--akzent-dunkel); font-weight: 750; }
+.hud .ziel {
+  display: inline-flex; align-items: center; gap: 8px; min-height: var(--ziel); max-width: 380px; padding: 0 16px 0 14px; border: 0; border-radius: 999px;
+  background: var(--glas-hud); box-shadow: var(--schatten-hud); font-size: 14px; color: var(--tinte); text-align: left;
+}
+.hud .ziel span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.hud .ziel .fahne { flex: none; width: 9px; height: 9px; border-radius: 50%; background: var(--akzent-warm); box-shadow: 0 0 0 3px var(--warm-a30); }
+
+.hud-pillen { display: flex; gap: 8px; min-width: 0; }
+.pille { position: relative; display: flex; align-items: center; gap: 9px; min-width: 112px; height: 58px; padding: 0 16px 0 7px; border-radius: 999px; background: var(--glas-hud); box-shadow: var(--schatten-hud); }
+.res-objekt {
+  display: grid; place-items: center; flex: none; width: 44px; height: 44px; border-radius: 50%;
+  background: radial-gradient(120% 120% at 35% 25%, var(--flaeche) 0%, var(--tint, var(--akzent-hell)) 62%); box-shadow: inset 0 -3px 0 var(--tinte-a08), inset 0 0 0 1px var(--tinte-a08);
+}
+.res-objekt > svg { width: 30px; height: 30px; }
+.res-wert { display: flex; flex-direction: column; min-width: 0; line-height: 1.05; }
+.pille .res-zahl { font: 800 21px var(--schrift-rund); letter-spacing: -.01em; }
+.pille .res-name { overflow: hidden; font: 600 13.5px var(--schrift-rund); color: var(--tinte-leise); text-overflow: ellipsis; white-space: nowrap; }
+.pille .res-plus { position: absolute; top: -10px; right: 6px; padding: 1px 8px; border-radius: 999px; background: var(--akzent); color: var(--flaeche); font: 800 13px var(--schrift-rund); }
+.pille.null .res-zahl { font-weight: 700; color: var(--tinte-leise); }
+.pille.null .res-objekt { opacity: .75; }
+.hud .modus { align-self: center; padding: 2px 10px; border: 1px solid var(--linie); border-radius: 999px; background: var(--glas-hud); font-size: 12px; color: var(--tinte-leise); }
+.hud-klang, .hud-eltern {
+  position: relative; display: grid; place-items: center; flex: none; width: 48px; height: 48px; margin-top: 8px; border: 0; border-radius: 50%;
+  background: var(--weiss-a55); color: var(--tinte-leise); box-shadow: var(--schatten-hud);
+}
+.hud-note, .hud-note > svg { display: block; width: 24px; height: 24px; }
+.hud-note > svg { fill: none; stroke: currentColor; stroke-width: 1.9; stroke-linecap: round; stroke-linejoin: round; }
+.hud-note .note-aus { display: none; stroke-width: 2.4; }
+.hud-klang[aria-pressed="false"] { color: var(--tinte); background: var(--flaeche); }
+.hud-klang[aria-pressed="false"] .note-aus { display: inline; }
+.hud-klang[aria-pressed="false"] .note-an { display: none; }   /* aus: durchgestrichen in voller Deckkraft */
+.hud-schluessel, .hud-schluessel > svg { display: block; width: 24px; height: 24px; }
+.hud-schluessel > svg { fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+.hud-eltern .start-punkt { position: absolute; top: 10px; right: 10px; width: 6px; height: 6px; margin: 0; background: var(--tinte-a20); box-shadow: none; }   /* ruhig, ohne Akzentfarbe: der Hinweis gilt den Eltern */
+.hud.testprofil .hud-medaille { box-shadow: var(--schatten-hud), inset 0 0 0 3px var(--akzent-warm); }   /* ein Testprofil bekommt ein auffälliges Band (8.1) */
+
+.app[data-hud="knapp"] > .hud, .app[data-hud="aus"] > .hud { opacity: 0; visibility: hidden; pointer-events: none; }   /* während einer Aufgabe auch ohne Klangschalter */
+.app[data-hud="aus"] > .hud { transform: translateY(-24px); }
+
+/* ---- Hauptfläche: die Ansicht als Glas zwischen HUD und Dock ---------------------------------------------------- */
+.haupt { position: absolute; inset: 0; z-index: 10; pointer-events: none; }
+.ansicht { position: absolute; overflow: auto; overscroll-behavior: contain; -webkit-overflow-scrolling: touch; pointer-events: auto; }
+.ansicht:empty { visibility: hidden; }
+.app[data-modus="welt"] .ansicht {
+  top: var(--hud-raum); bottom: var(--dock-raum); left: 0; right: 0; width: min(900px, calc(100% - 2 * var(--rand))); margin: 0 auto;
+  padding: 22px 26px; border-radius: 28px; background: var(--glas-tafel); box-shadow: var(--schatten-karte);
+}
+.app[data-modus="welt"] .ansicht[data-ansicht="start"] { left: calc(env(safe-area-inset-left) + var(--rand)); right: auto; bottom: auto; width: 440px; max-height: calc(100% - var(--hud-raum) - var(--dock-raum)); margin: 0; }
+.app[data-modus="welt"] .ansicht.welt-ansicht { left: calc(env(safe-area-inset-left) + var(--rand)); right: calc(env(safe-area-inset-right) + var(--rand)); width: auto; margin: 0; padding: 0; overflow: hidden; }
+.app[data-modus="welt"].mit-tafel .ansicht.welt-ansicht { right: calc(env(safe-area-inset-right) + var(--tafel-breite) + 2 * var(--rand)); }
+.app[data-modus="aufgabe"] .ansicht {
+  top: var(--oben); bottom: calc(env(safe-area-inset-bottom) + 16px); left: 0; right: 0; width: min(880px, calc(100% - 2 * var(--rand))); margin: 0 auto;
+  padding: 22px 28px; border-radius: 30px; background: var(--papierweiss); box-shadow: var(--schatten-karte);
+}
+.app[data-modus="aufgabe"] > .buehne-ebene .bn-marke { visibility: hidden; opacity: 0; pointer-events: none; }   /* während der Runde ist die Insel nur Kulisse: keine Schilder, nichts antippbar */
+.app[data-modus="eltern"] { background: var(--grund); }
+.app[data-modus="eltern"] > .buehne-ebene { visibility: hidden; }
+.app[data-modus="eltern"] .ansicht { inset: 0; padding: calc(env(safe-area-inset-top) + 22px) calc(env(safe-area-inset-right) + 26px) calc(env(safe-area-inset-bottom) + 22px) calc(env(safe-area-inset-left) + 26px); }
+.app[data-modus="eltern"] .ansicht > * { margin-inline: auto; }               /* Inhalte mit eigener Höchstbreite stehen in der Mitte */
+@media (orientation: landscape) {
+  .app.mit-ziel { --hud-raum: calc(var(--oben) + var(--hud-hoehe) + 68px); }   /* das «Nächste Ziel» steht unter der Medaille, die Ansicht rückt darunter */
+}
+.status-meldung {
+  position: absolute; z-index: 40; top: var(--hud-raum); left: 0; right: 0; width: max-content; max-width: min(560px, calc(100% - 2 * var(--rand))); margin: 0 auto;
+  padding: 8px 16px; border-radius: 999px; background: var(--glas-hud); box-shadow: var(--schatten-hud); font-size: 13.5px; color: var(--tinte-leise);
+}
+.status-meldung:empty { display: none; }
+
+/* ---- Dock unten --------------------------------------------------------------------------------------------- */
+.dock {
+  position: absolute; z-index: 30; left: 0; right: 0; bottom: calc(env(safe-area-inset-bottom) + 18px); display: flex; justify-content: center; pointer-events: none;
+  transition: opacity var(--dauer-tafel) var(--kurve-raus), transform var(--dauer-tafel) var(--kurve-raus);
+}
+.dock-reihe { display: flex; align-items: flex-end; gap: 4px; height: var(--dock-hoehe); padding: 7px 10px; border-radius: 32px; background: var(--glas-hud); box-shadow: var(--schatten-hud), inset 0 1px 0 var(--flaeche); pointer-events: auto; }
+.dock-knopf {
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; width: 92px; height: 70px; min-height: var(--ziel); padding: 0; border: 0; border-radius: 22px;
+  background: transparent; color: var(--tinte); font: 700 14px var(--schrift-rund);
+  transition: transform var(--dauer) var(--kurve), background-color var(--dauer) var(--kurve);
+}
+.dock-knopf:active { transform: scale(.94); }
+.dock-knopf[aria-current="page"] { background: var(--akzent-hell); color: var(--akzent-dunkel); }
+.dock-knopf[aria-disabled="true"] { opacity: .45; }
+.dock-mini { display: grid; place-items: center; width: 42px; height: 34px; color: var(--akzent-dunkel); }
+.dock-mini > svg { width: 42px; height: 34px; }
+.dock-mini > .ico { width: 30px; height: 30px; }
+.dock-knopf.dock-haupt {
+  flex-direction: row; justify-content: flex-start; gap: 14px; width: 268px; height: 102px; margin: 0 8px 2px; padding: 0 22px 0 16px; border-radius: 28px;
+  background: linear-gradient(180deg, var(--akzent-hoch), var(--akzent) 70%); color: var(--flaeche);
+  box-shadow: inset 0 2px 0 var(--weiss-a30), 0 6px 0 var(--kante-akzent), 0 12px 22px var(--akzent-a30);
+  transition: transform var(--dauer) var(--kurve), box-shadow var(--dauer) var(--kurve);
+}
+.dock-knopf.dock-haupt:active { transform: translateY(5px); box-shadow: inset 0 2px 0 var(--weiss-a30), 0 1px 0 var(--kante-akzent), 0 4px 10px var(--akzent-a30); }
+.haupt-ring { display: grid; place-items: center; flex: none; width: 52px; height: 52px; border-radius: 50%; background: var(--weiss-a30); box-shadow: inset 0 0 0 3px var(--weiss-a30); }
+.haupt-text { display: flex; flex-direction: column; align-items: flex-start; min-width: 0; line-height: 1.15; text-align: left; }
+.haupt-text b { font: 800 22px var(--schrift-rund); letter-spacing: -.01em; white-space: nowrap; }
+.haupt-info { margin-top: 3px; font: 600 14px var(--schrift-rund); white-space: nowrap; opacity: .92; }
+.app.mit-tafel .dock-knopf.dock-haupt { gap: 10px; height: 70px; width: 262px; padding: 0 16px 0 12px; box-shadow: inset 0 2px 0 var(--weiss-a30), 0 4px 0 var(--kante-akzent); }
+.app.mit-tafel .haupt-ring { width: 40px; height: 40px; }
+.app.mit-tafel .haupt-text b { font-size: 19px; }
+.app.mit-tafel .haupt-info { font-size: 12.5px; margin-top: 1px; }   /* Anzahl und Minuten stehen überall im Hauptknopf */
+/* Stand des Tages: ein dünner Balken im Hauptknopf, sobald heute etwas gemacht ist (der Satz steht für Vorleser im selben Element) */
+.dock-haupt { position: relative; }
+.dock .heute { position: absolute; left: 22px; right: 22px; bottom: 11px; height: 0; pointer-events: none; }
+.dock .heute .spur { position: absolute; left: 0; right: 0; bottom: 0; height: 5px; border-radius: 3px; background: var(--weiss-a30); overflow: hidden; }
+.dock .heute .spur > i { display: block; height: 100%; border-radius: 3px; background: var(--flaeche); }
+.app.mit-tafel .dock .heute { bottom: 7px; left: 16px; right: 16px; }
+.app[data-dock="aus"] > .dock { opacity: 0; visibility: hidden; transform: translateY(140%); }
+
+/* ---- Hochformat: Pillen in eigener Zeile, Dock enger -------------------------------------------------------- */
+@media (orientation: portrait) {
+  .app { --hud-raum: calc(var(--oben) + var(--hud-hoehe) + 74px); --blatt-welt: calc(var(--blatt-hoehe) * .72); }   /* Blatt einer Welt-Tafel: die Karte bleibt darüber antippbar */
+  .app > .hud { flex-wrap: wrap; row-gap: 10px; }
+  .hud-links { grid-auto-flow: column; align-items: center; }               /* Ziel neben der Medaille, die Pillen bekommen die zweite Zeile */
+  .hud .ziel { max-width: min(380px, calc(100vw - 2 * var(--rand) - 340px)); }
+  .hud-pillen { order: 3; flex-basis: 100%; }
+  .pille { flex: 1; min-width: 0; }
+  .hud-pillen.eng .pille { gap: 6px; padding-right: 10px; }   /* fünf Pillen: die Namen bleiben, nur kleiner */
+  .hud-pillen.eng .res-objekt { width: 38px; height: 38px; }
+  .hud-pillen.eng .res-name { font-size: 12px; }
+  .dock-knopf { width: 78px; font-size: 13px; }
+  .dock-knopf.dock-haupt { width: 296px; gap: 12px; padding: 0 16px 0 14px; }   /* «48 Aufgaben · etwa 12 Min.» und «Trotzdem üben» passen ganz */
+  .app.mit-tafel .dock-knopf.dock-haupt { width: 252px; }
+  .app[data-modus="welt"] .ansicht[data-ansicht="start"] { right: calc(env(safe-area-inset-right) + var(--rand)); width: auto; }
+  .app[data-modus="welt"].mit-tafel .ansicht.welt-ansicht { right: calc(env(safe-area-inset-right) + var(--rand)); bottom: calc(var(--dock-raum) + var(--blatt-welt) + 12px); }
+  .app[data-modus="aufgabe"] .ansicht { top: calc(var(--oben) + 58px); padding: 18px 20px; }
+}
+@media (max-width: 1000px) and (orientation: landscape) {
+  .pille { min-width: 0; padding-right: 12px; }
+  .hud-pillen.eng .res-name { display: none; }
+}

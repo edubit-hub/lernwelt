@@ -1,0 +1,179 @@
+/* app/stil/eltern.css: der Elternbereich (docs/gestaltung-umbau.md 2.13, Paket A7). Ruhiger als die Ansichten des Kindes: Modus «eltern» blendet HUD und Dock aus,
+   der Grund (--grund) liegt über der Insel (huelle.css). Kacheln in der Form der Tafel, aber deckend auf Papier statt Glas, ohne Effekte ausser dem Übergang
+   der Hülle. Hier stehen die Regeln, die bis Phase 1 als STIL-Blöcke in den Skripten app/ansichten/eltern*.js lagen, nur mit Tokens.
+   Gerüst:   .eltern (.eltern-kopf, .eltern-banner, .eltern-reiter > button[role=tab], .eltern-tafel, .eltern-meldung), .eltern-kachel, .eltern-pin
+   Bausteine: .eltern-zeile, .eltern-werte, .eltern-feld, .eltern-text, .eltern-schalter[role=switch] (Klänge), .knopf.schalter[aria-pressed] (Module, Prüfung, Ferien)
+   Reiter:   mod-* (Module), anp* (Anpassung), lm-* (Lehrmittel), wl-* (Wortlisten), pr-* (Prüfung), fe-* (Ferien), sw-* (Schwächen), gesp-* (Gespräch), probe-kopf */
+
+/* ---- Gerüst ------------------------------------------------------------------------------------------------- */
+.eltern { max-width: 900px; padding-bottom: var(--a5); }
+.eltern-kopf { display: flex; align-items: flex-start; justify-content: space-between; gap: var(--a3); margin-bottom: var(--a4); }
+.eltern-kopf h2 { font: 750 26px/1.15 var(--schrift-rund); letter-spacing: -.01em; }
+.eltern-kopf .klein { margin-top: 4px; }
+.eltern-banner { display: grid; gap: var(--a2); }
+.eltern-banner:not(:empty) { margin-bottom: var(--a4); }
+.eltern-banner .kasten { border-radius: 18px; }
+.eltern-banner .kasten p + p { margin-top: 4px; }
+.eltern-banner .kasten .knopf { margin-top: var(--a2); }
+
+/* Reiter als ruhige Leiste: der gewählte liegt als helle Fläche darin, keine Bewegung */
+.eltern-reiter {
+  display: flex; flex-wrap: wrap; gap: 2px; margin-bottom: var(--a4); padding: 4px;
+  border: 1px solid var(--tinte-a08); border-radius: 18px; background: var(--beige-flaeche);
+}
+.eltern-reiter button {
+  display: inline-flex; align-items: center; min-height: var(--ziel); padding: 0 14px; border: 0; border-radius: 14px;
+  background: transparent; color: var(--tinte-leise); font: 650 var(--t-text)/1.2 var(--schrift-rund); white-space: nowrap;
+}
+.eltern-reiter button[aria-selected="true"] { background: var(--papierweiss); color: var(--tinte); box-shadow: var(--schatten-chip), inset 0 0 0 1px var(--tinte-a08); }
+.eltern-punkt { display: inline-block; width: 8px; height: 8px; margin-left: 6px; border-radius: 50%; background: var(--akzent-warm); vertical-align: middle; }
+.eltern-inhalt { display: grid; gap: var(--a4); min-width: 0; }
+.eltern-meldung { min-height: 1.4em; margin-top: var(--a3); font-size: var(--t-klein); color: var(--tinte-leise); }
+.eltern-meldung.ok { color: var(--ok-text); }
+.eltern-meldung.fehler { color: var(--fehler-text); }
+
+/* ---- Kachel: Form der Tafel, deckend, ohne Glas --------------------------------------------------------------- */
+.kachel.eltern-kachel, .eltern .eltern-inhalt > .kachel {
+  gap: var(--a3); padding: 20px 22px; border: 1px solid var(--tinte-a08); border-radius: 24px; background: var(--papierweiss); box-shadow: var(--schatten-chip);
+}
+.eltern-kachel > h3, .eltern-kachel .mod-kopf h3, .eltern-kachel .pr-kopf h3 { font: 700 var(--t-titel)/1.2 var(--schrift-rund); letter-spacing: -.005em; }
+.eltern-kachel h4 { font: 650 var(--t-text)/1.3 var(--schrift-rund); }
+.eltern-kachel div > h4:not(:first-child) { margin-top: var(--a2); }
+.eltern-kachel .kasten { border-radius: 14px; }
+.eltern-zeile { display: flex; flex-wrap: wrap; align-items: center; gap: var(--a2); }
+.eltern-werte { display: grid; grid-template-columns: minmax(120px, 210px) minmax(0, 1fr); gap: 6px var(--a4); margin: 0; }
+.eltern-werte + p { margin-top: var(--a3); }
+.eltern-werte dt { color: var(--tinte-leise); }
+.eltern-werte dd { margin: 0; overflow-wrap: anywhere; }
+.eltern-feld { display: grid; gap: 4px; max-width: 360px; }
+.eltern-feld > span { font-size: var(--t-klein); color: var(--tinte-leise); }
+.eltern-feld input, .eltern-feld select, .eltern-zeile select, .eltern-text {
+  min-height: var(--ziel); padding: 8px 12px; border: 1px solid var(--linie); border-radius: 12px; background: var(--flaeche); color: var(--tinte);
+}
+.eltern-text { display: block; width: 100%; font: 12.5px/1.4 ui-monospace, monospace; resize: vertical; overflow-wrap: anywhere; -webkit-user-select: text; user-select: text; }
+label.knopf { position: relative; }
+
+/* Knöpfe im Elternbereich: dieselben Knöpfe, mit flacherer Kante (ruhiger als bei den Kindern) */
+.eltern .knopf:not(.leise):not(:disabled):not(.gesperrt) { box-shadow: inset 0 0 0 1px var(--tinte-a10), 0 3px 0 var(--kante-weiss); }
+.eltern .knopf.primaer:not(:disabled):not(.gesperrt) { box-shadow: 0 3px 0 var(--kante-akzent); }
+.eltern .knopf.gefahr:not(:disabled):not(.gesperrt) { box-shadow: inset 0 0 0 1px var(--fehler), 0 3px 0 var(--kante-weiss); }
+
+/* Gedrückte Schalter (aria-pressed) der Reiter Module, Prüfung und Ferien sind sichtbar abgesetzt */
+.eltern .knopf.schalter[aria-pressed="true"] { background: var(--akzent-hell); color: var(--akzent-dunkel); }
+.eltern .knopf.schalter[aria-pressed="true"]:not(:disabled) { box-shadow: inset 0 0 0 2px var(--akzent), 0 3px 0 var(--akzent-mitte); }
+
+/* Schalter «Klänge» (role=switch, aria-checked): Bahn mit Knauf und Wort, 44 px hoch */
+.eltern-schalter {
+  display: inline-flex; align-items: center; gap: var(--a3); min-height: var(--ziel); min-width: var(--ziel); padding: 0 10px 0 4px;
+  border: 0; border-radius: 22px; background: transparent; color: var(--tinte); font: 650 var(--t-text)/1 var(--schrift-rund);
+}
+.eltern-schalter-bahn {
+  position: relative; flex: none; width: 54px; height: 32px; border-radius: 16px; background: var(--lampe-aus);
+  box-shadow: inset 0 1px 2px var(--tinte-a14); transition: background-color var(--dauer) var(--kurve);
+}
+.eltern-schalter-bahn::after {
+  content: ""; position: absolute; top: 3px; left: 3px; width: 26px; height: 26px; border-radius: 50%; background: var(--flaeche);
+  box-shadow: var(--schatten-leicht); transition: transform var(--dauer) var(--kurve);
+}
+.eltern-schalter[aria-checked="true"] .eltern-schalter-bahn { background: var(--akzent); }
+.eltern-schalter[aria-checked="true"] .eltern-schalter-bahn::after { transform: translateX(22px); }
+.eltern-schalter:disabled { color: var(--tinte-leise); }
+.eltern-schalter:disabled .eltern-schalter-bahn { background: var(--gesperrt); }
+
+/* ---- PIN-Hürde: eine ruhige Tafel in der Mitte -------------------------------------------------------------- */
+.kachel.eltern-pin {
+  max-width: 400px; margin: var(--a5) auto; align-items: center; gap: var(--a3); padding: 26px 28px 22px; text-align: center;
+  border: 1px solid var(--tinte-a08); border-radius: 30px; background: var(--papierweiss); box-shadow: var(--schatten-hud);
+}
+.eltern-pin > h3 { font: 700 var(--t-titel)/1.2 var(--schrift-rund); }
+.eltern-pin .kachel-fuss { flex-wrap: wrap; justify-content: center; }
+.eltern-punkte { display: flex; gap: 14px; margin: var(--a1) 0; }
+.eltern-punkte i { width: 16px; height: 16px; border: 2px solid var(--akzent); border-radius: 50%; }
+.eltern-punkte i.an { background: var(--akzent); }
+.eltern-fehler { min-height: 1.4em; color: var(--fehler-text); }
+
+/* ---- Probe aus dem Elternbereich ---------------------------------------------------------------------------- */
+.probe-kopf { max-width: 900px; margin-bottom: var(--a3); padding: 8px 14px; border-radius: 14px; background: var(--beige-flaeche); }
+.probe-kopf + .lauf-huelle { max-width: 900px; }
+
+/* ---- Listen in Kacheln (Themen, Lehrmittel, Wortlisten, Ferien, Schwächen, Gespräch) --------------------------- */
+.mod-themen li, .lm-liste li, .wl-liste li, .fe-liste li, .sw-liste li, .gesp-liste li {
+  padding: var(--a2) var(--a3); border: 1px solid var(--tinte-a08); border-radius: 14px; background: var(--flaeche);
+}
+
+/* Module (eltern-module.js) und Einstellungen eines Moduls (eltern-anpassung.js) */
+.mod-liste { display: grid; gap: var(--a4); }
+.mod-kopf { display: flex; flex-wrap: wrap; align-items: center; gap: var(--a2); }
+.mod-kopf h3 { margin-right: var(--a2); }
+.mod-details { margin-top: var(--a1); }
+.mod-details summary { min-height: var(--ziel); display: flex; align-items: center; cursor: pointer; font-weight: 650; }
+.mod-themen { display: grid; gap: var(--a2); margin: var(--a2) 0 0; padding: 0; list-style: none; }
+.mod-themen li { display: grid; gap: 4px; }
+.mod-themen li > div { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--a2); }
+.anp { display: grid; gap: var(--a3); margin-top: var(--a1); }
+.anp-zeile { max-width: none; }
+.anp-zeile input { max-width: 120px; }
+
+/* Lehrmittel der Klasse (eltern-lehrmittel.js) */
+.lm-faecher { display: flex; flex-wrap: wrap; gap: var(--a3); }
+.lm-faecher .eltern-feld { flex: 1 1 200px; max-width: none; }
+.lm-liste { display: grid; gap: var(--a2); margin: var(--a3) 0 0; padding: 0; list-style: none; }
+.lm-liste li { display: grid; gap: 4px; }
+.lm-liste li > div { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--a2); }
+
+/* Wortlisten (eltern-listen.js) */
+.wl-felder { display: flex; flex-wrap: wrap; align-items: flex-start; gap: var(--a3); }
+.wl-felder .eltern-feld { flex: 1 1 200px; max-width: none; }
+.wl-felder input, .wl-felder select { font-size: var(--t-gross); }
+.eltern-feld.wl-breit { max-width: none; margin-top: var(--a3); }
+.wl-aktionen { margin-top: var(--a3); }
+.wl-vorschau { margin-top: var(--a4); }
+.wl-text {
+  display: block; width: 100%; min-height: 220px; padding: 10px 12px; border: 1px solid var(--linie); border-radius: 12px;
+  background: var(--flaeche); color: var(--tinte); font: var(--t-gross) / 1.5 var(--schrift); resize: vertical;
+}
+.wl-liste { display: grid; gap: var(--a2); margin: var(--a3) 0 0; padding: 0; list-style: none; }
+.wl-liste li { display: grid; gap: 2px; overflow-wrap: anywhere; }
+.wl-satz { font-size: var(--t-klein); color: var(--tinte-leise); }
+.wl-probleme { margin: var(--a2) 0 0; padding-left: var(--a5); }
+@media (min-width: 700px) { .wl-liste { grid-template-columns: 1fr 1fr; } }
+
+/* Prüfung (eltern-pruefung.js, eltern-plan.js) und Ferien (eltern-ferien.js) */
+.pr-liste { display: grid; gap: var(--a4); }
+.pr-kopf { display: flex; flex-wrap: wrap; align-items: center; gap: var(--a2); }
+.pr-ampel { margin-bottom: var(--a3); padding: var(--a2) var(--a3); border: 1px solid var(--linie); border-left-width: 6px; border-radius: 12px; background: var(--flaeche); }
+.pr-gruen { border-left-color: var(--ok); }
+.pr-gelb { border-left-color: var(--akzent-warm); }
+.pr-rot { border-left-color: var(--fehler); }
+.pr-risiken { margin: var(--a2) 0 var(--a3); padding-left: var(--a5); }
+.pr-teil { display: grid; gap: var(--a2); margin-top: var(--a3); padding-top: var(--a3); border-top: 1px solid var(--linie-leise); }
+.pr-verlauf { margin: 0; padding-left: var(--a5); }
+.fe-liste { display: grid; gap: var(--a2); margin: var(--a2) 0; padding: 0; list-style: none; }
+.fe-liste li > div { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--a2); }
+
+/* Schwächen (eltern-schwaechen.js) */
+.sw-liste { display: grid; gap: var(--a2); margin: var(--a2) 0 0; padding: 0; list-style: none; }
+.sw-liste li { display: grid; gap: 2px; overflow-wrap: anywhere; }
+.sw-teil { display: grid; gap: var(--a2); margin-top: var(--a4); }
+.sw-teil > summary { display: flex; align-items: center; min-height: var(--ziel); cursor: pointer; font-weight: 650; }
+.sw-begleitung { display: grid; gap: var(--a2); margin: 0; padding-left: var(--a5); }
+
+/* Gespräch (eltern-gespraech.js): die Siedlung nur zum Lesen, gezeichnet mit Render.karte */
+.gesp-karte { position: relative; height: 340px; overflow: hidden; border-radius: 18px; background: var(--meer); box-shadow: inset 0 0 0 1px var(--tinte-a08); }
+.gesp-karte .welt-karte, .gesp-karte svg { display: block; width: 100%; height: 100%; }
+.gesp-karte .bauplatz.frei circle, .gesp-karte .bauplatz.frei path[d^="M-9 0H9"] { display: none; }   /* das Plus lädt zum Bauen ein, hier gibt es nichts zu bauen */
+.gesp-wahl { min-height: 1.5em; margin-top: var(--a2); }
+.gesp-liste { display: grid; gap: var(--a2); margin: var(--a2) 0 0; padding: 0; list-style: none; }
+
+/* ---- Schmale Fenster und Hochformat ------------------------------------------------------------------------- */
+@media (max-width: 600px) {
+  .eltern-werte { grid-template-columns: minmax(0, 1fr); gap: 0; }
+  .eltern-werte dd { margin-bottom: var(--a2); }
+}
+@media (orientation: portrait) {
+  .eltern-reiter button { padding: 0 11px; }
+  .kachel.eltern-kachel, .eltern .eltern-inhalt > .kachel { padding: 18px 20px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .eltern-schalter-bahn, .eltern-schalter-bahn::after { transition: none; animation: none; }
+}

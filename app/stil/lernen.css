@@ -1,0 +1,82 @@
+/* app/stil/lernen.css: die Tagesauftrag-Auswahl (docs/gestaltung-umbau.md 2.5, Vorbild docs/mockup/richtung-a/a-karten.css «runden» und a-tafeln.css).
+   Die Auswahl liegt als Tafel (aside.tafel.tafel-seite.lernen-tafel) in der Ansicht über der Insel: quer von rechts, hoch als Blatt von unten.
+   Die Ansicht selbst ist dabei durchsichtig (.ansicht.lernen-auswahl), damit die Insel daneben frei bleibt.
+   Karten: article.kachel.runde-karte[data-runde] > .runde-bild (Rohstoff-Objekt) + .runde-text (.kachel-kopf, .runde-info, .runde-ertrag, .kachel-fuss).
+   Die ganze Karte startet die Runde: der Knopf «Starten» spannt seine Fläche über die Karte. Nur Token aus tokens.css. */
+
+/* Die Ansicht als durchsichtige Bühne für die Tafel */
+.app[data-modus="welt"] .ansicht.lernen-auswahl {
+  inset: 0; width: auto; margin: 0; padding: 0; overflow: visible; border-radius: 0; background: none; box-shadow: none; pointer-events: none;
+}
+.ansicht.lernen-auswahl > .tafel { pointer-events: auto; }
+.tafel-seite.lernen-tafel { width: min(560px, calc(50vw - var(--rand))); min-width: var(--tafel-breite); }
+.lernen-tafel .tafel-titel { font-size: 26px; }
+.lernen-tafel .tafel-rumpf { padding: 6px 22px 22px; }
+
+/* Inhalt der Auswahl */
+.lernen { display: flex; flex-direction: column; gap: var(--a3); }
+.lernen > .unterzeile { margin: -2px 0 2px; font-size: var(--t-text); color: var(--tinte-leise); }
+.lernen .kasten { margin: 0; }
+.lernen .kachel p { margin: 0; }
+.lernen .hinweis { margin: 0; }
+.lernen .kacheln.runden { grid-template-columns: minmax(0, 1fr); gap: var(--a3); margin: 0; }
+
+/* Karte einer Runde: links das Fach als Rohstoff-Objekt auf getöntem Grund, rechts Name, Etikett, Umfang, Ertrag und «Starten» */
+.kachel.runde-karte {
+  position: relative; display: grid; grid-template-columns: 120px minmax(0, 1fr); gap: 0; min-height: 112px; padding: 0; overflow: hidden;
+  border: 0; border-radius: 24px; background: var(--flaeche); box-shadow: var(--schatten-knopf);
+  transition: transform var(--dauer) var(--kurve-raus), box-shadow var(--dauer) var(--kurve-raus);
+}
+.kachel.runde-karte.hervor { box-shadow: 0 0 0 3px var(--akzent), var(--schatten-knopf); }   /* die Runde des Fachs, das ein Handlungsknopf «Rechnen üben» meint */
+.kachel.runde-karte:active { transform: translateY(4px); box-shadow: inset 0 0 0 1px var(--tinte-a08), 0 1px 0 var(--kante-weiss), 0 3px 8px var(--tinte-a10); }
+.runde-bild { display: grid; place-items: center; background: radial-gradient(110% 90% at 50% 100%, var(--flaeche) 0%, var(--tint, var(--akzent-hell)) 80%); }
+.runde-objekt { display: grid; place-items: center; line-height: 0; }
+.runde-bild .runde-objekt > svg { width: 84px; height: 84px; }
+.runde-bild .runde-objekt.ohne > svg { width: 64px; height: 52px; }
+.runde-text { display: grid; grid-template-columns: minmax(0, 1fr) auto; grid-template-rows: auto auto auto; align-content: center; gap: 4px 12px; padding: 12px 14px 12px 18px; }
+.runde-text .kachel-kopf { grid-column: 1; flex-wrap: wrap; justify-content: flex-start; gap: 4px 10px; }   /* bricht der Titel um, steht «2 neu» direkt darunter */
+.runde-text h3 { margin: 0; font: 800 22px/1.15 var(--schrift-rund); letter-spacing: -.01em; }
+.runde-karte .etikett { padding: 3px 10px; border: 0; background: var(--warm-hell); color: var(--warm-tinte); font: 700 13px var(--schrift-rund); }
+.lernen .runde-info { grid-column: 1; font: 600 16px var(--schrift-rund); color: var(--tinte); }
+.lernen .runde-ertrag { grid-column: 1; display: flex; align-items: center; gap: 6px; font-size: var(--t-klein); color: var(--tinte-leise); }
+.runde-ertrag .runde-objekt > svg { width: 22px; height: 22px; }
+.runde-text .kachel-fuss { grid-column: 2; grid-row: 1 / -1; align-self: center; margin: 0; }
+.knopf.runde-los { min-width: 104px; margin: 0; }
+.knopf.runde-los::after { content: ''; position: absolute; inset: 0; border-radius: inherit; }      /* die ganze Karte ist antippbar */
+.knopf.runde-los:not(.primaer) { background: linear-gradient(var(--flaeche), var(--taste-oben)); }
+.kachel.runde-karte .knopf.runde-los:not(:disabled):active { transform: none; }                  /* die Karte sinkt schon, der Knopf nicht doppelt */
+
+.lernen-alle { align-self: flex-start; margin-top: var(--a2); }
+.lernen .zusatz { margin-top: var(--a2); }
+.lernen details.weitere { margin-top: var(--a1); }
+/* Nachbesserung 2: «Weitere Möglichkeiten» als ruhiger Knopf mit Winkel statt des nackten Dreiecks */
+.lernen details.weitere > summary { display: flex; align-items: center; justify-content: space-between; gap: 10px; min-height: var(--ziel); padding: 10px 16px; border-radius: 16px;
+  background: var(--tinte-a04); box-shadow: inset 0 0 0 1px var(--tinte-a08); line-height: 22px; cursor: pointer; font-weight: 700; color: var(--akzent-dunkel); list-style: none; }   /* 44 px zum Antippen */
+.lernen details.weitere > summary::-webkit-details-marker { display: none; }
+.lernen details.weitere > summary::after { content: ''; flex: none; width: 9px; height: 9px; margin-right: 4px; border-right: 2.5px solid currentColor; border-bottom: 2.5px solid currentColor; transform: rotate(45deg) translateY(-2px); transition: transform var(--dauer) ease; }
+.lernen details.weitere[open] > summary::after { transform: rotate(-135deg) translateY(-2px); }
+.lernen details.weitere > summary:active { background: var(--tinte-a08); }
+.lernen details.weitere[open] > summary { margin-bottom: var(--a2); }
+.lauf-huelle { width: 100%; margin: 0 auto; }
+
+/* Querformat: vier Runden (auch mit zweizeiligem Fach) und «Alle der Reihe nach» passen ohne Rollen in die Tafel */
+@media (orientation: landscape) {
+  .kachel.runde-karte { grid-template-columns: 100px minmax(0, 1fr); min-height: 84px; }
+  .lernen, .lernen .kacheln.runden { gap: var(--a2); }
+  .lernen-alle { margin-top: var(--a1); }
+  .runde-bild .runde-objekt > svg { width: 66px; height: 66px; }
+  .runde-text { gap: 2px 12px; padding: 8px 12px 8px 16px; }
+  .runde-text h3 { font-size: 20px; }
+  .lernen-tafel .tafel-titel { font-size: 24px; }
+}
+/* Hochformat: die Tafel ist ein Blatt von unten, die Karten etwas niedriger */
+@media (orientation: portrait) {
+  .tafel-seite.lernen-tafel { width: auto; min-width: 0; height: min(var(--blatt-hoehe), calc(100% - var(--hud-raum) - var(--dock-raum))); }
+  .kachel.runde-karte { grid-template-columns: 104px minmax(0, 1fr); min-height: 100px; }
+  .runde-bild .runde-objekt > svg { width: 72px; height: 72px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .kachel.runde-karte { transition: none; animation: none; }
+  .kachel.runde-karte.hervor { box-shadow: 0 0 0 3px var(--akzent), var(--schatten-knopf); }   /* die Runde des Fachs, das ein Handlungsknopf «Rechnen üben» meint */
+.kachel.runde-karte:active { transform: none; }
+}

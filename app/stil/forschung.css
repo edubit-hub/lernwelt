@@ -1,0 +1,140 @@
+/* app/stil/forschung.css: die Ansicht «Forschung» am Forschungsturm (docs/gestaltung-umbau.md 2.10, Vorbild docs/mockup/richtung-b/b-seiten.css «Forschung»).
+   aside.tafel.tafel-karte.info.forschung-tafel > .tafel-rumpf > .forschung-feld.fo-karte (Kartenpapier mit feinem Raster, waagrechter Bildlauf nur hier)
+   und .fo-detail (der gewählte Knoten: .fo-detail-info mit Kopf und Fakten, daneben .fo-detail-seite mit .fo-aktionen und dem Weg). Im SVG: .fo-band je Epoche
+   (offen, gesperrt, horizont mit Schraffur und .fo-schild), .fo-zweig je Fach, .fo-kante, .fo-knoten.z-<zustand> mit .fo-siegel, .fo-marke (Raute des
+   Zustands), .fo-lampe und beim Tor .fo-raute. Die leere Ansicht hinter der Tafel ist unsichtbar, die Bühne zeigt den Turm. Nur Token aus tokens.css
+   und dem Welt-Thema (--see-*), keine Farbwerte. Bewegt wird nur in Effekten (forschung.js, effekte.js). */
+
+.app[data-modus="welt"] .ansicht.fo-ansicht { visibility: hidden; pointer-events: none; }
+
+.tafel.forschung-tafel .tafel-kopf { padding-top: 8px; }
+.tafel.forschung-tafel .tafel-titel { margin-top: 1px; font-size: 19px; }
+.tafel.info.forschung-tafel .tafel-rumpf { display: flex; flex-direction: column; gap: 8px; overflow: hidden; padding: 2px 14px 14px; }
+.forschung-tafel.eingebettet { display: flex; flex-direction: column; gap: 10px; }
+
+/* Karte: Papier mit doppeltem Rahmen und feinem Raster, läuft nur waagrecht */
+.fo-karte {
+  flex: none; overflow-x: auto; overflow-y: hidden; padding: 7px; border-radius: 16px; background: var(--papier-buch);
+  box-shadow: inset 0 0 0 1px var(--papier-rand), inset 0 0 0 5px var(--papier-buch), inset 0 0 0 6px var(--papier-rand);
+  -webkit-overflow-scrolling: touch; overscroll-behavior-x: contain; touch-action: pan-x;
+}
+.fo-svg {
+  display: block; width: 100%; max-width: var(--fo-breite); min-width: calc(var(--fo-breite) * .86); height: auto; margin: 0 auto; border-radius: 10px;
+  background-image: linear-gradient(var(--tinte-a04) 1px, transparent 1px), linear-gradient(90deg, var(--tinte-a04) 1px, transparent 1px); background-size: 22px 22px;
+}
+.fo-svg text { font-family: var(--schrift-rund); fill: var(--tinte); }
+
+/* Epochen als Spalten, Fächer als Zeilen */
+.fo-band-flaeche { fill: var(--see-flach, var(--akzent-hell)); fill-opacity: .7; stroke: var(--akzent-mitte); stroke-width: 1.2; }
+.fo-gesperrt .fo-band-flaeche, .fo-horizont .fo-band-flaeche { fill: var(--papierweiss); fill-opacity: .55; stroke: var(--tinte-a20); stroke-dasharray: 5 5; }
+.fo-schraffur { stroke: var(--akzent-dunkel); stroke-width: 1.4; stroke-opacity: .08; }
+.fo-svg .fo-band-titel { font-size: 10.5px; font-weight: 750; letter-spacing: .1em; fill: var(--akzent-dunkel); }
+.fo-svg .fo-gesperrt .fo-band-titel, .fo-svg .fo-horizont .fo-band-titel { fill: var(--tinte-leise); }
+.fo-schild rect { fill: var(--papierweiss); stroke: var(--tinte-a14); }
+.fo-svg .fo-schild text { font-size: 11.5px; font-weight: 750; letter-spacing: .04em; fill: var(--tinte-leise); }
+.fo-zeile { fill: none; stroke: var(--tinte-a08); stroke-dasharray: 2 6; }
+.fo-svg .fo-zweig text { font-size: 11.5px; font-weight: 750; fill: var(--tinte-leise); }
+
+/* Kanten: ruhige Linien, erforscht durchgezogen, der nächste offene Schritt warm, der Horizont blass */
+.fo-kante { fill: none; stroke: var(--akzent-mitte); stroke-width: 3; stroke-linecap: round; stroke-dasharray: 1 7; }
+.fo-kante.aktiv { stroke: var(--akzent-dunkel); stroke-dasharray: none; stroke-opacity: .75; }
+.fo-kante.bereit { stroke: var(--akzent-warm); stroke-opacity: 1; stroke-width: 3.5; }
+.fo-kante.horizont { stroke: var(--tinte-a14); }
+.fo-licht { fill: none; stroke: var(--warm-hoch); stroke-width: 6; stroke-linecap: round; opacity: 0; pointer-events: none; }
+
+/* Knoten: Platte mit Siegel, Name, Bereich, Lampen und Kosten */
+.fo-knoten { cursor: pointer; outline: none; -webkit-tap-highlight-color: transparent; }
+.fo-schatten { fill: var(--tinte-a06); }
+.fo-platte { fill: var(--papierweiss); stroke: var(--papier-rand); stroke-width: 1.5; }
+.fo-aussen { fill: none; stroke: var(--akzent-dunkel); stroke-width: 2.5; stroke-dasharray: 5 4; opacity: 0; }
+.fo-knoten.gewaehlt .fo-aussen, .fo-knoten:focus-visible .fo-aussen { opacity: 1; }
+.fo-knoten.gewaehlt .fo-platte { stroke: var(--akzent); stroke-width: 2; }
+.fo-knoten:active .fo-platte { fill: var(--beige-flaeche); }
+.fo-siegel { transform-box: fill-box; transform-origin: center; }
+.fo-siegel-rand { fill: var(--gesperrt); stroke: var(--tinte-a20); stroke-width: 1.4; }
+.fo-glanz { fill: var(--warm-a30); }
+.fo-svg .fo-name { font-size: 15px; font-weight: 750; }   /* Nachbesserung 2: Knotentexte grösser */
+.fo-svg .fo-bereich, .fo-svg .fo-leise { font-size: 13px; fill: var(--tinte-leise); }
+.fo-svg .fo-kosten { font-size: 13px; font-weight: 750; }
+.fo-svg .fo-kosten.warm { fill: var(--warm-tinte); }
+.fo-lampe { fill: var(--lampe-aus); fill-opacity: .55; }
+.fo-lampe.an { fill: var(--akzent); fill-opacity: 1; }
+.fo-raute { fill: var(--lampe-aus); fill-opacity: .55; }
+.fo-raute.an { fill: var(--akzent-warm); fill-opacity: 1; }
+.fo-spur { fill: var(--spur); }
+.fo-fuell { fill: var(--akzent-warm); }
+.fo-bogen { fill: none; stroke: var(--warm-icon); stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
+.fo-ziel-stab { fill: none; stroke: var(--tinte-leise); stroke-width: 1.6; stroke-linecap: round; }
+.fo-ziel-tuch { fill: var(--akzent-warm); }
+
+.z-erforscht .fo-siegel-rand { fill: var(--akzent-dunkel); stroke: var(--akzent-dunkel); }
+.z-erforscht .fo-lampe.an { fill: var(--ok); }
+.z-erforscht .fo-bogen { stroke: var(--flaeche); }
+.z-moeglich .fo-platte { fill: var(--warm-flaeche); stroke: var(--warm-kante); }
+.z-moeglich .fo-siegel-rand { fill: var(--warm-hell); stroke: var(--warm-tief); stroke-width: 1.6; }
+.z-gesperrt .fo-siegel-rand { stroke-dasharray: 3 3; }
+.z-gesperrt .fo-siegel svg, .z-horizont .fo-siegel svg { opacity: .55; }
+.fo-knoten.z-horizont { opacity: .6; }
+.z-horizont .fo-platte { fill: var(--weiss-a55); stroke: var(--tinte-a20); stroke-dasharray: 4 4; }
+.z-horizont .fo-siegel-rand { fill: transparent; stroke-dasharray: 3 3; }
+.fo-tor .fo-platte { fill: var(--warm-flaeche); stroke: var(--warm-kante); }
+.fo-tor.z-horizont .fo-platte, .fo-tor.z-gesperrt .fo-platte { fill: var(--papierweiss); }
+
+/* Raute des Zustands am Siegel */
+.fo-marke rect { fill: var(--papierweiss); stroke: var(--tinte-a20); stroke-width: 1.4; }
+.fo-marke.r-erforscht rect { fill: var(--ok); stroke: var(--papierweiss); stroke-width: 2; }
+.fo-marke.r-moeglich rect { fill: var(--akzent-warm); stroke: var(--papierweiss); stroke-width: 2; }
+.fo-zeichen { fill: none; stroke: var(--tinte-leise); stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
+.fo-zeichen-voll { fill: var(--tinte-leise); }
+.fo-zeichen-punkt { fill: var(--flaeche); }
+.r-erforscht .fo-zeichen { stroke: var(--flaeche); stroke-width: 2; }
+
+/* Unter der Karte: der gewählte Knoten, daneben der Weg */
+.fo-detail { display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(250px, 1fr); gap: 10px 16px; flex: 1 1 auto; align-content: start; min-height: 0; overflow: auto; overscroll-behavior: contain; }
+.fo-detail-seite { display: grid; gap: 10px; align-content: start; min-width: 0; }
+.fo-detail-kopf { display: grid; grid-template-columns: auto minmax(0, 1fr); align-items: center; gap: 6px 12px; }   /* Status als Plakette unter dem Titel, nie frei schwebend */
+.fo-detail-kopf > :first-child { grid-row: span 2; }
+.fo-detail-kopf > .fo-status { grid-column: 2; justify-self: start; margin-left: 0; }
+.fo-detail-siegel {
+  display: grid; place-items: center; flex: none; width: 50px; height: 50px; border-radius: 50%;
+  background: radial-gradient(120% 120% at 35% 25%, var(--flaeche) 0%, var(--gesperrt) 70%); box-shadow: inset 0 0 0 2px var(--tinte-a14);
+}
+.fo-detail-siegel.s-moeglich { background: radial-gradient(120% 120% at 35% 25%, var(--flaeche) 0%, var(--warm-hell) 70%); box-shadow: inset 0 0 0 2.5px var(--warm-tief), 0 0 0 5px var(--warm-a30); }
+.fo-detail-siegel.s-erforscht { background: var(--akzent-dunkel); box-shadow: 0 0 0 3px var(--akzent-hell); }
+.fo-detail-siegel > svg { width: 40px; height: 34px; }
+.fo-detail-titel { flex: 1 1 auto; min-width: 0; }
+.fo-detail-titel h3 { margin: 2px 0 0; font: 800 19px/1.15 var(--schrift-rund); white-space: nowrap; }   /* «Sprachkunde I» bricht nicht um; der Status rückt sonst in die nächste Zeile */
+.fo-status { margin-left: auto; padding: 5px 11px; border-radius: 999px; background: var(--tinte-a06); font: 700 13px var(--schrift-rund); color: var(--tinte-leise); white-space: nowrap; }
+.fo-status.s-moeglich { background: var(--warm-hell); color: var(--warm-tinte); }
+.fo-status.s-erforscht { background: var(--akzent-hell); color: var(--ok-text); }
+.fo-fakten { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 18px; margin-top: 10px; }
+.fo-fakt { display: flex; align-items: center; gap: 10px; min-width: 0; }
+.fo-fakt-titel { font: 750 11.5px var(--schrift-rund); letter-spacing: .08em; text-transform: uppercase; color: var(--tinte-leise); }
+.fo-fakt .kosten-zeile { min-height: 40px; }
+.fo-module, .fo-frei, .fo-text { margin: 6px 0 0; font-size: 14px; line-height: 1.4; color: var(--tinte-leise); }
+.fo-frei b { color: var(--tinte); }
+.fo-aktionen { display: flex; flex-wrap: wrap; gap: 10px; }
+.fo-aktionen .knopf { flex: 1 1 auto; padding: 0 14px; white-space: nowrap; }
+.fo-detail-seite .weg { gap: 5px; padding: 8px 14px 9px; }
+.fo-detail-seite .weg-knopf { min-height: var(--ziel); margin-top: 0; }
+.fo-detail-seite .weg-titel { font-size: 15px; }
+.fo-detail-seite .weg-schritte > li { grid-template-columns: 24px minmax(0, 1fr); align-items: center; padding-bottom: 4px; font-size: 14px; }
+.fo-detail-seite .weg-schritte > li::before { left: 11px; top: 24px; }
+.fo-detail-seite .weg-punkt { width: 24px; height: 24px; font-size: 12.5px; }
+
+/* Ein ganz erfüllter Weg weicht in jeder Lage «Erforschen» (Nachbesserung 2: keine Wegbox ohne offenen Schritt) */
+.fo-detail .weg.fertig { display: none; }
+
+/* Querformat und Hochformat (am Ende, damit sie die Grundregeln oben übersteuern) */
+@media (orientation: landscape) {
+  /* Schlussprüfung: die Karte passt quer ganz in die Tafel (keine angeschnittenen Wörter, die Epoche 2 mit ihrer Marke «Später»); links bleibt der Turm sichtbar */
+  .tafel.tafel-karte.forschung-tafel { width: min(940px, 66vw); }
+  /* quer ist die Höhe knapp: die Module nennt der Weg, den Stand die Zahl «2 von 3», erledigte Schritte und den Titel lässt das nummerierte Blatt weg, ein ganz erfüllter Weg weicht «Erforschen» */
+  .fo-detail .fo-module, .fo-detail .weg-balken, .fo-detail .weg-schritte > li.erledigt, .fo-detail .weg-titel { display: none; }
+  .fo-detail { grid-template-columns: minmax(0, 1fr) minmax(0, 1.3fr); }
+  .fo-detail-seite .weg-schritte > li { font-size: 13.5px; line-height: 1.3; }
+  .fo-svg { width: 100%; min-width: 0; }
+}
+@media (orientation: portrait) {
+  .tafel.tafel-karte.forschung-tafel { height: auto; }                   /* das Blatt so hoch wie sein Inhalt, darüber bleibt der Turm im Bild */
+}

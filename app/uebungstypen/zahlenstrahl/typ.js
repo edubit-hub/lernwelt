@@ -74,10 +74,13 @@
 
         const svg = svgEl('svg', { viewBox: `0 0 ${B} ${HOEHE}`, class: 'zs-flaeche', role: 'group', 'aria-label': `Zahlenstrahl von ${von} bis ${bis}` });
         zeichneSkala(svg, von, bis, gross, klein, beschriftung);
-        const marke = svgEl('g', { class: 'zs-marke aus', role: 'slider', tabindex: 0, 'aria-label': 'Marke', 'aria-valuemin': von, 'aria-valuemax': bis, 'aria-valuenow': von });   // bis zur ersten Berührung unsichtbar
-        marke.append(svgEl('line', { x1: 0, x2: 0, y1: Y - 46, y2: Y, class: 'zs-stiel' }), svgEl('circle', { cx: 0, cy: Y, r: 13, class: 'zs-kopf' }));
+        // Die Marke steht von Anfang an kräftig am linken Ende (Tropfen mit grossem Griff); gewertet wird erst nach der ersten Berührung
+        const marke = svgEl('g', { class: 'zs-marke aus', role: 'slider', tabindex: 0, 'aria-label': 'Marke', 'aria-valuemin': von, 'aria-valuemax': bis, 'aria-valuenow': von,
+          transform: `translate(${ort(von, von, bis).toFixed(1)} 0)` });
+        marke.append(svgEl('circle', { cx: 0, cy: Y - 40, r: 30, class: 'zs-griff' }), svgEl('line', { x1: 0, x2: 0, y1: Y - 40, y2: Y, class: 'zs-stiel' }),
+          svgEl('path', { d: `M0 ${Y - 12}C-6 ${Y - 24} -17 ${Y - 30} -17 ${Y - 42}A17 17 0 1 1 17 ${Y - 42}C17 ${Y - 30} 6 ${Y - 24} 0 ${Y - 12}Z`, class: 'zs-tropfen' }), svgEl('circle', { cx: 0, cy: Y, r: 7, class: 'zs-kopf' }));
         svg.append(marke);
-        const ok = H('button.knopf.primaer.zs-ok', { type: 'button', 'aria-label': 'Bestätigen', disabled: true, onclick: bestaetige }, 'Fertig');
+        const ok = H('button.knopf.primaer.zs-ok', { type: 'button', 'aria-label': 'Bestätigen', disabled: true, onclick: bestaetige }, 'Prüfen');
 
         function setze(neu) {
           if (beendet || neu === null || !Number.isFinite(neu)) return;

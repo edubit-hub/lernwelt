@@ -1,5 +1,6 @@
 /* app/lauf/schleife.js: die Schleife über alle Pakete einer Runde (Architektur 5.2 und 5.4): Paket zeigen lassen, Ergebnisse verbuchen, Raten
-   erkennen, Rückmeldung zeigen oder bis zum Ende sammeln, Bühne leeren. Dazu der Abschluss einer Probeprüfung. k ist der Zustand der Runde (lauf.js). */
+   erkennen, Rückmeldung zeigen oder bis zum Ende sammeln, Bühne leeren. Dazu der Abschluss einer Probeprüfung. k ist der Zustand der Runde (lauf.js).
+   Der Beobachter der Runde (k.beobachter) hört vor jedem Paket { nr, gesamt, art } und nach dem Verbuchen je Ergebnis { urteil, aufgabeKey }. */
 (function (g) {
   'use strict';
   const L = (g.Lernwelt = g.Lernwelt || {});
@@ -22,7 +23,22 @@
     return Array.isArray(erg) ? erg : [];
   }
 
-  const leere = k => { k.buehne.removeAttribute('inert'); k.buehne.replaceChildren(); };
+  /** Worum es im Paket geht, für Etikett und Arbeitsauftrag des Rahmens: Übungstyp, Fach und lesbarer Titel des Themas (ohne Welt). */
+  function worum(k, paket) {
+    const a = (paket.aufgaben && paket.aufgaben[0]) || {};
+    let thema = null;
+    try { thema = a.modul && a.thema ? k.katalog.thema(a.modul, a.thema).titel || null : null; } catch (fehler) { thema = null; }
+    return { typ: paket.typ || null, fach: a.fach || null, thema };
+  }
+
+  const leere = k => { k.buehne.removeAttribute('inert'); k.buehne.removeAttribute('data-urteil'); k.buehne.replaceChildren(); };
+
+  /** Meldet dem Beobachter der Runde (lauf.js, Umbauplan 3.7) ein Paket oder ein Ergebnis. Ein Fehler des Beobachters stoppt die Runde nicht. */
+  function beobachte(k, was, daten) {
+    const b = k.beobachter;
+    if (!b || typeof b[was] !== 'function') return;
+    try { b[was](daten); } catch (fehler) { if (L.Fehlerlog) L.Fehlerlog.melde(fehler, { art: 'fehler' }); }
+  }
 
   /** Arbeitet die Warteschlange ab, bis sie leer ist, die Runde abgebrochen wird oder der Zeitdeckel erreicht ist (dann bleibt der Rest fällig). */
   async function fuehreAus(k) {
@@ -30,7 +46,9 @@
     let schnell = 0;                                     // schnelle Fehler in Folge
     for (let paket = ablauf.naechstes(); paket && !k.signal.aborted; paket = ablauf.naechstes()) {
       if (k.maxMs && L.Dienste.jetzt() - k.t0 >= k.maxMs) { b.zeitdeckel = true; break; }
-      k.fortschritt.textContent = T.fortschritt(paket.art, Math.min(k.gesehen.size + 1, k.gesamt), k.gesamt);
+      const nr = Math.min(k.gesehen.size + 1, k.gesamt);
+      k.fortschritt.textContent = T.fortschritt(paket.art, nr, k.gesamt);
+      beobachte(k, 'paket', { nr, gesamt: k.gesamt, art: paket.art, ...worum(k, paket) });
       k.zeitbuchen();
       L.Verbuchen.merkeStand(k, paket);
       let ergebnisse;
@@ -43,6 +61,7 @@
       if (ergebnisse.length || !k.signal.aborted) b.pakete += 1;      // ein abgebrochenes Paket ohne Ergebnis zählt nicht
       for (const e of ergebnisse) { const v = L.Verbuchen.ergebnis(k, paket, e); if (v) schnell = v.raten ? schnell + 1 : 0; }
       L.Verbuchen.meldeThemen(k, paket);
+      if (!k.signal.aborted) for (const e of ergebnisse) if (e) beobachte(k, 'ergebnis', { urteil: e.urteil, aufgabeKey: e.aufgabeKey });
       if (k.signal.aborted) { leere(k); break; }
       const hinweis = schnell >= RATEN_FOLGE;
       if (hinweis) schnell = 0;                          // der Hinweis kommt erst nach drei weiteren schnellen Fehlern wieder
@@ -50,7 +69,7 @@
         k.sammlung.ergebnisse.push(...ergebnisse); k.sammlung.aufgaben.push(...paket.aufgaben); Object.assign(k.sammlung.info, k.info);
       } else {
         k.buehne.setAttribute('inert', '');              // Markierungen des Typs bleiben sichtbar, antippen geht nicht mehr
-        await L.Rueckmeldung.zeige(k.rueck, paket, ergebnisse, { hinweisZeitNehmen: hinweis, info: k.info, signal: k.signal });
+        await L.Rueckmeldung.zeige(k.rueck, paket, ergebnisse, { hinweisZeitNehmen: hinweis, info: k.info, signal: k.signal, buehne: k.buehne });
       }
       leere(k);                                          // 5.2 Schritt 7: danach leert der Lauf die Bühne
     }

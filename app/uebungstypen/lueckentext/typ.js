@@ -152,7 +152,9 @@
           return k;
         }));
         const tastaturOrt = tast ? H('div.eingabe', tast.el) : null, wahlOrt = H('div.wahl-ort');
-        const was = alleZahlen ? (n === 1 ? 'Ergänze die fehlende Zahl.' : 'Ergänze die fehlenden Zahlen.') : (n === 1 ? 'Ergänze das fehlende Wort.' : 'Ergänze die fehlenden Wörter.');
+        const tippen = !getippt.length, ding = alleZahlen ? 'die passende Zahl' : 'das passende Wort';   // nur Wahl: das Kind tippt Kärtchen an und schreibt nichts
+        const was = tippen ? (n === 1 ? `Tippe ${ding} für die Lücke an.` : `Tippe für jede Lücke ${ding} an. Die markierte Lücke ist dran.`)
+          : alleZahlen ? (n === 1 ? 'Ergänze die fehlende Zahl.' : 'Ergänze die fehlenden Zahlen.') : (n === 1 ? 'Ergänze das fehlende Wort.' : 'Ergänze die fehlenden Wörter.');
         const hinweis = text(a.inhalt.hinweis) ? a.inhalt.hinweis : `${was}${getippt.length && !nurZiffern ? ' Gross- und Kleinschreibung zählt.' : ''}`;
 
         function zeichneLuecken() {
@@ -167,9 +169,9 @@
           const l = gaps[aktiv];
           if (tastaturOrt) tastaturOrt.hidden = !!l.wahl;             // bleibt im Dokument, sonst meldet sich die Hardware-Tastatur ab
           if (!l.wahl) return wahlOrt.replaceChildren();
-          wahlOrt.replaceChildren(n > 1 ? H('p.klein.wahl-titel', `Für die markierte Lücke (${aktiv + 1} von ${n})`) : '', H('div.waehlen', { role: 'group', 'aria-label': 'Auswahl' }, l.wahl.map(w =>
+          wahlOrt.replaceChildren(n > 1 ? H('p.klein.wahl-titel', `Lücke ${aktiv + 1} von ${n}`) : '', H('div.waehlen', { role: 'group', 'aria-label': 'Auswahl' }, l.wahl.map(w =>
             H(`button.antwort${w.length === 1 ? '.zeichen' : ''}${werte[aktiv] === w ? '.gewaehlt' : ''}`, { type: 'button', 'aria-pressed': werte[aktiv] === w ? 'true' : 'false', onclick: () => waehle(w) }, w))));
-          if (n > 1 && alleVoll()) wahlOrt.append(H('button.knopf.primaer.gross.fertig', { type: 'button', onclick: abgeben }, 'Fertig'));
+          if (n > 1 && alleVoll()) wahlOrt.append(H('button.knopf.primaer.gross.fertig', { type: 'button', onclick: abgeben }, 'Prüfen'));
         }
         function waehleLuecke(i) {
           aktiv = i;

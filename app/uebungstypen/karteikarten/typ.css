@@ -1,13 +1,14 @@
-/* app/uebungstypen/karteikarten/typ.css: Karte des Typs «karteikarten». Knöpfe gestaltet app/stil/basis.css (.knopf), Farben und Masse kommen aus
-   app/stil/tokens.css. Die Karte ist eine ruhige weisse Fläche mit feinem Rand. Vorder- und Rückseite stehen untereinander, die Rückseite in
-   der Akzentfarbe und durch eine Linie getrennt (nicht nur durch Farbe). */
+/* app/uebungstypen/karteikarten/typ.css: Karte des Typs «karteikarten» (docs/gestaltung-umbau.md 2.6: Karte aus Papier, Wenden als Drehung,
+   Selbsteinschätzung als zwei Knöpfe). Knöpfe gestaltet app/stil/basis.css (.knopf), Farben und Masse kommen aus app/stil/tokens.css.
+   Vorder- und Rückseite stehen untereinander, die Rückseite in der Akzentfarbe und durch eine Linie getrennt (nicht nur durch Farbe).
+   Erscheint die Rückseite, dreht sie sich kurz herein (Ereigniseffekt, bei reduzierter Bewegung nur Einblenden). */
 .uebung-karte {
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: var(--a5);
   width: 100%;
-  max-width: 640px;
+  max-width: 680px;
   margin: 0 auto;
   color: var(--tinte);
   touch-action: manipulation;
@@ -16,16 +17,18 @@
   display: grid;
   gap: var(--a4);
   width: 100%;
-  padding: var(--a5);
-  border: 1px solid var(--linie);
-  border-radius: var(--radius);
-  background: var(--flaeche);
-  box-shadow: var(--schatten-leicht);
+  padding: var(--a6) var(--a5);
+  border: 0;
+  border-radius: 22px;
+  background: var(--papier-buch);
+  box-shadow: inset 0 0 0 1px var(--papier-rand), 0 3px 0 var(--papier-rand), var(--schatten-marke);
   text-align: center;
+  perspective: 900px;
 }
 .uebung-karte .karte-seite { display: grid; justify-items: center; gap: var(--a3); }
-.uebung-karte .karte-seite + .karte-seite { padding-top: var(--a4); border-top: 1px solid var(--linie); }
-.uebung-karte .karte-text { margin: 0; font-size: var(--t-anzeige); line-height: 1.2; overflow-wrap: anywhere; }
+.uebung-karte .karte-seite + .karte-seite { padding-top: var(--a4); border-top: 1.5px dashed var(--papier-rand); }
+.uebung-karte .hinten { transform-origin: 50% 0; animation: karte-wenden var(--dauer-tafel) var(--kurve-raus) both; }
+.uebung-karte .karte-text { margin: 0; font: 700 var(--t-anzeige)/1.2 var(--schrift-rund); overflow-wrap: anywhere; }
 .uebung-karte .hinten .karte-text { color: var(--akzent-dunkel); }
 .uebung-karte .hinweis { margin: 0; }
 .uebung-karte img {
@@ -42,5 +45,11 @@
 
 .uebung-karte .selbst { display: grid; justify-items: center; gap: var(--a2); width: 100%; }
 .uebung-karte .selbst .klein { margin: 0; }
-.uebung-karte .selbst-knoepfe { display: flex; flex-wrap: wrap; justify-content: center; gap: var(--a3); }
-.uebung-karte .selbst-knoepfe .knopf { min-width: 120px; min-height: var(--taste-hoehe); }
+.uebung-karte .selbst-knoepfe { display: flex; flex-wrap: wrap; justify-content: center; gap: var(--a4); }
+.uebung-karte .selbst-knoepfe .knopf { min-width: 160px; min-height: var(--taste-hoehe); font-size: var(--t-gross); }
+
+@keyframes karte-wenden {
+  from { opacity: 0; transform: rotateX(-70deg); }
+  to { opacity: 1; transform: none; }
+}
+@media (prefers-reduced-motion: reduce) { .uebung-karte .hinten { animation: none; } }

@@ -33,7 +33,7 @@
   /** Passt der Typ zur Aufgabe? art: Art des Laufs. einzel: nur Typen, die eine einzelne Aufgabe zeigen können. */
   function passt(def, a, { art, einzel }) {
     const e = def.eigenschaften || {};
-    if (e.freiwillig && art !== 'herausforderung') return false;          // freiwillige Typen nie im Tagesauftrag
+    if (e.freiwillig && art !== 'herausforderung' && art !== 'vorschau') return false;   // freiwillige Typen nie im Tagesauftrag, die Vorschau schreibt nichts
     if (!(e.akzeptiert || []).includes(a.form)) return false;
     if (einzel && ((e.gruppe && e.gruppe.min) || 1) > 1) return false;
     return L.Dienste.faehig(e.braucht, a);

@@ -18,7 +18,7 @@
       schema: AKTUELL,
       geraet: { id: null, erstellt: null },
       profil: { vorname: '', klasse: 3 },                    // der Vorname ist die einzige Personenangabe und bleibt im Gerät
-      einstellungen: { stimmen: {}, welt: 'archipel', elternPin: null },
+      einstellungen: { stimmen: {}, welt: 'archipel', elternPin: null, klang: true },   // klang: Klänge an (E-19), ohne Schemasprung (E-20)
       module: {}, tage: {}, bestwerte: {},
       ledger: {                                              // Verdienstbuch nach Architektur 7.3, wächst nur
         ertrag: {}, wissen: {}, vergeben: {}, errungen: {}, pflegeRest: 0,

@@ -91,7 +91,7 @@
         function legenOberflaeche() {
           const gelegt = [], summe = () => gelegt.reduce((s, w) => s + w, 0);
           const ablage = H('div.geld-stuecke.ablage', { 'aria-label': 'Auf dem Tisch', role: 'group' }), anzeige = H('p.klein.geld-summe');
-          const ok = H('button.knopf.primaer.geld-ok', { type: 'button', 'aria-label': 'Bestätigen', disabled: true, onclick: () => { if (!beendet && gelegt.length) urteil(summe(), undefined); } }, 'Fertig');
+          const ok = H('button.knopf.primaer.geld-ok', { type: 'button', 'aria-label': 'Bestätigen', disabled: true, onclick: () => { if (!beendet && gelegt.length) urteil(summe(), undefined); } }, 'Prüfen');
           const zeichne = () => {
             ablage.replaceChildren(...gelegt.map((w, n) => H('button.geld-stueck.gelegt', { type: 'button', 'data-index': n, 'aria-label': `${name(w)} zurücknehmen`, onclick: () => { gelegt.splice(n, 1); zeichne(); } }, stueck(w))));
             anzeige.textContent = opt.summe === 'sichtbar' ? `Auf dem Tisch: ${text(summe())}` : '';
@@ -100,7 +100,7 @@
           const vorrat = WERTE.filter(w => w <= soll).reverse().map(w => H('button.geld-stueck', { type: 'button', 'data-rp': w, 'aria-label': name(w),
             onclick: () => { if (!beendet && gelegt.length < MAX_GELEGT) { gelegt.push(w); zeichne(); } } }, stueck(w)));
           zeichne();
-          return H('div.geld-bedienung', H('p.aufgabe', `Lege ${text(soll)}`), H('div.geld-stuecke.vorrat', { role: 'group', 'aria-label': 'Münzen und Noten' }, vorrat), ablage, anzeige, ok);
+          return H('div.geld-bedienung', H('p.aufgabe', `Lege ${text(soll)}`), H('p.hinweis.geld-anleitung', 'Tippe Münzen und Noten an. Sie kommen auf den Tisch.'), H('div.geld-stuecke.vorrat', { role: 'group', 'aria-label': 'Münzen und Noten' }, vorrat), ablage, anzeige, ok);
         }
 
         function zaehlenOberflaeche() {

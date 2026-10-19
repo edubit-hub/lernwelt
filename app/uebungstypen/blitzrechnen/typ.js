@@ -56,7 +56,7 @@
           bild(H('div.kachel.bl-karte', H('h3', 'Blitzrunde'),
             H('p', `${aufgaben.length} Rechnungen hintereinander. Es zählt nur deine eigene Zeit.`),
             mitBestzeit ? H('p.klein', bestzeit ? `Deine Bestzeit: ${zeitText(bestzeit)}` : 'Die erste Runde legt deine Bestzeit fest.') : null,
-            H('div.kachel-fuss', H('button.knopf.primaer.gross', { type: 'button', onclick: () => frage(0) }, 'Start'), verlassen)));
+            H('div.kachel-fuss', H('button.knopf.primaer.gross', { type: 'button', onclick: () => frage(0) }, 'Start'))));   // beenden geht über den Kopf des Laufs
         }
 
         function frage(n) {

@@ -18,9 +18,10 @@
     return { id, s, form: 'rechnung', mach(rng) {
       const n = zahl(rng), rest = n % stufe, unten = n - rest, ziel = richtung ? unten + stufe : (rest ? unten : n - stufe), abst = Math.abs(ziel - n);
       const text = `${NAME[stufe][richtung]} ${n}`, op = richtung ? '+' : MINUS, was = stufe === 10 ? 'Zehner' : 'Hunderter';
-      const satz = richtung ? `Bis zum nächsten ${was} fehlen ${abst}.` : `${stufe === 10 ? 'Der Einer ist' : 'Zehner und Einer sind'} ${rest}.`;
+      const satz = richtung ? `Bis zum nächsten ${was} fehlen ${abst}.` : rest ? `${stufe === 10 ? 'Der Einer ist' : 'Zehner und Einer sind'} ${rest}.`
+        : `${n} liegt selbst auf einem vollen ${was}. Der Nachbar darunter ist ein ${was} weniger.`;            // ab 0.2.0: die Zahl liegt schon auf dem Strich
       const schritte = stufe === 1 ? [`${n} ${op} 1 = ${ziel}`] : [satz, `${n} ${op} ${abst} = ${ziel}`];
-      const mitte = stufe === 1 ? [n - 3, n + 3] : [Math.floor(n / 100) * 100, Math.floor(n / 100) * 100 + 100];
+      const mitte = stufe === 1 ? [n - 3, n + 3] : !rest && stufe === 10 ? [n - 20, n + 20] : [Math.floor(n / 100) * 100, Math.floor(n / 100) * 100 + 100];
       return { inhalt: Z.rechnung(n, op, abst, text, { art: 'nachbar', stufe, richtung: richtung ? 'ueber' : 'unter' }),
         hilfe: { weg: 'nachbarn', schritte, hilfsmittel: { name: 'zahlenstrahl', daten: { von: mitte[0], bis: mitte[1], marken: [n] } } } };
     } };
@@ -28,7 +29,7 @@
 
   const gegenueber = i => {                                         // der Nachbar auf der anderen Seite
     const rest = i.a % i.stufe, unten = i.a - rest;
-    return i.stufe === 1 ? i.a + (i.richtung === 'unter' ? 1 : -1) : i.richtung === 'unter' ? unten + i.stufe : unten;
+    return i.stufe === 1 ? i.a + (i.richtung === 'unter' ? 1 : -1) : i.richtung === 'unter' ? unten + i.stufe : rest ? unten : unten - i.stufe;   // liegt die Zahl auf dem Strich, ist der untere Nachbar einen Strich tiefer
   };
   const wechsel = (z, c, i) => Math.floor(z / 100) === Math.floor(i.a / 100) && Math.floor(c / 100) !== Math.floor(i.a / 100) && z % 100 === c % 100;
 
@@ -40,14 +41,23 @@
     nachbar('nb-zehner-unten', 2, 10, 0, rng => ohne(rng, 101, 999, n => n % 10 === 0)),
     nachbar('nb-zehner-oben', 2, 10, 1, rng => ohne(rng, 101, 999, n => n % 10 === 0)),
     nachbar('nb-hunderter-unten', 2, 100, 0, rng => ohne(rng, 101, 999, n => n % 100 === 0)),
-    nachbar('nb-hunderter-oben', 2, 100, 1, rng => ohne(rng, 101, 999, n => n % 100 === 0))
+    nachbar('nb-hunderter-oben', 2, 100, 1, rng => ohne(rng, 101, 999, n => n % 100 === 0)),
+    /* ab 0.2.0: Nachbarzehner besonders üben, auch wenn die Zahl schon auf einem Zehner liegt oder an der Hunderter- und Tausendergrenze */
+    nachbar('nb-zehner-unten-strich', 2, 10, 0, rng => Z.vielfaches(rng, 10, 110, 990)),                  // 400 → 390
+    nachbar('nb-zehner-oben-strich', 2, 10, 1, rng => Z.vielfaches(rng, 10, 110, 990)),                   // 400 → 410, 990 → 1000
+    nachbar('nb-zehner-unten-hunderter', 3, 10, 0, rng => zw(rng, 1, 9) * 100 + zw(rng, 1, 9)),          // 403 → 400
+    nachbar('nb-zehner-oben-hunderter', 3, 10, 1, rng => zw(rng, 1, 8) * 100 + zw(rng, 91, 99)),         // 397 → 400
+    nachbar('nb-zehner-oben-tausend', 3, 10, 1, rng => zw(rng, 991, 999))                                // 996 → 1000
   ];
 
   const zuerstN = { 'nb-vorgaenger-ue': ['nb-vorgaenger'], 'nb-nachfolger-ue': ['nb-nachfolger'], 'nb-zehner-unten': ['nb-vorgaenger-ue'], 'nb-zehner-oben': ['nb-nachfolger-ue'],
-    'nb-hunderter-unten': ['nb-zehner-unten'], 'nb-hunderter-oben': ['nb-zehner-oben'] };
+    'nb-hunderter-unten': ['nb-zehner-unten'], 'nb-hunderter-oben': ['nb-zehner-oben'],
+    'nb-zehner-unten-strich': ['nb-zehner-unten'], 'nb-zehner-oben-strich': ['nb-zehner-oben'], 'nb-zehner-unten-hunderter': ['nb-zehner-unten'],
+    'nb-zehner-oben-hunderter': ['nb-zehner-oben'], 'nb-zehner-oben-tausend': ['nb-zehner-oben-hunderter'] };
   L.generator('mathe-zahlraum-1000/nachbarn', F.bauen('mathe-zahlraum-1000/nachbarn', nachbarn, F.zahlDiag(
     (z, c, i) => z === gegenueber(i) && 'nachbar-andere-seite',
-    (z, c, i) => wechsel(z, c, i) && 'hunderter-uebergang'), zuerstN));
+    (z, c, i) => wechsel(z, c, i) && 'hunderter-uebergang',
+    (z, c) => z >= 100 && z <= 999 && z % 100 === c % 100 && Math.floor(z / 100) !== Math.floor(c / 100) && 'hunderterziffer-falsch'), zuerstN));
 
   /* ---------- Zahlenstrahl ---------- */
   const GROSS = [1, 2, 5, 10, 20, 50, 100, 200, 500, 1000];

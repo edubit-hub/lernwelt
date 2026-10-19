@@ -1,15 +1,24 @@
-/* app/ansichten/start.js: die Startansicht (Architektur 5.7, 7.8, 8.5). Beim ersten Start legt sie das Profil an (Vorname, Klasse), danach grüsst sie,
-   nennt den Umfang des Tages und hat den Knopf «Start». Der Tipp darauf entsperrt in derselben Berührung Sprache und Audio (iOS), ein kleiner Knopf
-   «Eltern» führt in den Elternbereich (AP-13a meldet ihn als Lernwelt.Ansichten.eltern an). Nur hier erscheint «Neue Version bereit» (8.5). */
+/* app/ansichten/start.js: die Startansicht (Architektur 5.7, 7.8, 8.5; docs/gestaltung-umbau.md 2.2 bis 2.4, Vorbild docs/mockup/richtung-a «start»).
+   Die Insel steht in Totale (Kamera «start», ohne Schleier, Ortsschilder antippbar). Darauf liegt die Begrüssungskarte aus Glas: Datum als Kicker,
+   «Hallo Mia.», der Satz zum Tag (in den Ferien ohne Rückstand) und das nächste Ziel als nächster Schritt. Der eine Einstieg ist der Hauptknopf
+   «Tagesauftrag» im Dock (dort .start-los). Die Ortsschilder sagen, was an jedem Ort geht (start-orte.js).
+   Quer steht die Karte links unter der Medaille, hoch im unteren Drittel über dem Dock (start.css). Ohne Profil liegt die Insel im leichten Schleier, das Dock fehlt, und eine Tafel
+   «halb» fragt «Wie heisst du?» (Feld input.profil-feld, Klasse, «Weiter»). Den Weg in den Elternbereich bietet der Schlüssel im HUD
+   (button.hud-eltern.start-eltern, huelle-hud.js, mit .start-punkt bei einem Hinweis); nur «Zu den Eltern» (.start-zu-eltern) steht hier, solange
+   nichts eingerichtet ist. Nur hier erscheint «Neue Version bereit» (8.5). Texte: texte.js (Texte.start) und start-texte.js (Texte.startseite). */
 (function (g) {
   'use strict';
   const L = (g.Lernwelt = g.Lernwelt || {});
   L.Ansichten = L.Ansichten || {};
 
   const H = (...a) => L.ui.h(...a);
-  const T = () => L.Texte.start;
+  const T = () => L.Texte.start, TS = () => L.Texte.startseite;
   const S = () => L.Start || {};
   const melde = fehler => { try { L.Fehlerlog.melde(fehler); } catch (e) { /* nur Protokoll */ } };
+  const sicher = (f, sonst) => { try { return f(); } catch (fehler) { melde(fehler); return sonst; } };
+
+  /** Fehlt das Profil (noch kein Vorname)? Scheitert die Frage, gilt das Profil als vorhanden. */
+  const ohneProfil = doc => { try { const d = doc || L.Zustand.hole(); return !d.profil || !String(d.profil.vorname || '').trim(); } catch (e) { return false; } };
 
   /** Die Ansicht «eltern» (F-AP12-01). Meldet sich der Elternbereich nur als Lernwelt.Eltern.zeige(huelle, { onZurueck }) (AP-13a), macht diese Datei
       daraus beim ersten Gebrauch eine Ansicht. Eine echte Anmeldung als Lernwelt.Ansichten.eltern geht vor. */
@@ -20,13 +29,6 @@
     return L.Huelle.ansicht('eltern');
   }
 
-  /** Steht im Elternbereich eine Erinnerung an (Sicherung fällig, V-AP13a-01)? Fehlt der Elternbereich oder scheitert die Frage, gibt es keinen Hinweis. */
-  const elternHinweis = () => { try { return !!(L.ElternDaten && L.ElternDaten.lage(L.Zustand.hole(), L.Tag.heute()).erinnerung); } catch (e) { return false; } };
-
-  /** Der unauffällige Einstieg in den Elternbereich, mit einem kleinen Punkt, wenn dort ein Hinweis wartet. Ohne Elternbereich meldet er das ehrlich. */
-  const eltern = (ctx, hinweis = false) => H('button.knopf.leise.start-eltern', { type: 'button', 'aria-label': hinweis ? T().elternMitHinweis : T().elternBeschriftung, title: hinweis ? T().elternHinweis : null, onclick: () => {
-    if (elternAnsicht()) ctx.gehe('eltern'); else L.ui.dialog.meldung(T().elternFehlt);
-  } }, T().eltern, hinweis ? H('i.start-punkt', { 'aria-hidden': 'true' }) : '');
   /** Hinweise zum Gerät und zum Speicher: sachlich, ohne Dringlichkeit. */
   function hinweise() {
     const texte = [...(S().hinweise || [])], st = L.Zustand.status();
@@ -38,16 +40,17 @@
   const update = () => (S().sw && S().sw.bereit() ? H('div.kasten.hilfe.start-update', { role: 'status' }, H('b', T().neueVersion),
     H('button.knopf', { type: 'button', onclick: () => S().sw.aktiviere() }, T().neueVersionKnopf)) : '');
 
-  /** Profil beim ersten Start. Aktiviert die Module der Klasse (Start.modulWahl), lädt sie und öffnet danach die Startansicht. */
-  function profil(ctx) {
+  /** Profil beim ersten Start in einer Tafel «halb» (hoch als Blatt). Aktiviert die Module der Klasse (Start.modulWahl), lädt sie und öffnet danach
+      die Startansicht. Gibt { schliesse } zurück, damit die Hülle die Tafel beim Wechsel wegräumt. Ohne Tafel (eingebettet) steht alles in der Ansicht. */
+  function profil(huelle, ctx) {
     let klasse = 3;
     const feld = H('input.profil-feld', { type: 'text', id: 'profil-vorname', maxlength: '30', autocomplete: 'off', autocorrect: 'off', autocapitalize: 'words', spellcheck: 'false',
-      onkeydown: e => { if (e.key === 'Enter') speichere(); } });
+      enterkeyhint: 'done', onkeydown: e => { if (e.key === 'Enter') speichere(); } });
     const meldung = H('p.fehler-text.klein', { role: 'alert' });
     const knoepfe = [3, 4, 5, 6].map(k => H('button.knopf', { type: 'button', 'aria-pressed': String(k === klasse), onclick: () => {
       klasse = k; knoepfe.forEach((b, i) => b.setAttribute('aria-pressed', String(i + 3 === k)));
     } }, String(k)));
-    const weiter = H('button.knopf.primaer.gross', { type: 'button', onclick: () => speichere() }, T().weiter);
+    const weiter = H('button.knopf.primaer.gross.profil-weiter', { type: 'button', onclick: () => speichere() }, T().weiter);
     async function speichere() {
       const name = String(feld.value || '').trim().replace(/\s+/g, ' ').slice(0, 30);
       if (!name) { meldung.textContent = T().vornameFehlt; if (feld.focus) feld.focus(); return; }
@@ -56,10 +59,15 @@
       try { if (S().ladeModule) await S().ladeModule(); } catch (fehler) { melde(fehler); }
       ctx.gehe('start');
     }
-    return H('div.start-seite', H('h1', T().willkommen), H('p.unterzeile', T().profilEinleitung),
+    const inhalt = H('div.profil-seite', H('p.unterzeile', `${T().willkommen} ${T().profilEinleitung}`),
       H('div.profil', H('label.profil-etikett', { for: 'profil-vorname' }, T().vorname), feld,
-        H('div.profil-etikett', { id: 'profil-klasse' }, T().klasse), H('div.wahl', { role: 'group', 'aria-labelledby': 'profil-klasse' }, knoepfe), meldung, weiter),
-      H('div.start-fuss', eltern(ctx)));
+        H('div.profil-etikett', { id: 'profil-klasse' }, T().klasse), H('div.wahl', { role: 'group', 'aria-labelledby': 'profil-klasse' }, knoepfe), meldung));
+    const tafel = typeof ctx.tafel === 'function' && L.Tafel ? sicher(() => ctx.tafel({ art: 'halb', klasse: 'profil-tafel', kicker: TS().profilKicker, titel: TS().profilTitel }), null) : null;
+    if (!tafel) { huelle.replaceChildren(H('div.start-seite', H('h1', TS().profilTitel), inhalt, weiter)); return undefined; }
+    huelle.replaceChildren();
+    tafel.rumpf.append(inhalt);
+    tafel.fuss.append(weiter);
+    return { schliesse: () => tafel.schliesse() };
   }
 
   /** Der grosse Knopf «Zu den Eltern»: Ist noch nichts eingerichtet, ist das für das Kind der einzige Weg (die Module schaltet der Elternbereich ein). */
@@ -75,22 +83,75 @@
     return t.gemacht.aufgaben > 0 ? T().heuteErledigt : T().heuteNichts;
   }
 
+  /** Das nächste Ziel der Forschung (WeltDaten.ziel) als warme Karte. Sie sagt den nächsten Schritt: Wissen als Rauten, «noch 7 Stein»
+      mit dem Rohstoff, oder «Sprachkunde I erforschen» mit vollen Rauten. Ohne Welt-Thema oder ohne offenes Ziel nichts. */
+  function ziel(ctx) {
+    const D = L.WeltDaten, B = L.WeltBausteine, h = L.Texte.huelle;
+    if (!D || typeof D.kontext !== 'function' || typeof D.ziel !== 'function') return '';
+    const z = sicher(() => { const k = D.kontext(); return k ? D.ziel(k) : null; }, null);
+    if (!z) return '';
+    const w = z.wissen, bild = H('span.start-ziel-bild', { 'aria-hidden': 'true' });
+    bild.innerHTML = sicher(() => (L.Iso && L.Iso.mini && (!L.Iso.MINIS || L.Iso.MINIS.includes('forschung')) ? L.Iso.mini('forschung') : ''), '') || '';
+    const lampen = w && B && typeof B.lampen === 'function' ? sicher(() => B.lampen(w.hat, w.braucht), '') : '';
+    const unter = z.zustand === 'material' && z.fehlt[0] ? H('span.start-ziel-noch', B && B.objekt ? B.objekt(z.fehlt[0].symbol, 24) : '', D.standText(z.fehlt))
+      : z.zustand === 'bereit' ? H('span.start-ziel-noch.bereit', lampen, H('span', h.bereitZumErforschen)) : lampen;
+    return H(`button.start-ziel.z-${z.zustand || 'wissen'}`, { type: 'button', 'aria-label': TS().zielOeffnen(z.name), onclick: () => ctx.gehe('forschung', { wahl: z.id }) }, bild,
+      H('span.start-ziel-text', H('small', TS().zielKicker), H('b', z.zustand === 'bereit' ? h.zielErforschen(z.name) : z.name), unter));
+  }
+
+  /** Die Karte gleitet herein (quer von links, hoch von unten), wenn die Hülle nicht gerade selbst einen Wechsel zeigt. Kein weiterer Effekt. */
+  function gleite(el) {
+    if (!L.Uebergang || !el || typeof el.animate !== 'function') return;
+    Promise.resolve().then(() => {
+      if (typeof el.getAnimations === 'function' && el.getAnimations().length) return;
+      L.Uebergang.wechsel(el, { von: L.Tafel && L.Tafel.hoch() ? 'unten' : 'links' });
+    }).catch(() => {});
+  }
+
+  /** Die Kamera rückt die Insel neben (quer) oder über (hoch) die Begrüssungskarte: freier Bereich aus der Lage der Karte im Layout. Nur im Browser. */
+  function kameraNebenKarte(huelle, ctx) {
+    const b = ctx.buehne, d = huelle.ownerDocument;
+    if (!b || typeof b.kamera !== 'function' || typeof g.requestAnimationFrame !== 'function' || !d || typeof d.querySelector !== 'function') return;
+    g.requestAnimationFrame(() => sicher(() => {
+      const karte = huelle.querySelector('.start-seite');
+      if (!karte || !karte.isConnected || !karte.offsetWidth || L.Huelle.aktuell() !== 'start') return;
+      let x = 0, y = 0;                                   // Lage ohne die Transformation des Hereingleitens
+      for (let n = karte; n; n = n.offsetParent) { x += n.offsetLeft; y += n.offsetTop; }
+      const W = g.innerWidth, Hh = g.innerHeight, hud = d.querySelector('header.hud'), dock = d.querySelector('nav.dock');
+      const oben = hud ? Math.round(hud.getBoundingClientRect().bottom) : 0, unten = dock ? Math.round(Hh - dock.getBoundingClientRect().top) : 0;
+      b.kamera('start', { frei: Hh > W ? { links: 0, oben, rechts: 0, unten: Math.max(unten, Hh - y + 8) } : { links: x + karte.offsetWidth + 8, oben, rechts: 0, unten } });
+    }));
+  }
+
   function zeige(huelle, ctx) {
     const doc = L.Zustand.hole(), r = S().ergebnis || {};
     if (r.fehler) {
-      huelle.replaceChildren(H('div.start-seite', H('h1', T().fehlerTitel), H('div.kasten.fehler', { role: 'alert' }, L.Zustand.status().text || ''), update(), H('div.start-fuss', eltern(ctx))));
-      return;
+      huelle.replaceChildren(H('div.start-seite', H('h1', T().fehlerTitel), H('div.kasten.fehler', { role: 'alert' }, L.Zustand.status().text || ''), update()));
+      return undefined;
     }
-    if (!doc.profil || !String(doc.profil.vorname || '').trim()) { huelle.replaceChildren(profil(ctx)); return; }
+    if (ohneProfil(doc)) return profil(huelle, ctx);
     let t = null;
     try { t = L.Lernplan.tagesauftrag(); } catch (fehler) { melde(fehler); }
-    const los = t && !t.keinModul ? H('button.knopf.primaer.gross.start-los', { type: 'button', onclick: () => { if (S().entsperre) S().entsperre(); ctx.gehe('lernen'); } }, t.ferien ? T().losFerien : T().los) : '';
+    const ferien = !!(t && t.ferien);
+    // Der eine Einstieg in den Tag ist der grosse Knopf «Tagesauftrag» im Dock (huelle-dock.js, auf dem Start mit .start-los); die Karte begrüsst und zeigt das Ziel
+    const zielKarte = t && !t.keinModul ? ziel(ctx) : '';
+    const tag = sicher(() => TS().datum(L.Lernplan.heute(doc)), '');
     // Die Versionsnummer steht im Elternbereich unter «Diagnose», nicht hier.
-    huelle.replaceChildren(H('div.start-seite', L.Abschluss && L.Abschluss.insel ? L.Abschluss.insel() : '', H('h1', T().hallo(doc.profil.vorname)),
-      H('p.unterzeile', t ? heute(t) : ''), t && t.keinModul ? H('div.kein-modul', H('p', T().keinModul), zuDenEltern(ctx)) : '', update(), hinweise(), los,
-      H('div.start-fuss', eltern(ctx, elternHinweis()))));
+    huelle.replaceChildren(H(`div.start-seite${zielKarte ? '.mit-ziel' : ''}${ferien ? '.ferien' : ''}`, { role: 'group', 'aria-label': TS().begruessung },
+      tag ? H('p.kicker.start-datum', tag) : '', H('h1', T().hallo(doc.profil.vorname)), H('p.unterzeile.start-satz', t ? heute(t) : ''),
+      zielKarte, t && t.keinModul ? H('div.kein-modul', H('p', T().keinModul), zuDenEltern(ctx)) : '', update(), hinweise()));
+    if (L.StartOrte && L.WeltDaten) sicher(() => L.StartOrte.setze(ctx.buehne, L.WeltDaten.kontext()));
+    gleite(huelle);
+    kameraNebenKarte(huelle, ctx);
+    return undefined;
   }
 
-  // titel als Getter: texte.js lädt nach dieser Datei (alphabetisch), gelesen wird erst beim Aufruf
-  L.Ansichten.start = { id: 'start', get titel() { return L.Texte.menue.start; }, icon: 'pfeil', menue: 10, zeige, zuDenEltern };
+  // titel als Getter: texte.js lädt nach dieser Datei (alphabetisch), gelesen wird erst beim Aufruf. buehne ebenso: ohne Profil Schleier und kein Dock.
+  L.Ansichten.start = {
+    // Kein Eintrag im Dock: zur ganzen Insel führt die Medaille im HUD (oder das Schliessen einer Tafel)
+    id: 'start', get titel() { return L.Texte.menue.start; }, icon: 'pfeil', zeige, zuDenEltern,
+    get buehne() {
+      return ohneProfil() ? { kamera: 'start', schleier: 'leicht', marken: 'keine', dock: false } : { kamera: 'start', schleier: 'keine', marken: 'orte' };
+    }
+  };
 })(globalThis);

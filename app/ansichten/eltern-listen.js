@@ -14,34 +14,12 @@
     deutsch: 'Ein Wort pro Zeile. «Wort = Beispielsatz» ergibt zusätzlich eine Lückenaufgabe. Steht das Wort im Satz in einer anderen Form, diese Form in geschweifte Klammern setzen: Der Hund {rennt} schnell.',
     englisch: 'Ein Wort pro Zeile: «Wort = Bedeutung». Ein Beispielsatz folgt nach einem zweiten Gleichheitszeichen: «Wort = Bedeutung = Beispielsatz» und ergibt eine Lückenaufgabe.'
   };
-  const STIL = `
-.wl-felder { display: flex; flex-wrap: wrap; align-items: flex-start; gap: var(--a3); }
-.wl-felder .eltern-feld { flex: 1 1 200px; max-width: none; }
-.wl-felder input, .wl-felder select { font-size: var(--t-gross); }
-.eltern-feld.wl-breit { max-width: none; margin-top: var(--a3); }
-.wl-aktionen { margin-top: var(--a3); }
-.wl-vorschau { margin-top: var(--a4); }
-.wl-text { display: block; width: 100%; min-height: 220px; padding: 10px 12px; border: 1px solid var(--linie); border-radius: var(--radius); background: var(--flaeche); color: var(--tinte); font: var(--t-gross) / 1.5 var(--schrift); resize: vertical; }
-.wl-liste { display: grid; gap: var(--a2); margin: var(--a3) 0 0; padding: 0; list-style: none; }
-.wl-liste li { display: grid; gap: 2px; padding: var(--a2) var(--a3); border: 1px solid var(--linie); border-radius: var(--radius); background: var(--flaeche); overflow-wrap: anywhere; }
-.wl-satz { font-size: var(--t-klein); color: var(--tinte-leise); }
-.wl-probleme { margin: var(--a2) 0 0; padding-left: var(--a5); }
-@media (min-width: 700px) { .wl-liste { grid-template-columns: 1fr 1fr; } }
-`;
+  /* Gestaltung: app/stil/eltern.css (wl-*). */
 
   const baustein = () => L.registry.bausteine.get(BAUSTEIN);
   const bereit = () => (L.registry.bausteine.has(BAUSTEIN) ? Promise.resolve(true) : L.Start && typeof L.Start.ladeListen === 'function' ? Promise.resolve(L.Start.ladeListen()).catch(() => false) : Promise.resolve(false));
   const zeilen = (n, eins, viele) => `${n} ${n === 1 ? eins : viele}`;
   const gekuerzt = s => String(s || '').replace(/\s+/g, ' ').trim();
-
-  function stil(k) {
-    const d = k.dok;
-    if (!d || !d.head || (d.getElementById && d.getElementById('eltern-listen-stil'))) return;
-    const s = d.createElement('style');
-    s.setAttribute('id', 'eltern-listen-stil');
-    s.textContent = STIL;
-    d.head.append(s);
-  }
 
   /** Nach jeder Änderung: die Module der Listen neu anmelden (Lernwelt.Start.meldeListen), damit die Liste ohne Neustart im Tagesauftrag steht. */
   function meldeListen(k) {
@@ -148,7 +126,6 @@
 
   function bau(k) {
     const h = k.h, wurzel = h('div.eltern-inhalt');
-    stil(k);
     const zeigeUebersicht = () => wurzel.replaceChildren(uebersicht(k, { neu: () => zeigeFormular(null), bearbeite: l => zeigeFormular(l), geloescht: zeigeUebersicht }));
     const zeigeFormular = liste => wurzel.replaceChildren(formular(k, liste, zeigeUebersicht));
     wurzel.replaceChildren(h('p.klein', 'Wortlisten werden geladen.'));

@@ -16,6 +16,10 @@
     cryptoSubtle: 'Der Browser kann Dateien nicht prüfen (crypto.subtle fehlt). Die Installation für den Offline-Betrieb funktioniert so nicht.'
   };
 
+  /** Klang- und Musikdaten sind Beiwerk: Lädt eine davon nicht, bleibt der Ton still (Vertrag von app/ui/klang.js), die App startet.
+      Der Ladefehler steht trotzdem im Fehlerprotokoll (Fehlerlog hört am Lader mit). */
+  const BEIWERK = /^app\/klang\//;
+
   /** 'ja', 'voll' (Schreiben scheitert am Platz) oder 'nein'. Der Probeschlüssel wird sofort wieder entfernt. */
   function speicherProbe(w) {
     try {
@@ -50,7 +54,7 @@
     };
     ['localStorage', 'structuredClone', 'sprachmittel'].forEach(id => { if (!f[id]) fehlt.push({ id, text: FEHLT[id] }); });
     const lader = (w.Lernwelt && w.Lernwelt.Lader) || opt.lader;
-    const dateien = lader && Array.isArray(lader.fehler) ? lader.fehler.map(e => e.datei) : [];
+    const dateien = lader && Array.isArray(lader.fehler) ? lader.fehler.map(e => e.datei).filter(d => !BEIWERK.test(String(d))) : [];
     f.skripte = dateien.length === 0;
     if (dateien.length) {
       const liste = dateien.slice(0, 5).join(', ') + (dateien.length > 5 ? ` und ${dateien.length - 5} weitere` : '');
@@ -82,7 +86,7 @@
       el('ul', 'margin:.5rem 0;padding-left:1.25rem', ...ergebnis.fehlt.map(x => el('li', 'margin:.25rem 0', x.text))),
       el('p', leise, 'Wenn es nach dem Aktualisieren von iPadOS und Safari weiterhin nicht klappt, hilft die Meldung bei der Suche.'),
       ...(protokoll ? [el('p', leise + ';margin-bottom:.25rem', 'Technische Angaben'),
-        el('pre', 'margin:0;padding:.5rem .75rem;background:#F3EFE6;border-radius:4px;color:#1E2A34;font:12px/1.4 ui-monospace,Menlo,monospace;white-space:pre-wrap;word-break:break-word;-webkit-user-select:text;user-select:text', protokoll)] : []));
+        el('pre', 'margin:0;padding:.5rem .75rem;background:#F3EFE6;border-radius:4px;color:#1E2A34;font:12px/1.4 ui-monospace,monospace;white-space:pre-wrap;word-break:break-word;-webkit-user-select:text;user-select:text', protokoll)] : []));
     kasten.setAttribute('role', 'alert');
     kasten.setAttribute('class', 'startfehler');
     huelle.replaceChildren(kasten);

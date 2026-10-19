@@ -1,20 +1,21 @@
-/* app/uebungstypen/zahlenstrahl/typ.css: Anordnung des Typs «zahlenstrahl». Knöpfe gestaltet app/stil/basis.css (.knopf), Farben und Masse kommen aus
-   app/stil/tokens.css. Die Fläche mit dem Strahl nimmt Pointer Events an und lässt dafür das Scrollen und Zoomen des Browsers aus (touch-action: none),
-   sonst zieht der Finger die Seite statt der Marke. Die Schritt-Knöpfe sind die Bedienung ohne Ziehen. */
+/* app/uebungstypen/zahlenstrahl/typ.css: Anordnung des Typs «zahlenstrahl» (docs/gestaltung-umbau.md 2.6: Strahl in Tinte, Marke als Fähnchen).
+   Knöpfe gestaltet app/stil/basis.css (.knopf), Farben und Masse kommen aus app/stil/tokens.css. Der Strahl liegt auf einer Papierfläche, die
+   Marke ist ein warmes Fähnchen mit Stiel. Die Fläche nimmt Pointer Events an und lässt dafür das Scrollen und Zoomen des Browsers aus
+   (touch-action: none), sonst zieht der Finger die Seite statt der Marke. Die Schritt-Knöpfe sind die Bedienung ohne Ziehen. */
 .uebung-zahlenstrahl {
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: var(--a4);
   width: 100%;
-  max-width: 920px;
+  max-width: 940px;
   margin: 0 auto;
   color: var(--tinte);
 }
 .uebung-zahlenstrahl .aufgabe {
   margin: 0;
   text-align: center;
-  font-size: var(--t-anzeige);
+  font: 800 calc(var(--t-anzeige) * 1.2)/1.2 var(--schrift-rund);
   font-variant-numeric: tabular-nums;
 }
 .uebung-zahlenstrahl .zs-flaeche {
@@ -22,9 +23,10 @@
   width: 100%;
   height: auto;
   padding: var(--a2) 0;
-  border: 1px solid var(--linie);
-  border-radius: var(--radius);
-  background: var(--flaeche);
+  border: 0;
+  border-radius: 18px;
+  background: var(--papier-buch);
+  box-shadow: inset 0 0 0 1px var(--papier-rand), 0 3px 0 var(--papier-rand);
   touch-action: none;                       /* Pointer Events statt Scrollen und Zoomen */
   -webkit-user-select: none;
   user-select: none;
@@ -33,10 +35,12 @@
 .uebung-zahlenstrahl .zs-achse { stroke: var(--tinte); stroke-width: 3; stroke-linecap: round; }
 .uebung-zahlenstrahl .zs-fein { stroke: var(--tinte-leise); stroke-width: 2; fill: none; }
 .uebung-zahlenstrahl .zs-grob { stroke: var(--tinte); stroke-width: 3; fill: none; }
-.uebung-zahlenstrahl .zs-zahl { fill: var(--tinte); font-size: 30px; text-anchor: middle; font-variant-numeric: tabular-nums; }
+.uebung-zahlenstrahl .zs-zahl { fill: var(--tinte); font-family: var(--schrift-rund); font-size: 30px; font-weight: 700; text-anchor: middle; font-variant-numeric: tabular-nums; }
 .uebung-zahlenstrahl .zs-marke { outline: none; }
-.uebung-zahlenstrahl .zs-marke.aus { visibility: hidden; }
-.uebung-zahlenstrahl .zs-stiel { stroke: var(--akzent-warm); stroke-width: 4; stroke-linecap: round; }
+.uebung-zahlenstrahl .zs-griff { fill: var(--weiss-a00); }                 /* unsichtbarer Griff, gut 44 px gross */
+.uebung-zahlenstrahl .zs-tropfen { fill: var(--akzent-warm); stroke: var(--flaeche); stroke-width: 3; }
+.uebung-zahlenstrahl .zs-marke.aus .zs-tropfen { fill: var(--akzent-warm); }   /* vor der ersten Berührung gleich kräftig: das ist die Marke zum Schieben */
+.uebung-zahlenstrahl .zs-stiel { stroke: var(--warm-tief); stroke-width: 4; stroke-linecap: round; }
 .uebung-zahlenstrahl .zs-kopf { fill: var(--akzent-warm); stroke: var(--flaeche); stroke-width: 3; }
 .uebung-zahlenstrahl .zs-marke:focus-visible .zs-kopf { stroke: var(--tinte); }
 .uebung-zahlenstrahl .zs-schritte {

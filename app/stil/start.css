@@ -1,0 +1,126 @@
+/* app/stil/start.css: Startansicht, Profil, Ferien und Einstufung (docs/gestaltung-umbau.md 2.2 bis 2.4, Vorbild docs/mockup/richtung-a a-stil.css «Begrüssung»
+   und a-hoch.css). Die Begrüssungskarte ist die Ansicht selbst (section.ansicht[data-ansicht=start], Glas aus huelle.css): quer links unter der Medaille,
+   hoch im unteren Drittel über dem Dock. Das Profil liegt in einer Tafel «halb» (.tafel.profil-tafel), so hoch wie ihr Inhalt, hoch als Blatt
+   unten (ohne Dock); das Feld steht oben im Blatt, über der Bildschirmtastatur. Die Karte der Einstufung (.einstufung) und ihr Ergebnis als kurze Logbuchseite (.einstufung-ergebnis)
+   stehen in der Tagesauftrag-Auswahl. Nur Token aus tokens.css. Die Insel des Platzhalters («Siedlung folgt», im Abschluss) färbt der letzte Block:
+   flache Isometrie in drei Tönen je Körper, die erste Zeile je Körper gilt für Browser ohne color-mix. */
+
+/* ---- Begrüssungskarte ------------------------------------------------------------------------------------------- */
+.app[data-modus="welt"] .ansicht[data-ansicht="start"] { width: 420px; padding: 20px 22px 22px; border-radius: 30px; }
+.start-seite { display: grid; gap: var(--a3); align-content: start; }
+.start-seite .start-datum { color: var(--tinte-leise); font-size: 14px; letter-spacing: .04em; text-transform: none; }
+.start-seite > h1 { margin-top: -4px; font: 800 46px/1.04 var(--schrift-rund); letter-spacing: -.025em; overflow-wrap: anywhere; }
+.start-seite > .start-satz { font: 600 18px/1.35 var(--schrift-rund); color: var(--tinte); }
+.start-seite > .kasten { margin: 0; }
+.start-update { display: flex; align-items: center; justify-content: space-between; gap: var(--a3); }
+.kein-modul { display: grid; gap: var(--a3); }
+.start-punkt { display: inline-block; width: 10px; height: 10px; border-radius: 50%; background: var(--akzent-warm); box-shadow: 0 0 0 3px var(--warm-a30); }   /* Hinweis am Elternschlüssel */
+
+/* Der eine Einstieg ist der Hauptknopf im Dock (.dock-haupt.start-los); in den Ferien hell und ruhig */
+.dock-knopf.dock-haupt.start-los.ferien { background: linear-gradient(var(--flaeche), var(--taste-oben)); color: var(--tinte);
+  box-shadow: inset 0 0 0 1px var(--tinte-a14), 0 6px 0 var(--tinte-a14); }
+.dock-haupt.start-los.ferien .haupt-ring { background: var(--akzent-hell); box-shadow: none; color: var(--akzent-dunkel); }
+
+/* Nächstes Ziel: warme Karte mit Turm-Miniatur und Lampen (Vorbild A «Nächstes Ziel») */
+.start-ziel {
+  display: flex; align-items: center; gap: 12px; width: 100%; min-height: var(--ziel); padding: 12px 14px 12px 12px; border: 0; border-radius: 20px; text-align: left;
+  background: var(--warm-flaeche); color: var(--tinte); box-shadow: inset 0 0 0 1px var(--warm-linie), 0 4px 0 var(--warm-linie);
+  transition: transform var(--dauer) var(--kurve), box-shadow var(--dauer) var(--kurve);
+}
+.start-ziel:active { transform: translateY(3px); box-shadow: inset 0 0 0 1px var(--warm-linie), 0 1px 0 var(--warm-linie); }
+.start-ziel-bild { display: grid; place-items: center; flex: none; width: 50px; height: 50px; border-radius: 14px; background: var(--warm-hell); }
+.start-ziel-bild > svg { width: 42px; height: 38px; }
+.start-ziel-text { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+.start-ziel-text small { font: 700 12.5px var(--schrift-rund); letter-spacing: .07em; text-transform: uppercase; color: var(--warm-tinte); }
+.start-ziel-text b { font: 800 17px/1.2 var(--schrift-rund); }
+.start-ziel .lampen { margin-top: 2px; }
+/* Nächster Schritt: «noch 7 Stein» mit dem Rohstoff, oder volle Rauten mit «Bereit zum Erforschen» */
+.start-ziel-noch { display: flex; align-items: center; gap: 8px; font: 700 15px/1.25 var(--schrift-rund); color: var(--warm-tinte); }
+.start-ziel-noch .lampen { margin-top: 0; }
+.start-ziel-noch.bereit { flex-wrap: nowrap; white-space: nowrap; }
+.start-ziel-noch.bereit .lampen > em { display: none; }   /* volle Rauten mit dem Verb, kein zweiter Zähler «2 von 2» */
+
+/* ---- Profil beim ersten Start (Tafel «halb») ---------------------------------------------------------------------- */
+.profil-seite { display: grid; gap: var(--a4); }
+.profil-seite > .unterzeile { font-size: var(--t-gross); color: var(--tinte-leise); }
+.profil { display: grid; gap: var(--a2); }
+.profil-etikett { margin-top: var(--a2); font: 700 12.5px var(--schrift-rund); letter-spacing: .07em; text-transform: uppercase; color: var(--tinte-leise); }
+.profil-feld {
+  width: 100%; height: 56px; min-height: 56px; padding: 0 24px; border: 0; border-radius: 999px; background: var(--flaeche); color: var(--tinte);
+  font: 700 21px var(--schrift-rund); box-shadow: inset 0 0 0 1px var(--tinte-a14), inset 0 3px 6px var(--tinte-a06);
+}
+.profil-feld:focus { outline: none; box-shadow: inset 0 0 0 2px var(--akzent), 0 0 0 4px var(--akzent-a30); }
+.wahl { display: flex; gap: var(--a2); }
+.wahl .knopf { flex: 1; min-height: 56px; border-radius: 18px; font: 800 21px var(--schrift-rund); }
+.profil-seite .wahl .knopf[aria-pressed="true"]:not(:disabled) {
+  background: linear-gradient(180deg, var(--akzent-hoch), var(--akzent) 70%); color: var(--flaeche); box-shadow: inset 0 2px 0 var(--weiss-a30), 0 5px 0 var(--kante-akzent);
+}
+.profil-seite .fehler-text:empty { display: none; }
+.app .tafel.profil-tafel { bottom: auto; height: auto; max-height: calc(100% - var(--hud-raum) - var(--dock-raum)); }   /* so hoch wie der Inhalt */
+.tafel.profil-tafel .tafel-fuss .knopf { flex: 1; min-height: 60px; }
+.tafel.profil-tafel .tafel-titel { font-size: 30px; }
+/* Während der ersten Angaben treten Medaille und Pillen zurück, Klang und Elternschlüssel bleiben erreichbar */
+.app:has(.tafel.profil-tafel) > .hud > .hud-links, .app:has(.tafel.profil-tafel) > .hud > .hud-pillen { visibility: hidden; }
+
+/* ---- Einstufung: Karte in der Auswahl ---------------------------------------------------------------------------- */
+.kasten.hilfe.einstufung {
+  display: grid; grid-template-columns: 64px minmax(0, 1fr); column-gap: 16px; row-gap: 4px; align-items: start; margin: 0; padding: 18px 20px 16px;
+  border: 0; border-radius: 22px; background: var(--warm-flaeche); color: var(--tinte); font-size: var(--t-text);
+  box-shadow: inset 0 0 0 1px var(--warm-linie), 0 4px 0 var(--warm-linie);
+}
+.einstufung > * { grid-column: 2; margin: 0; }
+.einstufung > .einstufung-bild { grid-column: 1; grid-row: 1 / span 6; display: grid; place-items: center; width: 64px; height: 64px; border-radius: 18px; background: var(--warm-hell); }
+.einstufung-bild > svg { width: 52px; height: 44px; }
+.einstufung .einstufung-kicker { color: var(--warm-tinte); }
+.kasten.einstufung > .einstufung-titel { display: block; font: 800 20px/1.2 var(--schrift-rund); color: var(--tinte); }
+.einstufung-lead { font: 600 16px/1.35 var(--schrift-rund); }
+.einstufung-info { color: var(--tinte); }
+.einstufung > .klein { color: var(--tinte-leise); }
+.einstufung > .kachel-fuss { margin-top: var(--a2); }
+
+/* Ergebnis als kurze Logbuchseite: Papier mit Linien, Kopfzeile, ein Satz, runder Stempel mit Häkchen (ohne Text) */
+.kasten.ok.einstufung-ergebnis {
+  position: relative; margin: 0; padding: 14px 100px 14px 24px; border: 0; border-radius: 6px 20px 20px 6px; color: var(--tinte);
+  background: repeating-linear-gradient(180deg, var(--weiss-a00) 0 27px, var(--papier-rand) 27px 28px) 0 13px / 100% 100% no-repeat, var(--papier-buch);
+  box-shadow: inset 5px 0 0 var(--papier-rand), 0 4px 0 var(--papier-rand), var(--schatten-hud); font: 500 16px/28px var(--schrift-rund);
+}
+.kasten.ok.einstufung-ergebnis > b:first-child { margin: 0; font: 800 18px/28px var(--schrift-rund); color: var(--tinte); }
+.ergebnis-stempel {
+  position: absolute; top: 50%; right: 20px; width: 64px; height: 64px; margin-top: -32px; border: 3px solid var(--akzent-dunkel); border-radius: 50%;
+  box-shadow: inset 0 0 0 4px var(--papier-buch), inset 0 0 0 6px var(--akzent-dunkel); opacity: .78; transform: rotate(-12deg);
+}
+.ergebnis-stempel::after {
+  content: ''; position: absolute; left: 21px; top: 15px; width: 12px; height: 22px; border: solid var(--akzent-dunkel); border-width: 0 4px 4px 0; border-radius: 1px;
+  transform: rotate(40deg);
+}
+
+/* ---- Hochformat: Karte im unteren Drittel über dem Dock, Ziel rechts daneben; Profil als Blatt unter dem HUD -------------- */
+@media (orientation: portrait) {
+  .app[data-modus="welt"] .ansicht[data-ansicht="start"] { top: auto; bottom: var(--dock-raum); width: auto; max-height: calc(100% - var(--hud-raum) - var(--dock-raum)); }
+  .start-seite.mit-ziel { grid-template-columns: minmax(0, 1fr) minmax(0, 340px); column-gap: 20px; }
+  .start-seite.mit-ziel > * { grid-column: 1 / -1; }
+  .start-seite.mit-ziel > .start-datum, .start-seite.mit-ziel > h1, .start-seite.mit-ziel > .start-satz { grid-column: 1; }
+  .start-seite.mit-ziel > .start-ziel { grid-column: 2; grid-row: 1 / span 3; align-self: center; }
+  .start-seite > h1 { font-size: 42px; }
+  .app .tafel.profil-tafel { top: auto; bottom: calc(env(safe-area-inset-bottom) + 24px); max-height: calc(100% - var(--hud-raum) - 24px); }   /* ohne Dock */
+}
+@media (max-width: 720px) and (orientation: portrait) {
+  .start-seite.mit-ziel { grid-template-columns: minmax(0, 1fr); }
+  .start-seite.mit-ziel > .start-ziel { grid-column: 1; grid-row: auto; }
+}
+
+/* ---- Insel aus Code (Platzhalter im Abschluss) ------------------------------------------------------------------- */
+.insel-meer { fill: var(--meer); opacity: .55; }
+.insel-gras { fill: var(--gras); }
+.insel-seite-l, .insel-seite-r { fill: var(--sand); }
+.insel-seite-l { fill: color-mix(in srgb, var(--sand) 84%, var(--tinte)); }
+.insel-seite-r { fill: color-mix(in srgb, var(--sand) 68%, var(--tinte)); }
+.stein-o, .stein-l, .stein-r { fill: var(--stein); }
+.stein-l { fill: color-mix(in srgb, var(--stein) 84%, var(--tinte)); }
+.stein-r { fill: color-mix(in srgb, var(--stein) 68%, var(--tinte)); }
+.holz-o, .holz-l, .holz-r { fill: var(--holz); }
+.holz-o { fill: color-mix(in srgb, var(--holz) 78%, var(--flaeche)); }
+.holz-r { fill: color-mix(in srgb, var(--holz) 74%, var(--tinte)); }
+.kalk-o, .kalk-l, .kalk-r { fill: var(--flaeche); }
+.kalk-l { fill: color-mix(in srgb, var(--flaeche) 84%, var(--tinte)); }
+.kalk-r { fill: color-mix(in srgb, var(--flaeche) 68%, var(--tinte)); }

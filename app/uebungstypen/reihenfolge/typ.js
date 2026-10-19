@@ -64,11 +64,13 @@
             H('span.nr', pos >= 0 ? pos + 1 : ''), H('span.text', schritte[s]));
         };
         const liste = H('div.schritte', { role: 'group', 'aria-label': 'Schritte' });
+        const leiste = H('div.satzleiste', { 'aria-live': 'polite' });              // die getippten Karten der Reihe nach, wie sie zusammen gelesen werden
         const neu = H('button.knopf.leise.neu', { type: 'button', onclick: () => { if (!bewertet && !beendet) { folge.length = 0; zeichne(); } } }, 'Von vorn');
         const pruefen = H('button.knopf.primaer.gross.pruefen', { type: 'button', onclick: pruefe }, 'Prüfen');
 
         function zeichne() {
           liste.replaceChildren(...reihe.map(karte));
+          leiste.replaceChildren(...schritte.map((_, p) => (p < folge.length ? H('span.satz-teil', schritte[folge[p]]) : H('span.satz-platz', { 'aria-hidden': 'true' }, String(p + 1)))));
           pruefen.disabled = bewertet || folge.length < schritte.length;
           neu.disabled = bewertet || !folge.length;
         }
@@ -87,7 +89,7 @@
         buehne.replaceChildren(H('div.uebung.uebung-reihenfolge',
           H('div.frage', text(a.inhalt.frage) ? H('p.aufgabe', a.inhalt.frage) : null,
             H('p.hinweis', 'Tippe die Karten in der richtigen Reihenfolge an. Mit einem zweiten Tipp nimmst du eine Karte zurück.')),
-          liste, H('div.leiste', neu, pruefen)));
+          leiste, liste, H('div.leiste', neu, pruefen)));
         zeichne();
       });
     }

@@ -1,6 +1,6 @@
 /* app/manifest.js: Ladelisten. ERZEUGT von `lw manifest` (tools/lw/manifest.mjs), nicht von Hand ändern.
    Aufbau (Festlegung F-02 in docs/vertragsaenderungen.md):
-     kern         Stylesheets und Skripte aus app/stil, kern, ui, lernsteuerung, pruefung, welt, lauf, ansichten und module/katalog.js
+     kern         Stylesheets und Skripte aus app/stil, kern, klang, ui, lernsteuerung, pruefung, welt, lauf, ansichten und module/katalog.js
      typen        app/uebungstypen/<id>/typ.css und typ.js
      hilfsmittel  app/hilfsmittel/<id>.js
      welten       Tabelle { <welt-id>: [Dateien] }, geladen wird nur das gewählte Thema
@@ -13,14 +13,26 @@
   L.manifest = {
     version: 1,
     kern: [
+      'app/stil/abschluss.css',
+      'app/stil/aufgabe.css',
+      'app/stil/auftraege.css',
       'app/stil/basis.css',
       'app/stil/bauteile.css',
+      'app/stil/buehne.css',
       'app/stil/dialog.css',
+      'app/stil/effekte.css',
+      'app/stil/eltern.css',
+      'app/stil/forschung.css',
+      'app/stil/huelle.css',
       'app/stil/icons.css',
-      'app/stil/start-lernen.css',
+      'app/stil/lernen.css',
+      'app/stil/logbuch.css',
+      'app/stil/siedlung.css',
+      'app/stil/start.css',
+      'app/stil/tafel.css',
       'app/stil/tastenfeld.css',
       'app/stil/tokens.css',
-      'app/stil/welt-ansichten.css',
+      'app/stil/welt.css',
       'app/kern/ereignisse.js',
       'app/kern/fehlerlog.js',
       'app/kern/formen.js',
@@ -33,10 +45,18 @@
       'app/kern/zeit.js',
       'app/kern/zufall.js',
       'app/kern/zustand.js',
+      'app/klang/klaenge.js',
+      'app/klang/musik.js',
       'app/ui/dialog.js',
+      'app/ui/effekte-flug.js',
+      'app/ui/effekte.js',
       'app/ui/h.js',
+      'app/ui/klang.js',
+      'app/ui/musik.js',
+      'app/ui/tafel.js',
       'app/ui/tastatur.js',
       'app/ui/tastenfeld.js',
+      'app/ui/uebergang.js',
       'app/lernsteuerung/einstufung.js',
       'app/lernsteuerung/fehler.js',
       'app/lernsteuerung/lernregeln.js',
@@ -51,9 +71,16 @@
       'app/pruefung/inhalt-welt.js',
       'app/pruefung/inhalt.js',
       'app/pruefung/ton.js',
+      'app/welt/buehne-bau.js',
+      'app/welt/buehne-kamera.js',
+      'app/welt/buehne-land.js',
+      'app/welt/buehne-leben.js',
+      'app/welt/buehne-marken.js',
+      'app/welt/buehne.js',
       'app/welt/engine.js',
       'app/welt/expedition.js',
       'app/welt/iso-formen.js',
+      'app/welt/iso-objekte.js',
       'app/welt/iso.js',
       'app/welt/ledger.js',
       'app/welt/render-land.js',
@@ -68,8 +95,12 @@
       'app/lauf/schleife.js',
       'app/lauf/verbuchen.js',
       'app/lauf/zugriff.js',
+      'app/ansichten/abschluss-schritt.js',
+      'app/ansichten/abschluss-texte.js',
       'app/ansichten/abschluss.js',
+      'app/ansichten/aufgabe-rahmen.js',
       'app/ansichten/auftraege-plan.js',
+      'app/ansichten/auftraege-texte.js',
       'app/ansichten/auftraege.js',
       'app/ansichten/einstieg.js',
       'app/ansichten/eltern-anpassung.js',
@@ -90,18 +121,28 @@
       'app/ansichten/eltern.js',
       'app/ansichten/ferien.js',
       'app/ansichten/forschung-graph.js',
+      'app/ansichten/forschung-texte.js',
       'app/ansichten/forschung.js',
+      'app/ansichten/huelle-dock.js',
+      'app/ansichten/huelle-hud.js',
+      'app/ansichten/huelle-texte.js',
       'app/ansichten/huelle.js',
       'app/ansichten/lehrmittel.js',
+      'app/ansichten/lernen-texte.js',
       'app/ansichten/lernen.js',
       'app/ansichten/lernplan.js',
       'app/ansichten/logbuch-daten.js',
       'app/ansichten/logbuch-grafik.js',
       'app/ansichten/logbuch-kacheln.js',
+      'app/ansichten/logbuch-texte.js',
       'app/ansichten/logbuch.js',
       'app/ansichten/pruefung-lage.js',
+      'app/ansichten/siedlung-hinweise.js',
       'app/ansichten/siedlung-info.js',
+      'app/ansichten/siedlung-texte.js',
       'app/ansichten/siedlung.js',
+      'app/ansichten/start-orte.js',
+      'app/ansichten/start-texte.js',
       'app/ansichten/start.js',
       'app/ansichten/texte.js',
       'app/ansichten/welt-bausteine.js',
@@ -109,6 +150,7 @@
       'app/ansichten/welt-daten.js',
       'app/ansichten/welt-rahmen.js',
       'app/ansichten/welt-texte.js',
+      'app/ansichten/welt-weg.js',
       'module/katalog.js'
     ],
     typen: [
@@ -168,6 +210,15 @@
         'module/deutsch-rechtschreibung/doppelkonsonant.js',
         'module/deutsch-rechtschreibung/modul.js'
       ],
+      'deutsch-satzbau': [
+        'module/_gemeinsam/schreibantwort.js',
+        'module/deutsch-satzbau/saetze.js',
+        'module/deutsch-satzbau/gen-fragen.js',
+        'module/deutsch-satzbau/gen-erkennen.js',
+        'module/deutsch-satzbau/gen-bauen.js',
+        'module/deutsch-satzbau/gen-schreiben.js',
+        'module/deutsch-satzbau/modul.js'
+      ],
       'deutsch-wortarten': [
         'module/_gemeinsam/schreibantwort.js',
         'module/deutsch-wortarten/gen-wortarten.js',
@@ -177,6 +228,9 @@
         'module/deutsch-wortarten/gen-satz.js',
         'module/deutsch-wortarten/gen-abc.js',
         'module/deutsch-wortarten/modul.js'
+      ],
+      'englisch-farben-formen': [
+        'module/englisch-farben-formen/modul.js'
       ],
       'englisch-grundlagen': [
         'module/englisch-grundlagen/modul.js'
@@ -222,7 +276,13 @@
         'module/mathe-zahlraum-1000/fam-folgen.js',
         'module/mathe-zahlraum-1000/fam-rechnen.js',
         'module/mathe-zahlraum-1000/fam-erweitert.js',
+        'module/mathe-zahlraum-1000/fam-plaettchen.js',
+        'module/mathe-zahlraum-1000/fam-plaettchen-moeglich.js',
+        'module/mathe-zahlraum-1000/fam-tausenderbuch.js',
         'module/mathe-zahlraum-1000/modul.js'
+      ],
+      'nmg-korn-pasta': [
+        'module/nmg-korn-pasta/modul.js'
       ],
       'nmg-stoffe': [
         'module/nmg-stoffe/modul.js'

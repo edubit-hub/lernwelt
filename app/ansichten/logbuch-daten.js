@@ -97,12 +97,13 @@
     }).filter(Boolean).sort((a, b) => (a.tag < b.tag ? -1 : a.tag > b.tag ? 1 : 0));
   }
 
-  /** Fundstücke des Welt-Themas: alle Stücke des Themas, die erreichten mit Datum und Quelle (Expedition), die übrigen mit dem Weg dorthin. [{ id, name, da, tag, quelle }] */
+  /** Fundstücke des Welt-Themas: alle Stücke des Themas, die erreichten mit Datum und Quelle (Expedition), die übrigen mit dem Weg dorthin.
+      [{ id, name, da, tag, quelle, bild }], bild ist die Formenliste aus dem Thema oder null (dann zeigt die Vitrine ein Platzhalter-Objekt). */
   function fundstuecke(thema, ledger) {
     const buch = liste(ledger && ledger.sammlung).filter(s => objekt(s)), exped = liste(thema && thema.expeditionen);
-    return liste(thema && thema.sammlung).map(s => {
+    return liste(thema && thema.sammlung).filter(objekt).map(s => {
       const da = buch.find(x => x.id === s.id), quelle = exped.find(e => e.id === (da && da.quelle)) || exped.find(e => e.belohnung && e.belohnung.sammlung === s.id);
-      return { id: s.id, name: s.name || s.id, da: !!da, tag: da ? da.tag : null, quelle: quelle ? quelle.name : null };
+      return { id: s.id, name: s.name || s.id, da: !!da, tag: da ? da.tag : null, quelle: quelle ? quelle.name : null, bild: Array.isArray(s.bild) && s.bild.length ? s.bild : null };
     });
   }
 

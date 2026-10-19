@@ -1,0 +1,162 @@
+/* app/stil/aufgabe.css: der Aufgabenrahmen einer Runde (docs/gestaltung-umbau.md 2.6 und 2.7, Vorbild docs/mockup/richtung-b/b-start.css «au-*», «ar-*»).
+   Während einer Runde steht die Insel still und gedämpft unter dem Schleier (Modus «aufgabe», huelle.css). Darauf liegt die Ansicht als Papier
+   (.ansicht.mit-rahmen) mit dem Rahmen: .aufgabe-rahmen > .lauf-huelle > .lauf > .lauf-kopf.mit-route (button.lauf-beenden, .lauf-fortschritt,
+   .ar-route mit .ar-anker, .ar-bahn [.ar-wasser, .ar-spur, .ar-stationen > .ar-station, .ar-schiff > .ar-boot], .ar-ziel, daneben .ar-ertrag),
+   darunter die helle Arbeitsfläche .lauf-buehne und die Rückmeldung .lauf-rueckmeldung (.rueckmeldung, .kasten.ok/.fehler/.hilfe, .rm-weg).
+   Eine falsche Antwort wird neutral markiert (Rand und Zeichen in --tinte-leise), nie rot und nie durchgestrichen. Nur Token aus tokens.css. */
+
+/* ---- Papier der Runde: eine Karte auf der ruhigen Insel (Nachbesserung 1 und 2) -----------------------------------
+   Quer steht die Karte links mit fester Oberkante (24 px unter dem Rand) und so hoch wie ihr Inhalt: Kopf, Route und Aufgabe bleiben beim Wechsel
+   von Eingabe zu Rückmeldung und von Typ zu Typ an ihrem Platz, nur die Arbeitsfläche wächst nach unten. Rechts bleibt die Insel sichtbar.
+   Hoch füllt die Karte die ganze Höhe: Kopf mit Route oben, die Aufgabe in der Mitte, Tastenfeld und Tastatur unten nah bei den Daumen. */
+.app[data-modus="aufgabe"] .ansicht.mit-rahmen {
+  top: calc(var(--oben) + 10px); bottom: auto; left: calc(env(safe-area-inset-left) + var(--rand) + 8px); right: auto; width: min(840px, calc(100% - 2 * var(--rand) - 280px));
+  height: fit-content; max-height: calc(100% - var(--oben) - 10px - env(safe-area-inset-bottom) - 16px); margin: 0;
+  padding: 16px 24px 20px; border-radius: 30px; background: var(--papierweiss); box-shadow: var(--schatten-karte), inset 0 0 0 1px var(--tinte-a06);
+}
+.aufgabe-rahmen { display: flex; flex-direction: column; min-height: 100%; }
+.aufgabe-rahmen > .lauf-huelle { display: flex; flex-direction: column; flex: 1 1 auto; }
+.aufgabe-rahmen .lauf { gap: var(--a3); }
+.aufgabe-rahmen .lauf-buehne { min-height: 300px; }
+/* Ist die Rückmeldung da, gilt der Arbeitsauftrag nicht mehr (Platz bleibt, damit nichts springt) */
+.aufgabe-rahmen .lauf:has(> .lauf-buehne[data-urteil]) .ar-auftrag { visibility: hidden; }
+.aufgabe-rahmen .uebung .hinweis.gehoben { display: none; }                    /* die Anleitung des Typs steht oben als Arbeitsauftrag */
+/* Bestätigen: ein Wort («Prüfen», im Tastenfeld «OK»), deaktiviert blass mit gestrichelter Kante, nicht wie eine Taste */
+.aufgabe-rahmen .lauf-buehne :is(.knopf.primaer, .taste-ok):disabled { background: transparent; color: var(--tinte-leise); box-shadow: none;
+  outline: 2px dashed var(--tinte-a20); outline-offset: -2px; opacity: 1; transform: none; }
+.ar-kopf { display: flex; align-items: center; gap: var(--a4); min-height: 64px; }       /* bis zum ersten Paket, danach im Kopf des Laufs */
+.ar-kopf .ar-route { flex: 1; }
+
+/* ---- Kopf: Beenden, Fortschritt, Route, Ertrag ---------------------------------------------------------------- */
+.lauf-kopf.mit-route {
+  display: grid; grid-template-columns: auto minmax(0, 1fr) auto; grid-template-areas: "beenden fort ertrag" "beenden route ertrag" "zeile zeile zeile";
+  align-items: center; column-gap: 22px; row-gap: 2px; min-height: 72px;
+}
+.lauf-kopf.mit-route .lauf-beenden { grid-area: beenden; }
+/* Etikett «Rechnen · Einmaleins» (wenige kleine Versalien) und Arbeitsauftrag */
+.ar-zeile { grid-area: zeile; display: flex; flex-wrap: wrap; align-items: center; gap: 4px 14px; margin-top: 10px; }
+.ar-etikett { display: inline-flex; align-items: center; gap: 8px; margin: 0; padding: 3px 14px 3px 4px; border-radius: 999px; background: var(--beige-flaeche);
+  font: 600 15px var(--schrift-rund); color: var(--tinte-leise); }   /* normale Schreibung, keine Kapitälchen («2er» statt «2ER») */
+.ar-etikett b { font-weight: 800; color: var(--tinte); }
+.ar-etikett-bild:empty { display: none; }
+.ar-etikett-bild .res-objekt { display: grid; place-items: center; width: 28px; height: 28px; border-radius: 50%;
+  background: radial-gradient(120% 120% at 35% 25%, var(--flaeche) 0%, var(--tint, var(--akzent-hell)) 62%); }
+.ar-etikett-bild .res-objekt > svg { width: 20px; height: 20px; }
+.ar-etikett:has(.ar-etikett-text:empty) { display: none; }
+.ar-auftrag { margin: 0; font: 600 18px/1.3 var(--schrift-rund); color: var(--tinte); }
+.ar-auftrag:empty { display: none; }
+.lauf-kopf.mit-route .lauf-fortschritt {
+  grid-area: fort; align-self: end; text-align: center; font: 700 15px/1.2 var(--schrift-rund); color: var(--tinte-leise);   /* normale Schreibung: «Aufgabe 3 von 8» */
+}
+.lauf-kopf.mit-route .ar-route { grid-area: route; }
+.lauf-kopf.mit-route .ar-ertrag { grid-area: ertrag; }
+.aufgabe-rahmen button.lauf-beenden.knopf {
+  min-height: var(--ziel); padding: 0 16px; border-radius: 14px; background: var(--beige-flaeche); color: var(--tinte); box-shadow: inset 0 0 0 1px var(--tinte-a08);
+}
+.aufgabe-rahmen .lauf-hinweis { margin: 0; text-align: center; }
+/* Rückfrage beim Beenden: ruhig, warm, zwei gleich hohe Knöpfe */
+.lauf-frage { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px 18px; padding: 12px 16px; border-radius: 18px;
+  background: var(--warm-hell); box-shadow: inset 0 0 0 1.5px var(--warm-kante); }
+.lauf-frage > p { margin: 0; font: 700 18px/1.3 var(--schrift-rund); }
+.lauf-frage-knoepfe { display: flex; gap: 10px; }
+.lauf-frage .knopf { min-height: var(--ziel); padding: 0 18px; }
+
+.ar-route { display: flex; align-items: center; gap: 10px; min-width: 0; }
+.ar-anker, .ar-ziel { display: grid; place-items: center; flex: none; width: 40px; height: 40px; border-radius: 50%; background: var(--flaeche); box-shadow: inset 0 0 0 1.5px var(--akzent-mitte); color: var(--akzent-dunkel); }
+.ar-anker > svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
+.ar-ziel { box-shadow: inset 0 0 0 2px var(--warm-kante), 0 0 0 4px var(--warm-a30); }
+.ar-ziel .res-objekt, .ar-ertrag .res-objekt { display: grid; place-items: center; width: 34px; height: 34px; border-radius: 50%;
+  background: radial-gradient(120% 120% at 35% 25%, var(--flaeche) 0%, var(--tint, var(--akzent-hell)) 62%); }
+.ar-ziel .res-objekt > svg { width: 24px; height: 24px; }
+.ar-ertrag .res-objekt { width: 46px; height: 46px; box-shadow: inset 0 -3px 0 var(--tinte-a08), inset 0 0 0 1px var(--tinte-a08); }
+.ar-ertrag .res-objekt > svg { width: 32px; height: 32px; }
+.res-objekt.leer { background: var(--beige-flaeche); }
+
+.ar-bahn { position: relative; flex: 1; min-width: 0; height: 40px; }
+.ar-wasser { position: absolute; left: 0; right: 0; top: 24px; height: 2px; background: repeating-linear-gradient(90deg, var(--akzent-mitte) 0 6px, var(--weiss-a00) 6px 12px); }
+.ar-spur { position: absolute; left: 0; right: 0; top: 23px; height: 4px; border-radius: 2px; background: var(--messing); transform-origin: 0 50%;
+  transition: transform calc(var(--dauer-tafel) * 2) var(--kurve-raum); }
+.ar-stationen { position: absolute; inset: 0; }
+.ar-station { position: absolute; top: 25px; width: 14px; height: 14px; margin: -7px 0 0 -7px; border-radius: 50%; background: var(--flaeche); box-shadow: inset 0 0 0 2px var(--akzent-mitte);
+  transition: background-color var(--dauer-tafel) var(--kurve), box-shadow var(--dauer-tafel) var(--kurve); }
+.ar-station.ok { background: var(--messing); box-shadow: inset 0 0 0 2px var(--warm-tief); }
+.ar-station.offen { background: var(--beige-flaeche); box-shadow: inset 0 0 0 2px var(--tinte-leise); }   /* falsch: neutral, kommt noch einmal dran */
+.ar-station.jetzt { opacity: 0; }                                         /* das Schiff ist die Marke «jetzt», kein zweiter Ring */
+.ar-station.etappe { width: 16px; height: 16px; margin: -8px 0 0 -8px; border-radius: 3px; transform: rotate(45deg); }
+.ar-schiff { position: absolute; inset: 0; pointer-events: none; transition: transform calc(var(--dauer-tafel) * 2) var(--kurve-raum); }
+.ar-boot { position: absolute; left: 0; top: -2px; width: 34px; height: 28px; margin-left: -17px; }
+.ar-boot > svg { display: block; width: 34px; height: 28px; overflow: visible; }
+.boot-rumpf { fill: var(--tinte); }
+.boot-mast { stroke: var(--tinte); stroke-width: 1.8; }
+.boot-segel { fill: var(--papierweiss); stroke: var(--tinte); stroke-width: 1.2; stroke-linejoin: round; }
+.boot-wimpel { fill: var(--akzent); }
+
+.ar-ertrag { display: flex; align-items: center; gap: 10px; min-height: 60px; padding: 0 18px 0 7px; border-radius: 999px; background: var(--flaeche);
+  box-shadow: var(--schatten-marke), 0 0 0 3px var(--warm-a30); }
+.ar-ertrag-text { display: flex; flex-direction: column; line-height: 1.1; }
+.ar-ertrag-text small { font: 600 13.5px var(--schrift-rund); color: var(--tinte-leise); }
+.ar-ertrag.leer .res-objekt { opacity: .5; }                           /* noch kein Ertrag: das Objekt blass, keine «0» */
+.ar-ertrag.leer .ar-ertrag-zahl { color: var(--tinte-leise); font-weight: 700; }
+.ar-ertrag.ohne { display: none; }                                       /* ohne Rohstoff (Freitext) kein Ertragsblock */
+.lauf-kopf.mit-route .ar-etappe { grid-area: fort; align-self: end; justify-self: start; font: 700 14px/1.2 var(--schrift-rund); color: var(--warm-tinte); }
+.ar-etappe:empty { display: none; }
+.ar-ertrag-zahl { font: 800 20px var(--schrift-rund); font-variant-numeric: tabular-nums; white-space: nowrap; }
+
+/* ---- Arbeitsfläche ------------------------------------------------------------------------------------------- */
+.aufgabe-rahmen .lauf-buehne {
+  display: flex; flex-direction: column; justify-content: center; min-height: 0; padding: 22px 26px; border-radius: 24px;
+  background: var(--flaeche); box-shadow: inset 0 0 0 1px var(--tinte-a08), 0 2px 0 var(--papier-rand);
+}
+.aufgabe-rahmen .lauf-buehne > .uebung { max-width: none; }
+.aufgabe-rahmen .lauf-buehne[data-urteil] .tastenfeld, .aufgabe-rahmen .lauf-buehne[data-urteil] .tastatur { display: none; }   /* nach der Antwort zählt die Rückmeldung */
+.aufgabe-rahmen .lauf-buehne[data-urteil] .hilfe-bereich { display: none; }
+
+/* ---- Rückmeldung ----------------------------------------------------------------------------------------------- */
+.aufgabe-rahmen .lauf-rueckmeldung { flex: none; }
+.aufgabe-rahmen .rueckmeldung { gap: var(--a3); }
+.aufgabe-rahmen .rueckmeldung .kasten { padding: 14px 18px; border: 0; border-left: 5px solid var(--linie); border-radius: 18px; background: var(--flaeche);
+  box-shadow: inset 0 0 0 1px var(--tinte-a08); font-size: var(--t-gross); line-height: 1.4; }
+.aufgabe-rahmen .rueckmeldung .kasten > b:first-of-type { display: block; margin-bottom: 2px; font: 800 19px var(--schrift-rund); }
+.aufgabe-rahmen .rueckmeldung .kasten.ok { border-left-color: var(--ok); }
+.aufgabe-rahmen .rueckmeldung .kasten.ok > b:first-of-type { color: var(--ok-text); }
+.aufgabe-rahmen .rueckmeldung .kasten.fehler { border-left-color: var(--tinte-leise); }                /* neutral: kein Rot */
+.aufgabe-rahmen .rueckmeldung .kasten.fehler > b:first-of-type { color: var(--tinte); }
+.aufgabe-rahmen .rueckmeldung .kasten.hilfe { border-left-color: var(--akzent); }
+.rm-haken { float: left; width: 30px; height: 30px; margin: -2px 10px 0 0; }
+.rm-haken:empty { display: none; }
+.rm-haken > .haken-zeichen { width: 30px; height: 30px; }
+.aufgabe-rahmen .rm-weg { display: grid; grid-template-columns: auto minmax(0, 1fr); align-items: start; gap: 6px 26px; margin-top: var(--a3); padding: 14px 18px;
+  border-radius: 14px; background: var(--beige-flaeche); }
+.aufgabe-rahmen .rm-weg-titel { grid-column: 1 / -1; margin: 0; font: 800 17px var(--schrift-rund); }
+/* Schritte: die Nummer steht als kleiner runder Marker abgesetzt neben der Rechnung (nie als «1. 2 · 2»); beim Punktefeld trägt sie den Ton des Teils */
+.aufgabe-rahmen .rm-schritte { grid-column: 2; grid-row: 2; display: grid; gap: 10px; margin: 0; padding: 0; list-style: none; counter-reset: rm-schritt;
+  font: 700 22px/1.3 var(--schrift-rund); font-variant-numeric: tabular-nums; }
+.aufgabe-rahmen .rm-schritte > li { display: flex; align-items: center; gap: 16px; counter-increment: rm-schritt; }
+.aufgabe-rahmen .rm-schritte > li::before { content: counter(rm-schritt); display: grid; place-items: center; flex: none; width: 26px; height: 26px; border-radius: 50%;
+  background: var(--flaeche); box-shadow: inset 0 0 0 1.5px var(--tinte-a20); color: var(--tinte-leise); font: 800 13px var(--schrift-rund); }
+.aufgabe-rahmen .rm-schritte > li.teil1 { color: var(--akzent-dunkel); }
+.aufgabe-rahmen .rm-schritte > li.teil1::before { background: var(--akzent); box-shadow: none; color: var(--flaeche); }
+.aufgabe-rahmen .rm-schritte > li.teil2 { color: var(--warm-tinte); }
+.aufgabe-rahmen .rm-schritte > li.teil2::before { background: var(--akzent-warm); box-shadow: none; color: var(--flaeche); }
+.aufgabe-rahmen .rm-schritte > li.beide::before { background: linear-gradient(90deg, var(--akzent) 50%, var(--akzent-warm) 50%); box-shadow: none; color: var(--flaeche); }
+.aufgabe-rahmen .rm-weg > .rm-schritte:last-child { grid-column: 1 / -1; }
+.aufgabe-rahmen .rm-hilfsmittel { grid-column: 1; grid-row: 2; margin: 0; }
+.aufgabe-rahmen .rm-code, .aufgabe-rahmen .rm-folge { margin: var(--a2) 0 0; font-size: var(--t-text); color: var(--tinte-leise); }
+.aufgabe-rahmen .rm-weiter { min-width: 180px; }
+
+/* ---- Hochformat: die Karte füllt die Höhe. Kopf mit Route oben, die Aufgabe mittig im freien Raum, Tastenfeld und Tastatur unten -------- */
+@media (orientation: portrait) {
+  .app[data-modus="aufgabe"] .ansicht.mit-rahmen { top: calc(var(--oben) + 6px); bottom: calc(env(safe-area-inset-bottom) + 16px); left: 0; right: 0; width: calc(100% - 2 * var(--rand));
+    height: auto; max-height: none; margin: 0 auto; padding: 14px 18px 18px; }   /* das HUD ist während der Runde aus */
+  .aufgabe-rahmen .lauf { flex: 1 1 auto; }
+  .lauf-kopf.mit-route { grid-template-columns: auto minmax(0, 1fr); grid-template-areas: "beenden ertrag" "fort fort" "route route" "zeile zeile"; row-gap: 8px; }
+  .aufgabe-rahmen .lauf-buehne { flex: 1 1 auto; justify-content: center; }
+  .aufgabe-rahmen .lauf-buehne > .uebung:has(.tastenfeld, .tastatur) { flex: 1 1 auto; display: flex; flex-direction: column; align-items: stretch; }
+  .aufgabe-rahmen .lauf-buehne > .uebung:has(.tastenfeld, .tastatur) > :first-child { margin-top: auto; }
+  .aufgabe-rahmen .lauf-buehne > .uebung:has(.tastenfeld, .tastatur) > :is(.tastenfeld, .tastatur, :has(.tastenfeld, .tastatur)) { margin-top: auto; }   /* nah bei den Daumen */
+  .lauf-kopf.mit-route .ar-ertrag { justify-self: end; }
+  .aufgabe-rahmen .rm-weg { grid-template-columns: auto minmax(0, 1fr); }    /* Punktefeld links neben den Schritten wie quer */
+}
+@media (prefers-reduced-motion: reduce) {
+  .ar-spur, .ar-schiff, .ar-station { transition: none; animation: none; }
+}

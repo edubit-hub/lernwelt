@@ -55,7 +55,7 @@
     const zeiger = (art, laenge, name) => {
       const z = svgEl('g', { class: `uhr-zeiger ${art}`, ...(einstellbar ? { role: 'slider', 'aria-label': name, 'aria-valuemin': 0 } : {}) });
       z.append(svgEl('line', { x1: M, y1: M, x2: M, y2: M - laenge, class: 'uhr-arm' }));
-      if (einstellbar) z.append(svgEl('circle', { cx: M, cy: M - laenge, r: 13, class: 'uhr-knauf' }));
+      if (einstellbar) z.append(svgEl('circle', { cx: M, cy: (M - laenge * 0.72).toFixed(1), r: art === 'stunde' ? 10 : 15, class: 'uhr-knauf' }));   // innerhalb des Zahlenrings: die 12 bleibt frei; kurzer Zeiger kleiner Griff, langer grosser
       return z;
     };
     const stundenzeiger = zeiger('stunde', 66, 'Stundenzeiger'), minutenzeiger = zeiger('minute', 104, 'Minutenzeiger');
@@ -115,9 +115,9 @@
         const bedienung = einstellen ? einstellenOberflaeche() : ablesenOberflaeche();
 
         function einstellenOberflaeche() {
-          let h12 = 0, m = 0, beruehrt = false, zieht = null, ziehe = null;
+          let h12 = 3, m = 0, beruehrt = false, zieht = null, ziehe = null;          // Start 3 Uhr: die Zeiger liegen getrennt, beide Griffe sind zu sehen
           uhr.stelle(h12, m);
-          const ok = H('button.knopf.primaer.uhr-ok', { type: 'button', 'aria-label': 'Bestätigen', disabled: true, onclick: () => { if (!beendet && beruehrt) urteil(h12 === h % 12 && m === min, h12, m); } }, 'Fertig');
+          const ok = H('button.knopf.primaer.uhr-ok', { type: 'button', 'aria-label': 'Bestätigen', disabled: true, onclick: () => { if (!beendet && beruehrt) urteil(h12 === h % 12 && m === min, h12, m); } }, 'Prüfen');
           const stelle = (nh, nm) => {
             if (beendet) return;
             h12 = ((nh % 12) + 12) % 12; m = ((nm % 60) + 60) % 60; beruehrt = true;

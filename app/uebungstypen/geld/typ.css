@@ -1,20 +1,21 @@
-/* app/uebungstypen/geld/typ.css: Anordnung und Grafik des Typs «geld». Knöpfe gestaltet app/stil/basis.css (.knopf), das Zahlenfeld app/stil/tastenfeld.css,
-   Farben und Masse kommen aus app/stil/tokens.css. Münzen und Noten sind eigene, schlichte Formen in den Grössenverhältnissen der echten Stücke.
-   Wo die Palette keinen passenden Ton hat, mischt color-mix() Tokens, davor steht ein Token als Rückfall. */
+/* app/uebungstypen/geld/typ.css: Anordnung und Grafik des Typs «geld» (docs/gestaltung-umbau.md 2.6: Münzen und Noten als flache Objekte).
+   Knöpfe gestaltet app/stil/basis.css (.knopf), das Zahlenfeld app/stil/tastenfeld.css, Farben und Masse kommen aus app/stil/tokens.css.
+   Münzen und Noten sind eigene, flache Formen ohne Verlauf in den Grössenverhältnissen der echten Stücke, mit einer dünnen Kante unten.
+   Wo die Palette keinen passenden Ton hat, mischt color-mix() Tokens, davor steht ein Token als Rückfall. Die Ablage ist eine Papierfläche. */
 .uebung-geld {
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: var(--a4);
   width: 100%;
-  max-width: 860px;
+  max-width: 880px;
   margin: 0 auto;
   color: var(--tinte);
 }
 .uebung-geld .geld-bedienung { display: flex; flex-direction: column; align-items: center; gap: var(--a4); width: 100%; }
-.uebung-geld .aufgabe { margin: 0; text-align: center; font-size: var(--t-anzeige); }
+.uebung-geld .aufgabe { margin: 0; text-align: center; font: 800 calc(var(--t-anzeige) * 1.2)/1.2 var(--schrift-rund); font-variant-numeric: tabular-nums; }
 .uebung-geld .geld-stuecke { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: var(--a3); width: 100%; }
-.uebung-geld .geld-stuecke.ablage { min-height: 84px; padding: var(--a3); border: 2px dashed var(--linie); border-radius: var(--radius); background: var(--glas-leise); }
+.uebung-geld .geld-stuecke.ablage { min-height: 92px; padding: var(--a3); border: 2px dashed var(--papier-rand); border-radius: 18px; background: var(--papier-buch); }
 .uebung-geld .geld-stueck {
   display: inline-flex;
   align-items: center;
@@ -23,22 +24,24 @@
   min-height: var(--ziel);
   padding: var(--a1);
   border: 0;
-  border-radius: var(--radius);
+  border-radius: 12px;
   background: transparent;
   touch-action: manipulation;
+  transition: transform var(--dauer) var(--kurve-raus);
 }
-.uebung-geld button.geld-stueck:active { background: var(--akzent-hell); }
+.uebung-geld button.geld-stueck:active { transform: translateY(3px); background: var(--akzent-hell); }
+.uebung-geld .geld-summe { margin: 0; font: 700 var(--t-gross) var(--schrift-rund); color: var(--tinte-leise); }
 .uebung-geld .geld-summe:empty { display: none; }
 .uebung-geld .geld-ok { min-height: var(--taste-hoehe); padding: 0 var(--a5); font-size: var(--t-gross); touch-action: manipulation; }
 
-.uebung-geld .stueck { display: block; overflow: visible; }
-.uebung-geld .stueck .koerper { stroke: var(--tinte-leise); stroke-width: 2.5; fill: var(--stein); }
-.uebung-geld .stueck .zahl { fill: var(--tinte); font-weight: 700; text-anchor: middle; font-variant-numeric: tabular-nums; }
+.uebung-geld .stueck { display: block; overflow: visible; filter: drop-shadow(0 3px 0 var(--kante-weiss)); }
+.uebung-geld .stueck .koerper { stroke: var(--tinte-a20); stroke-width: 2; fill: var(--stein); }
+.uebung-geld .stueck .zahl { fill: var(--tinte); font-family: var(--schrift-rund); font-weight: 800; text-anchor: middle; font-variant-numeric: tabular-nums; }
 .uebung-geld .stueck .einheit { fill: var(--tinte-leise); font-weight: 600; text-anchor: middle; }
 .uebung-geld .muenze.w5 .koerper, .uebung-geld .muenze.w10 .koerper { fill: var(--sand); fill: color-mix(in srgb, var(--akzent-warm) 38%, var(--flaeche)); }
-.uebung-geld .note .koerper { stroke-width: 3; }
+.uebung-geld .note .koerper { stroke-width: 2.5; }
 .uebung-geld .note.w1000 .koerper { fill: var(--sand); fill: color-mix(in srgb, var(--akzent-warm) 35%, var(--flaeche)); }
-.uebung-geld .note.w2000 .koerper { fill: var(--sand); fill: color-mix(in srgb, var(--fehler) 30%, var(--flaeche)); }
+.uebung-geld .note.w2000 .koerper { fill: var(--warm-hell); fill: color-mix(in srgb, var(--holz) 30%, var(--warm-hell)); }
 .uebung-geld .note.w5000 .koerper { fill: var(--gras); fill: color-mix(in srgb, var(--ok) 32%, var(--flaeche)); }
 .uebung-geld .note.w10000 .koerper { fill: var(--meer); fill: color-mix(in srgb, var(--akzent) 32%, var(--flaeche)); }
 .uebung-geld .note.w20000 .koerper { fill: var(--sand); fill: color-mix(in srgb, var(--holz) 40%, var(--flaeche)); }
@@ -53,13 +56,15 @@
   min-width: 120px;
   min-height: 84px;
   padding: var(--a2) var(--a3);
-  border: 2px solid var(--linie);
-  border-radius: var(--radius);
+  border: 2px solid var(--akzent-mitte);
+  border-radius: 18px;
   background: var(--flaeche);
+  box-shadow: inset 0 3px 0 var(--tinte-a04);
   color: var(--tinte);
   touch-action: manipulation;
 }
 .uebung-geld .geld-feld.aktiv { border-color: var(--akzent); background: var(--akzent-hell); }
-.uebung-geld .geld-wert { font-size: var(--t-anzeige); font-variant-numeric: tabular-nums; line-height: 1.1; }
+.uebung-geld .geld-wert { font: 800 var(--t-anzeige)/1.1 var(--schrift-rund); font-variant-numeric: tabular-nums; }
 .uebung-geld .hilfe-bereich { display: flex; flex-direction: column; align-items: center; gap: var(--a3); }
 .uebung-geld .hilfe-ort:empty { display: none; }
+@media (prefers-reduced-motion: reduce) { .uebung-geld .geld-stueck { transition: none; } .uebung-geld button.geld-stueck:active { transform: none; } }

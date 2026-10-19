@@ -2,6 +2,7 @@
    Die Daten stammen aus docs/recherche/curriculum-map.json (hinweise.kalender_2026_27 und schulwochen) und gelten für die Schulen der Gemeinde im Kanton Zug.
    Die Einstellung steht im Lernstand: einstellungen.ferien = { modus: 'auto' | 'an' | 'aus', bis?: 'JJJJ-MM-TT', eigene: [{ von, bis, name }] }.
    auto folgt dem Kalender (und den eigenen Zeiträumen), an gilt bis zum Datum «bis» (ohne Datum bis zum Ausschalten), aus ignoriert die Ferien.
+   Vorgabe ohne Einstellung ist «aus» (Entscheid vom 19.10.2026: der Tagesauftrag gilt auch in den Ferien). Den Kalender schalten die Eltern bei Bedarf ein.
    Schulwochen zählen ab dem Schuljahresbeginn: wocheVon(tag) nennt die Woche, die den Tag enthält, in den Ferien die nächste Schulwoche. */
 (function (g) {
   'use strict';
@@ -32,7 +33,7 @@
     const e = (doc && doc.einstellungen && doc.einstellungen.ferien) || {};
     const eigene = (Array.isArray(e.eigene) ? e.eigene : []).filter(x => x && gueltig(x.von) && gueltig(x.bis) && x.von <= x.bis)
       .map(x => ({ von: x.von, bis: x.bis, name: String(x.name || 'Ferien').slice(0, 40) }));
-    return { modus: MODI.includes(e.modus) ? e.modus : 'auto', bis: gueltig(e.bis) ? e.bis : null, eigene };
+    return { modus: MODI.includes(e.modus) ? e.modus : 'aus', bis: gueltig(e.bis) ? e.bis : null, eigene };
   }
 
   /** Alle Zeiträume des Kalenders und der eigenen Eintragungen, nach Beginn geordnet: [{ name, von, bis (null = offen), quelle }]. */

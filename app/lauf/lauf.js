@@ -19,7 +19,8 @@
     '.lauf-kopf{display:flex;align-items:center;justify-content:space-between;gap:var(--a3)}',
     '.lauf-buehne{flex:1 1 auto}',
     '.lauf-buehne[inert]{pointer-events:none}',
-    '.lauf-rueckmeldung:empty{display:none}'
+    '.lauf-rueckmeldung:empty{display:none}',
+    '.lauf-frage-ort:empty{display:none}'
   ].join('');
   let aktiv = null;                                      // { abbrechen } der laufenden Runde, es gibt nie zwei
 
@@ -59,9 +60,12 @@
 
   /** Führt eine Runde durch. art: tagesauftrag, einstufung, zusatz, expedition, herausforderung, simulation oder vorschau.
       plan: { heute, eintraege: [{ key, grund?, typ?, teil?, punkte? }], deckel?, maxMinuten?, ziel?, pruefung?: { modul, art }, modul? (einstufung),
-      nachschub?: ({ offen, nachgerueckt }) → Eintrag | null (tagesauftrag: nächste neue Aufgabe für eine schon bekannte, AP-23) }.
-      huelle: DOM-Element, in dem die Runde erscheint. signal: optionaler AbortSignal von aussen. Gibt ein Promise mit dem Bericht zurück. */
-  async function start({ art, plan, huelle, signal: extern } = {}) {
+      nachschub?: ({ offen, nachgerueckt }) → Eintrag | null (tagesauftrag: nächste neue Aufgabe für eine schon bekannte, AP-23),
+      katalog? (nur vorschau: Dienste.beispielKatalog(typ), das eingebaute Beispiel eines Typs) }.
+      huelle: DOM-Element, in dem die Runde erscheint. signal: optionaler AbortSignal von aussen. Gibt ein Promise mit dem Bericht zurück.
+      beobachter (optional, Umbauplan 3.7): { paket({ nr, gesamt, art }), ergebnis({ urteil, aufgabeKey }) }. Der Lauf ruft ihn vor jedem Paket und nach
+      jedem verbuchten Ergebnis, geschützt (ein Fehler des Beobachters stoppt die Runde nicht). Er bekommt nur Zahlen und Urteile, kein Welt-Wissen. */
+  async function start({ art, plan, huelle, signal: extern, beobachter = null } = {}) {
     const modus = MODI[art];
     if (!modus) throw new Error(`Lauf: unbekannte Art «${art}»`);
     if (!plan || !L.Tag.gueltig(plan.heute) || !Array.isArray(plan.eintraege)) throw new Error('Lauf: plan braucht heute (JJJJ-MM-TT) und eintraege');
@@ -74,14 +78,24 @@
     const t0 = jetzt(), maxMin = Number.isFinite(plan.maxMinuten) && plan.maxMinuten > 0 ? plan.maxMinuten : modus.deckel ? L.lernregeln.sitzung.maxMinuten : null;
     let grund = null, marke = t0;
     const beende = von => { if (ac.signal.aborted) return false; grund = von; ac.abort(); return true; };
+    const beendenKnopf = H('button.knopf.leise.lauf-beenden', { type: 'button', 'aria-label': T.beendenBeschriftung(), 'aria-expanded': 'false', onclick: () => frage(!frageOrt.children.length) }, T.beenden());
+    const frageOrt = H('div.lauf-frage-ort');
     const fortschritt = H('span.klein.lauf-fortschritt', { 'aria-live': 'polite' }), buehne = H('div.lauf-buehne'), rueck = H('div.lauf-rueckmeldung');
     const wurzel = H('div.lauf', { 'data-art': art },
-      H('div.lauf-kopf', fortschritt, H('button.knopf.leise.lauf-beenden', { type: 'button', 'aria-label': T.beendenBeschriftung(), onclick: () => beende('kind') }, T.beenden())),
+      H('div.lauf-kopf', fortschritt, beendenKnopf), frageOrt,
       art === 'zusatz' ? H('p.klein.lauf-hinweis', T.zusatzHinweis()) : '', buehne, rueck);
-    const k = { art, modus, plan, heute: plan.heute, signal: ac.signal, katalog: L.Dienste.katalog(plan.heute), zeit: L.Dienste.neueZeit(), buehne, rueck, fortschritt,
+    // «Beenden» fragt kurz nach (ein Tipp im Griffbereich des Daumens beendet die Runde nicht aus Versehen): Ja beendet, «Weiterüben» schliesst die Frage
+    const frageEl = H('div.lauf-frage', { role: 'group', 'aria-label': T.beendenBeschriftung() }, H('p', T.beendenFrage()),
+      H('div.lauf-frage-knoepfe', H('button.knopf.lauf-beenden-ja', { type: 'button', onclick: () => beende('kind') }, T.beendenJa()),
+        H('button.knopf.primaer.lauf-weiterueben', { type: 'button', onclick: () => frage(false) }, T.weiterUeben())));
+    function frage(an) {
+      if (an) frageOrt.replaceChildren(frageEl); else frageOrt.replaceChildren();
+      beendenKnopf.setAttribute('aria-expanded', String(!!an));
+    }
+    const k = { art, modus, plan, heute: plan.heute, signal: ac.signal, katalog: art === 'vorschau' && plan.katalog ? plan.katalog : L.Dienste.katalog(plan.heute), zeit: L.Dienste.neueZeit(), buehne, rueck, fortschritt,
       gesehen: new Set(), verbucht: new Map(), vorher: new Map(), info: {}, sammlung: { ergebnisse: [], aufgaben: [], info: {} }, mindestMs: L.lernregeln.sitzung.ratenMs, t0,
       maxMs: maxMin ? maxMin * 60000 : null, eintragVon: new Map(), alleAufgaben: [], deckel: deckelVon(plan.deckel), b: L.Bericht.neu(art, plan.heute),
-      z: L.Dienste.lernstand({ schreibt: modus.schreibt, heute: plan.heute }) };
+      z: L.Dienste.lernstand({ schreibt: modus.schreibt, heute: plan.heute }), beobachter: beobachter && typeof beobachter === 'object' ? beobachter : null };
     k.zeitbuchen = () => { const t = jetzt(); k.z.minuten((t - marke) / 60000); marke = t; };
     const verdeckt = () => { if (doc.visibilityState === 'hidden') beende('hintergrund'); }, vonAussen = () => beende('extern');
     aktiv = { abbrechen: beende };

@@ -106,10 +106,42 @@
   /** In derselben Berührung wie der Tipp auf «Start» aufrufen: iOS gibt Sprache und Audio nur aus einer Berührung frei (5.7). */
   S.entsperre = function entsperre() {
     const sp = L.Sprache;
+    if (L.Klang && typeof L.Klang.entsperre === 'function') sicher(() => L.Klang.entsperre());   // Web Audio in derselben Berührung
     if (!sp) return false;
     const ok = sicher(() => sp.entsperre() !== false) === true;
     sicher(() => sp.entsperreAudio());
     return ok;
+  };
+
+  /** Die Bühne (docs/gestaltung-umbau.md 3.1 und 3.3): einmal beim Start in div.buehne-ebene, nur mit Welt-Thema und nur, wenn L.Buehne geladen ist.
+      Die Weltschicht wird danach nie neu aufgebaut, die Hülle führt Modus, Kamera und geänderte Plätze nach. Ohne Bühne bleibt ein ruhiger Grund. */
+  S.baueBuehne = function baueBuehne(ebene) {
+    if (!ebene || !S.welt || !L.Buehne || typeof L.Buehne.baue !== 'function') return null;
+    try {
+      const doc = L.Zustand.hole(), stand = (doc.welt && doc.welt[S.welt.id]) || (L.Welt && L.Welt.leer ? L.Welt.leer() : {});
+      const wenig = !!(L.Effekte && typeof L.Effekte.wenig === 'function' && L.Effekte.wenig());
+      return L.Huelle.buehne(L.Buehne.baue(ebene, S.welt, stand, { wenig, kamera: 'start' }));
+    } catch (fehler) { sicher(() => L.Fehlerlog.melde(fehler)); return null; }
+  };
+
+  /** Im ersten Tipp irgendwo: Sprache und Klang entsperren (iOS gibt Audio nur aus einer Berührung frei, 5.7). Danach hört nichts mehr zu. */
+  // Nur touchend, click und keydown zählen in Safari als Nutzeraktivierung (pointerdown mit Touch nicht). Die Hörer bleiben, bis der Ton läuft
+  // (Klang.bereit) oder es keinen AudioContext gibt; jeder weitere Tipp versucht es erneut.
+  S.ersterTipp = function ersterTipp(d) {
+    if (!d || typeof d.addEventListener !== 'function') return;
+    const arten = ['touchend', 'click', 'keydown'];
+    const ohneTon = !(g.AudioContext || g.webkitAudioContext);
+    const tipp = () => {
+      S.entsperre();
+      const fertig = ohneTon || !L.Klang || typeof L.Klang.bereit !== 'function' || sicher(() => L.Klang.bereit()) === true;
+      if (fertig) arten.forEach(a => { if (d.removeEventListener) d.removeEventListener(a, tipp, true); });
+    };
+    arten.forEach(a => d.addEventListener(a, tipp, true));
+    // Nachbesserung 2: iOS unterbricht den Ton im Hintergrund; läuft er beim Zurückkommen nicht, hört der nächste Tipp wieder zu (doppelte Hörer verwirft der Browser)
+    d.addEventListener('visibilitychange', () => {
+      if (ohneTon || d.visibilityState === 'hidden' || !L.Klang || typeof L.Klang.bereit !== 'function' || sicher(() => L.Klang.bereit()) === true) return;
+      arten.forEach(a => d.addEventListener(a, tipp, true));
+    });
   };
 
   /** Service Worker (8.5): nur unter https und auf localhost mit ?sw=1. Gibt { registriert, bereit(), aktiviere(), pruefe() } zurück, «bereit» heisst: eine neue Version wartet. */
@@ -174,7 +206,10 @@
       S.sw = registriereSw(w);
       S.beiUpdate = () => { if (L.Huelle.aktuell() === 'start' && L.Zustand.hole().profil.vorname) L.Huelle.gehe('start'); };
       if (d.addEventListener) d.addEventListener('visibilitychange', () => { if (d.visibilityState === 'visible') S.sw.pruefe(); });
-      L.Huelle.aufbauen(wurzel);
+      const rahmen = L.Huelle.aufbauen(wurzel);
+      S.baueBuehne(rahmen && rahmen.ebene);
+      if (L.Klang) sicher(() => { const e = L.Zustand.hole().einstellungen; L.Klang.an(e.klang !== false); if (L.Klang.musikAn) L.Klang.musikAn(e.musik !== false); });   // ohne Feld: an
+      S.ersterTipp(d);
       L.Huelle.gehe('start');
       L.gestartet = true;
     } catch (fehler) {

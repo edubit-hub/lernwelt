@@ -1,86 +1,94 @@
-/* app/ansichten/welt-rahmen.js: der Rahmen der Welt-Ansichten im Gerüst der Hülle (Architektur 7.1 und 7.8, AP-16, Raster aus bauteile.css).
-   Die Hülle zeichnet nur Marke, Menü, Hauptfläche und Statusleiste. Eine Welt-Ansicht ergänzt für die Dauer ihrer Anzeige
-     die Ressourcenleiste und den Epochenstand in header.leiste (Vorrat, Zuwachs der Sitzung, Tor, Knopf «Üben»),
-     das Informationsfeld aside.info im Raster (die Klasse ohne-info fällt weg),
-     und rechts in der Statusleiste das «Nächste Ziel».
-   schliesse() räumt alles wieder ab und bucht die Zeit in der Welt (tage[heute].weltMin, höchstens fünf Minuten je Besuch, Schutzregel 7).
-   Steht die Ansicht nicht in einem Gerüst (zum Beispiel im Elternbereich), bleibt alles in der Ansicht: Leiste oben, Informationsfeld daneben. */
+/* app/ansichten/welt-rahmen.js: der Rahmen der Welt-Ansichten über der Bühne (docs/gestaltung-umbau.md 2.1 und 3.2, Architektur 7.8, AP-16).
+     WeltRahmen.oeffne(huelle, ctx, { voll, info, zeit }) → { seite, info, leiste(k), ziel(k), meldung(text), aktualisiere(), schliesse() }
+   seite ist der Inhalt der Ansicht in der Hauptfläche (voll: ohne Rand, über die ganze freie Fläche). info ist der Rumpf einer Tafel (aside.tafel.info),
+   die quer von rechts hereingleitet und hoch als Blatt von unten kommt. leiste(k) führt die Pillen und die Medaille im HUD nach, ziel(k) setzt das
+   «Nächste Ziel» unter die Medaille, die kurze Meldung schwebt über dem Dock. schliesse() räumt alles ab und bucht die Zeit in der Welt
+   (tage[heute].weltMin, höchstens fünf Minuten je Besuch, Schutzregel 7). Ohne Rahmen der Hülle (eingebettet) bleibt alles in der Ansicht. */
 (function (g) {
   'use strict';
   const L = (g.Lernwelt = g.Lernwelt || {});
 
   const H = (...a) => L.ui.h(...a);
-  const T = () => L.Texte.welt, D = () => L.WeltDaten, B = () => L.WeltBausteine;
+  const T = () => L.Texte.welt, D = () => L.WeltDaten;
   const hatKlasse = (n, k) => !!n && typeof n.getAttribute === 'function' && (n.getAttribute('class') || '').split(/\s+/).includes(k);
-  const kindMit = (el, k) => (el && el.children ? Array.from(el.children).find(c => hatKlasse(c, k)) : null) || null;
   const jetzt = () => (L.Dienste && typeof L.Dienste.jetzt === 'function' ? L.Dienste.jetzt() : Date.now());
   const MELDEZEIT = 6500, MAX_MINUTEN = 5;
 
-  /** Ressourcenleiste, Epoche und «Üben» in den Behälter `leiste` zeichnen. */
-  function zeichneLeiste(leiste, ctx, k) {
-    const t = T(), res = D().ressourcen(k, D().zuwachs()), e = D().epocheStand(k);
-    const eintrag = x => H(`li.res${x.zahl === 0 ? '.null' : ''}`, { title: x.name }, B().symbol(x.symbol, 26, 'res-symbol'),
-      H('span.res-text', H('span.res-name', x.name), H('span.res-zahl', String(x.zahl), x.plus ? H('span.res-plus', { title: t.zuwachs }, `+${x.plus}`) : '')));
-    const gueter = res.gueter.map(eintrag), anteil = e && e.tor ? Math.round(100 * Math.min(1, e.tor.hat / Math.max(1, e.tor.braucht))) : 0;
-    const epoche = e ? H('div.epoche', { 'aria-label': t.epocheName(e.nr, e.name) }, H('span.e', t.epoche(e.nr)), H('span.n', e.name),
-      e.tor ? H('span.tor', { title: e.tor.name }, H('span', t.tor), H('span.spur', H('i', { style: `width:${anteil}%` })), H('span', t.torStand(Math.min(e.tor.hat, e.tor.braucht), e.tor.braucht))) : '') : '';
-    leiste.replaceChildren(H('ul.ressourcen', { 'aria-label': t.vorratName }, res.roh.map(eintrag), gueter.length ? H('li.trenner', { 'aria-hidden': 'true' }) : '', gueter), epoche,
-      H('button.knopf.primaer.ueben', { type: 'button', 'aria-label': t.uebenBeschriftung, onclick: () => ctx.gehe('lernen') }, B().ico('ueben'), t.ueben));
+  /** Der Text des Ziels sagt den nächsten Schritt: «Moosbau I, Wissen 0 von 2», «Moosbau I: 3 von 10 Stein» oder «Moosbau I erforschen». */
+  function zielText(z) {
+    const w = z.wissen, t = T(), h = L.Texte.huelle;
+    if (z.zustand === 'bereit') return h.zielErforschen(z.name);
+    if (z.zustand === 'material') return h.zielStand(z.name, D().standText(z.fehlt));
+    return t.zielZeile(z.name, w ? t.zielWissen(Math.min(w.hat, w.braucht), w.braucht) : '');
   }
 
-  /**
-   * Öffnet den Rahmen in `huelle` (die Hauptfläche) und gibt die Griffe zurück.
-   * opt: { voll (Ansicht ohne Rand und ohne eigenes Scrollen), info (Informationsfeld), zeit (Zeit in der Welt zählen) }
-   * → { seite, info, leiste(k), ziel(k), meldung(text), aktualisiere(), schliesse() }. seite ist der Inhalt der Ansicht.
-   */
+  /** Öffnet den Rahmen in `huelle` (section.ansicht) und gibt die Griffe zurück. */
   function oeffne(huelle, ctx, opt = {}) {
-    const wurzel = huelle.parentNode && huelle.parentNode.parentNode, geruest = hatKlasse(wurzel, 'app') ? wurzel : null;
-    const kopfLeiste = geruest ? kindMit(geruest, 'leiste') : null, status = geruest ? kindMit(geruest, 'status') : null;
-    const seite = H(`div.welt-seite${opt.voll ? '.voll' : ''}`), leiste = H(`div.welt-leiste${kopfLeiste ? '' : '.eigen'}`), meldungEl = H('div.welt-meldung', { role: 'status' });
-    const info = opt.info ? H('aside.info', { 'aria-live': 'polite', 'aria-label': T().infoFeld }) : null;
-    let tot = false, timer = null, zielEl = null, zielDaten = null, abmelden = null;
+    const app = huelle.parentNode && huelle.parentNode.parentNode, geruest = hatKlasse(app, 'app') ? app : null;
+    const seite = H(`div.welt-seite${opt.voll ? '.voll' : ''}`), meldungEl = H('div.welt-meldung', { role: 'status' });
+    const a = L.Ansichten[ctx.id], kicker = (a && a.titel) || '';
+    let tot = false, timer = null, tafel = null, info = null, beobachter = null;
     const t0 = jetzt();
+    const melde = () => { if (L.Tafel && typeof L.Tafel.melde === 'function') L.Tafel.melde(); };          // die Kamera rückt den Ort neu in den freien Teil
+    const einklappen = () => {
+      if (!tafel || tot) return;
+      if (beobachter && typeof beobachter.takeRecords === 'function') beobachter.takeRecords();   // Inhalt von vorher holt die Tafel nicht zurück
+      tafel.el.classList.add('eingeklappt'); if (geruest) geruest.classList.remove('mit-tafel'); melde();
+    };
     if (opt.voll) huelle.classList.add('welt-ansicht');
     huelle.replaceChildren(seite);
-    if (kopfLeiste) kopfLeiste.append(leiste); else seite.append(leiste);
-    if (info && geruest) { geruest.classList.remove('ohne-info'); if (status && typeof geruest.insertBefore === 'function') geruest.insertBefore(info, status); else geruest.append(info); }
-    seite.append(meldungEl);
-    if (info && !geruest) { seite.classList.add('eingebettet'); seite.append(info); }
+    if (opt.info && geruest && L.Tafel) {
+      tafel = typeof ctx.tafel === 'function' ? ctx.tafel({ art: 'seite', klasse: 'info welt-tafel', kicker, schliessen: einklappen })
+        : L.Tafel.oeffne(geruest, { art: 'seite', klasse: 'info welt-tafel', kicker, schliessen: einklappen });
+      info = tafel.rumpf;
+      tafel.el.setAttribute('aria-live', 'polite');
+      // Neuer Inhalt (ein anderer Platz, ein anderer Knoten) holt die eingeklappte Tafel zurück
+      if (typeof g.MutationObserver === 'function') {
+        beobachter = new g.MutationObserver(() => { if (!tot && tafel.el.classList.contains('eingeklappt')) { tafel.el.classList.remove('eingeklappt'); geruest.classList.add('mit-tafel'); melde(); } });
+        beobachter.observe(info, { childList: true });
+      }
+    } else if (opt.info) {
+      info = H('aside.info', { 'aria-live': 'polite', 'aria-label': T().infoFeld });
+      seite.classList.add('eingebettet');
+      seite.append(info);
+    }
+    if (geruest) geruest.append(meldungEl); else seite.append(meldungEl);
 
-    const zeichneZiel = () => {                                 // die Hülle zeichnet die Statusleiste bei jeder Änderung neu: das Ziel wird danach wieder angehängt
-      if (zielEl) zielEl.remove();
-      zielEl = null;
-      if (!status || !zielDaten || tot) return;
-      zielEl = H('button.ziel', { type: 'button', onclick: zielDaten.klick }, H('i.fahne', { 'aria-hidden': 'true' }), H('span', `${T().naechstesZiel}: `, H('b', zielDaten.text)));
-      status.append(zielEl);
-    };
-    try { if (L.Zustand && typeof L.Zustand.beiStatus === 'function') abmelden = L.Zustand.beiStatus(() => { if (!tot) zeichneZiel(); }); } catch (e) { abmelden = null; }
+    const hud = () => (ctx.hud && typeof ctx.hud.aktualisiere === 'function' ? ctx.hud.aktualisiere() : null);
+    const setzeZiel = daten => { if (ctx.hud && typeof ctx.hud.ziel === 'function') ctx.hud.ziel(daten); };
 
-    const r = {
+    return {
       seite, info,
-      leiste: k => zeichneLeiste(leiste, ctx, k),
-      /** «Nächstes Ziel» in der Statusleiste: Forschung mit Stand des Wissens. Ohne offenes Ziel verschwindet die Zeile. */
+      /** Die Tafel der Welt-Ansicht (oder null, eingebettet) und ihr Kopf: setzeTitel(kicker, titel), etwa «Bauplatz» oder «Gebäude» je Zustand. */
+      tafel,
+      setzeTitel: (k2, t2) => { if (tafel && !tot) tafel.setzeTitel(k2, t2); },
+      /** Klappt die Tafel ein (wie «Schliessen»); neuer Inhalt holt sie zurück. */
+      einklappen,
+      /** Pillen und Medaille im HUD nach dem Stand k (der Stand kommt aus dem Zustand, k bleibt für die Ansichten gleich). */
+      leiste: () => { if (!tot) hud(); },
+      /** «Nächstes Ziel» unter der Medaille: Forschung mit Stand des Wissens. Ohne offenes Ziel verschwindet die Zeile. */
       ziel(k) {
-        const z = D().ziel(k), w = z && z.wissen;
-        zielDaten = z ? { text: T().zielZeile(z.name, w ? (w.art === 'summe' ? T().zielSumme(Math.min(w.hat, w.braucht), w.braucht) : T().zielWissen(Math.min(w.hat, w.braucht), w.braucht)) : ''), klick: () => ctx.gehe('forschung', { wahl: z.id }) } : null;
-        zeichneZiel();
+        if (tot) return;
+        const z = D().ziel(k);
+        setzeZiel(z ? { text: zielText(z), klick: () => ctx.gehe('forschung', { wahl: z.id }) } : null);
       },
-      /** Kurze Meldung unten links in der Ansicht, zum Beispiel was nach einem Tipp fehlt. Ein leerer Text räumt sie weg. */
+      /** Kurze Meldung über dem Dock, zum Beispiel was nach einem Tipp fehlt. Ein leerer Text räumt sie weg. */
       meldung(text) {
         meldungEl.textContent = text || '';
         clearTimeout(timer);
         timer = text ? setTimeout(() => { meldungEl.textContent = ''; }, MELDEZEIT) : null;
         if (timer && typeof timer.unref === 'function') timer.unref();
       },
-      /** Statusleiste und Menü der Hülle neu zeichnen (Tagesstand) und das Ziel danach wieder anhängen. */
-      aktualisiere() { ctx.aktualisiere(); zeichneZiel(); },
+      /** HUD und Dock der Hülle neu zeichnen (Tagesstand). */
+      aktualisiere() { ctx.aktualisiere(); },
       schliesse() {
         if (tot) return;
         tot = true;
         clearTimeout(timer);
-        if (abmelden) abmelden();
-        [leiste, info, zielEl, meldungEl].forEach(n => { if (n) n.remove(); });
-        if (info && geruest) geruest.classList.add('ohne-info');
+        if (beobachter) beobachter.disconnect();
+        setzeZiel(null);
+        meldungEl.remove();
+        if (tafel) tafel.schliesse(); else if (info) info.remove();
         if (opt.voll) huelle.classList.remove('welt-ansicht');
         const min = Math.min(MAX_MINUTEN, (jetzt() - t0) / 60000);
         if (opt.zeit && min >= 0.05) {
@@ -88,8 +96,7 @@
         }
       }
     };
-    return r;
   }
 
-  L.WeltRahmen = { oeffne };
+  L.WeltRahmen = { oeffne, zielText };
 })(globalThis);

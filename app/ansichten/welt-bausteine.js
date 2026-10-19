@@ -1,6 +1,6 @@
 /* app/ansichten/welt-bausteine.js: kleine DOM-Bausteine der Welt-Ansichten (Architektur 7.1 und 7.8, AP-16): Symbole, Kostenzeilen mit Vorrat,
-   Voraussetzungszeilen, Stufenanzeige, Abschnitte und Knöpfe des Informationsfelds. Klassen stehen in app/stil/bauteile.css, basis.css und
-   welt-ansichten.css. Gesperrte Knöpfe bleiben antippbar (aria-disabled), die Meldung nennt dann, was fehlt. */
+   Voraussetzungszeilen, Stufenanzeige, Abschnitte und Knöpfe der Tafel, dazu die Bausteine des neuen Rahmens: objekt, kosten (mit «du hast n»),
+   lampen und kicker. Klassen stehen in app/stil/bauteile.css, basis.css und welt.css. Gesperrte Knöpfe bleiben antippbar (aria-disabled), die Meldung nennt dann, was fehlt. */
 (function (g) {
   'use strict';
   const L = (g.Lernwelt = g.Lernwelt || {});
@@ -46,8 +46,38 @@
 
   /** Der Inhalt des Informationsfelds: scrollender Inhalt und feste Aktionsleiste. */
   function setzeInfo(info, inhalt, aktionen) {
-    info.replaceChildren(H('div.info-inhalt', inhalt), aktionen && aktionen.length ? H('div.info-aktionen', aktionen) : '');
+    const rumpf = H('div.info-inhalt', inhalt), knoepfe = (aktionen || []).filter(Boolean);
+    info.replaceChildren(rumpf, knoepfe.length ? H('div.info-aktionen', knoepfe) : '');
+    // Liegt Inhalt unter der Kante, zeigt eine weiche Ausblendkante, dass es weitergeht (iPad ohne sichtbare Bildlaufleiste)
+    const pruefe = () => { if (rumpf.isConnected) rumpf.classList.toggle('mehr', rumpf.scrollHeight - rumpf.scrollTop - rumpf.clientHeight > 6); };
+    if (typeof rumpf.addEventListener === 'function' && typeof g.requestAnimationFrame === 'function') {
+      rumpf.addEventListener('scroll', pruefe, { passive: true });
+      g.requestAnimationFrame(() => g.requestAnimationFrame(pruefe));
+    }
   }
 
-  L.WeltBausteine = { ico, symbol, kostenListe, bedingungsListe, stufenAnzeige, abschnitt, kopf, knopf, setzeInfo };
+  // ---- Bausteine der Tafeln (docs/gestaltung-umbau.md 3.8), Klassen in app/stil/welt.css -------------------------------------------
+
+  /** Rohstoff als kleines Objekt (Iso.objekt: Steinblock, Stamm, Kiste, Fläschchen), ohne F3 das Linien-Symbol. Ton über --tint aus archipel.css. */
+  function objekt(name, px = 28) {
+    const el = H('span.objekt', { 'aria-hidden': 'true', style: `--tint: var(--${name}-tint, var(--akzent-hell))` });
+    try { el.innerHTML = L.Iso && L.Iso.objekt ? L.Iso.objekt(name, { groesse: px }) : L.Iso && L.Iso.symbol ? L.Iso.symbol(name, { groesse: px - 4 }) : ''; } catch (e) { el.innerHTML = ''; }
+    return el;
+  }
+
+  /** Kosten als Zeilen mit Objekt: «Stein 30» und mit opt.duHast rechts «du hast 124». Was fehlt, steht warm (nicht rot) und mit Haken, wenn es reicht. */
+  const kosten = (liste, opt = {}) => H('ul.kosten', liste.map(p => H(`li.kosten-zeile${p.fehlt ? '.fehlt' : ''}`, { 'data-rohstoff': p.id || null }, objekt(p.symbol || p.id),
+    H('span.menge', T().posten(p.name, p.menge)), opt.duHast ? H('small.du-hast', L.Texte.huelle.duHast(p.hat)) : '', opt.duHast && !p.fehlt ? ico('haken', 'klein.ok') : '')));
+
+  /** Lampen für Wissen «x von y»: ist leuchten, die übrigen sind aus. Über zwölf eine Spur. */
+  function lampen(ist, soll) {
+    const n = Math.max(0, Math.min(ist, soll)), text = L.Texte.huelle.lampen(n, soll);
+    const zeichen = soll <= 12 ? Array.from({ length: soll }, (_, i) => H(`i${i < n ? '' : '.aus'}`)) : H('span.spur', H('i', { style: `width:${soll ? Math.round(100 * n / soll) : 0}%` }));
+    return H('span.lampen', { role: 'img', 'aria-label': text }, zeichen, H('em', text));
+  }
+
+  /** Kleiner gesperrter Kicker über einem Titel (eine Zeile Versalien). */
+  const kicker = text => H('p.kicker', text);
+
+  L.WeltBausteine = { ico, symbol, kostenListe, bedingungsListe, stufenAnzeige, abschnitt, kopf, knopf, setzeInfo, objekt, kosten, lampen, kicker };
 })(globalThis);

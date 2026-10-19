@@ -1,14 +1,15 @@
-/* app/uebungstypen/eingabe/typ.css: Anordnung des Typs «eingabe». Zahlenfeld und Tasten gestaltet app/stil/tastenfeld.css, den Knopf
-   «Hilfe» app/stil/basis.css (.knopf). Farben und Masse kommen aus app/stil/tokens.css. Hochformat: Aufgabe, Zahlenfeld, Hilfe untereinander.
-   Querformat: links Aufgabe und Hilfe, rechts das Zahlenfeld. */
+/* app/uebungstypen/eingabe/typ.css: Anordnung des Typs «eingabe» (docs/gestaltung-umbau.md 2.6: Rechnung gross, Antwortfeld als Kästchen, Tastenfeld
+   56 px plastisch). Zahlenfeld, Anzeige und Tasten gestaltet app/stil/tastenfeld.css, den Knopf «Hilfe» app/stil/basis.css (.knopf).
+   Farben und Masse kommen aus app/stil/tokens.css. Querformat: links Aufgabe, Anzeige und Hilfe, rechts das Zahlenfeld.
+   Hochformat: Aufgabe und Anzeige oben, das Zahlenfeld in voller Breite darunter. */
 .uebung-eingabe {
   display: grid;
   grid-template-columns: minmax(0, 1fr);
   grid-template-areas: "aufgabe" "eingabe" "hilfe";
   gap: var(--a4) var(--a6);
-  align-items: start;
+  align-items: center;
   width: 100%;
-  max-width: 760px;
+  max-width: 900px;
   margin: 0 auto;
   color: var(--tinte);
   touch-action: manipulation;
@@ -18,7 +19,8 @@
   align-self: center;
   margin: 0;
   text-align: center;
-  font-size: var(--t-anzeige);
+  font: 800 calc(var(--t-anzeige) * 1.6)/1.1 var(--schrift-rund);
+  letter-spacing: -.01em;
   font-variant-numeric: tabular-nums;
   overflow-wrap: break-word;               /* ein langes Zahlwort läuft nicht unter das Zahlenfeld, ein weiches Trennzeichen (U+00AD) bleibt die bevorzugte Bruchstelle (V-AP18b-04) */
   hyphens: manual;
@@ -27,7 +29,7 @@
   grid-area: eingabe;
   justify-self: center;
   width: auto;
-  gap: var(--a3);
+  gap: var(--a4);
 }
 .uebung-eingabe .hilfe-bereich {
   grid-area: hilfe;
@@ -38,11 +40,16 @@
 }
 .uebung-eingabe .hilfe-ort:empty { display: none; }
 
-@media (min-width: 640px) {
+@media (min-width: 640px) and (orientation: landscape) {
   .uebung-eingabe {
     grid-template-columns: minmax(0, 1fr) auto;
-    grid-template-rows: auto 1fr;
+    grid-template-rows: 1fr auto;          /* die Rechnung steht mittig neben dem Zahlenfeld, nicht oben über leerer Fläche */
     grid-template-areas: "aufgabe eingabe" "hilfe eingabe";
   }
-  .uebung-eingabe .aufgabe { font-size: calc(var(--t-anzeige) * 1.5); }
+  .uebung-eingabe .aufgabe { font-size: calc(var(--t-anzeige) * 2); }
+  .uebung-eingabe .eingabe { min-width: 320px; }
+}
+@media (orientation: portrait) {
+  .uebung-eingabe .eingabe { width: 100%; }
+  .uebung-eingabe .tastenfeld-anzeige { max-width: 360px; }
 }

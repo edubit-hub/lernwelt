@@ -159,5 +159,63 @@
     return aus;
   }
 
-  Object.assign(Land, { GROESSE, RASTER, MAX, plan, insel, umriss, boden, defs, baeume, wasser, ordne, rausch });
+  /** Küste der Landmaske als geschlossene Züge von Rasterecken [i, j] (nur Ecken, im Uhrzeigersinn). Die Bühne rundet sie (buehne-land.js). */
+  function kueste(ins) {
+    const land = ins.land, kanten = new Map(), aus = [];
+    const dazu = (a, b) => { const k = a.join(','); if (!kanten.has(k)) kanten.set(k, []); kanten.get(k).push(b); };
+    for (const [i, j] of ins.zellen) {
+      if (!land(i, j - 1)) dazu([i, j], [i + 1, j]);
+      if (!land(i + 1, j)) dazu([i + 1, j], [i + 1, j + 1]);
+      if (!land(i, j + 1)) dazu([i + 1, j + 1], [i, j + 1]);
+      if (!land(i - 1, j)) dazu([i, j + 1], [i, j]);
+    }
+    while (kanten.size) {
+      const start = kanten.keys().next().value.split(',').map(Number), zug = [start];
+      for (let jetzt = start, n = 0; n < 20000; n++) {
+        const k = jetzt.join(','), l = kanten.get(k);
+        if (!l) break;
+        const weiter = l.shift();
+        if (!l.length) kanten.delete(k);
+        if (weiter[0] === start[0] && weiter[1] === start[1]) break;
+        zug.push(weiter); jetzt = weiter;
+      }
+      const ecken = zug.filter((p, n) => { const a = zug[(n - 1 + zug.length) % zug.length], b = zug[(n + 1) % zug.length]; return (p[0] - a[0]) * (b[1] - p[1]) - (p[1] - a[1]) * (b[0] - p[0]) !== 0; });
+      if (ecken.length > 2) aus.push(ecken);
+    }
+    return aus;
+  }
+
+  // Himmelsrichtungen im Raster: Norden ist -y, Osten +x (auf dem Bildschirm liegt Norden oben rechts, Osten unten rechts).
+  const RICHTUNG = { nord: [0, -1], nordost: [1, -1], ost: [1, 0], suedost: [1, 1], sued: [0, 1], suedwest: [-1, 1], west: [-1, 0], nordwest: [-1, -1] };
+  /** Lage der Orte an der Küste: wuensche [{ id, lage, b, t, innen? }] → { id: { x, y, b, t, cx, cy, d } }. Ein Ort liegt auf der Linie durch die Mitte
+      von Platz 0 in Richtung lage, gleich hinter dem letzten Platz (oder Ort), der ihm im Weg steht. innen: an der Wegkreuzung neben Platz 0 (Lager).
+      Deterministisch, kein Ort überdeckt einen Platz oder einen anderen Ort. */
+  function orte(plaetze, wuensche) {
+    const aus = {}, p0 = plaetze[0] || { x: 0, y: 0, b: GROESSE, t: GROESSE }, m = [p0.x + p0.b / 2, p0.y + p0.t / 2];
+    const rects = plaetze.map(p => [p.x, p.y, p.x + p.b, p.y + p.t]), f = n => Math.round(n * 20) / 20;
+    const spanne = (r, v) => { const w = [[r[0], r[1]], [r[2], r[1]], [r[2], r[3]], [r[0], r[3]]].map(([x, y]) => (x - m[0]) * v[0] + (y - m[1]) * v[1]); return [Math.min(...w), Math.max(...w)]; };
+    for (const o of Array.isArray(wuensche) ? wuensche : []) {
+      const r = RICHTUNG[o && o.lage];
+      if (!r || !(o.b > 0 && o.t > 0)) continue;
+      let c;
+      if (o.innen) {                                          // Kreuzung der Wege diagonal neben Platz 0, die am besten zur Richtung passt
+        const a = RASTER / 2;
+        const k = [[1, 1], [1, -1], [-1, 1], [-1, -1]].reduce((b, q) => (q[0] * r[0] + q[1] * r[1] > b[0] * r[0] + b[1] * r[1] ? q : b));
+        c = [m[0] + k[0] * a, m[1] + k[1] * a];
+      } else {
+        const l = Math.hypot(r[0], r[1]), d = [r[0] / l, r[1] / l], q = [-d[1], d[0]];
+        const hd = (o.b * Math.abs(d[0]) + o.t * Math.abs(d[1])) / 2, hq = (o.b * Math.abs(q[0]) + o.t * Math.abs(q[1])) / 2 + .3;
+        let weit = 0;
+        for (const rc of rects) { const sq = spanne(rc, q); if (sq[1] > -hq && sq[0] < hq) weit = Math.max(weit, spanne(rc, d)[1]); }
+        const s = weit + .9 + hd;
+        c = [m[0] + d[0] * s, m[1] + d[1] * s];
+      }
+      const x = f(c[0] - o.b / 2), y = f(c[1] - o.t / 2);
+      aus[o.id] = { id: o.id, x, y, b: o.b, t: o.t, cx: x + o.b / 2, cy: y + o.t / 2, d: r };
+      rects.push([x, y, x + o.b, y + o.t]);
+    }
+    return aus;
+  }
+
+  Object.assign(Land, { GROESSE, RASTER, MAX, RICHTUNG, plan, insel, umriss, boden, defs, baeume, wasser, ordne, rausch, kueste, orte });
 })(globalThis);

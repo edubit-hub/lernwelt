@@ -6,7 +6,6 @@
   const L = (g.Lernwelt = g.Lernwelt || {});
 
   const mz = (n, eins, viele) => `${n} ${n === 1 ? eins : viele}`;
-  const STIL = '.einstufung{display:grid;gap:var(--a2)}.einstufung p{margin:0}';
 
   L.Texte = Object.assign(L.Texte || {}, { einstufung: {
     titel: name => `Einstufung ${name}`,
@@ -61,20 +60,31 @@
     };
   }
 
-  /** Die Karte «Einstufung» für ein Modul aus angebot(). start() startet die Runde. */
-  function karte(m, start) {
-    const H = L.ui.h, T = L.Texte.einstufung;
-    if (L.Dienste && L.Dienste.stil) L.Dienste.stil('einstieg-stil', STIL);
-    return H('section.kasten.hilfe.einstufung', { 'data-einstufung': m.id }, H('b', T.titel(m.titel)), H('p', T.info(m.aufgaben, m.minuten)), H('p.klein', T.frei),
-      H('div.kachel-fuss', H('button.knopf', { type: 'button', onclick: start }, T.starten)));
+  /** Bild der Karte: die Miniatur «lernen» (Buch mit Feder, Iso.mini), sonst nichts. */
+  function bild() {
+    const el = L.ui.h('span.einstufung-bild', { 'aria-hidden': 'true' });
+    try { if (L.Iso && L.Iso.mini && (!L.Iso.MINIS || L.Iso.MINIS.includes('lernen'))) el.innerHTML = L.Iso.mini('lernen'); } catch (e) { /* ohne Bild */ }
+    return el;
   }
 
-  /** Der Kasten mit dem Ergebnis der Einstufung von heute (je Modul), bleibt am selben Tag in der Ansicht stehen. */
+  /** Die Karte «Einstufung» für ein Modul aus angebot() im Kartenstil der Auswahl (docs/gestaltung-umbau.md 2.3, Stil in start.css): Bild, Kicker,
+      Titel, ein Satz, Umfang, freiwillig, Knopf (kein Primärknopf, der gehört dem Tagesauftrag). start() startet die Runde. */
+  function karte(m, start) {
+    const H = L.ui.h, T = L.Texte.einstufung, TS = L.Texte.startseite || {};
+    return H('section.kasten.hilfe.einstufung', { 'data-einstufung': m.id }, bild(), TS.einstufungKicker ? H('p.kicker.einstufung-kicker', TS.einstufungKicker) : '',
+      H('b.einstufung-titel', T.titel(m.titel)), TS.einstufungLead ? H('p.einstufung-lead', TS.einstufungLead) : '',
+      H('p.einstufung-info', T.info(m.aufgaben, m.minuten)), H('p.klein', T.frei),
+      H('div.kachel-fuss', H('button.knopf.einstufung-los', { type: 'button', onclick: start }, T.starten)));
+  }
+
+  /** Der Kasten mit dem Ergebnis der Einstufung von heute (je Modul), bleibt am selben Tag in der Ansicht stehen. Er erscheint als kurze Logbuchseite
+      (.kasten.ergebnis: Papier, Linien, Stempel mit Häkchen ohne Text, start.css), der Text bleibt ein Satz. */
   function ergebnis(doc, tag) {
     const H = L.ui.h, T = L.Texte.einstufung, tage = L.lernregeln.wiederholung.vortestTage;
     return L.Lernplan.aktive(doc).map(id => ({ id, e: doc.module[id].einstufung })).filter(x => x.e && x.e.tag === tag).map(({ id, e }) => {
       const titel = (L.registry.module.get(id) || {}).titel || id, rest = e.aufgaben - e.bekannt;
-      return H('div.kasten.ok.einstufung-ergebnis', { role: 'status' }, H('b', T.kopf(titel)), ` ${T.ergebnis(e.aufgaben, e.bekannt, tage)}${rest > 0 ? ` ${T.morgen(rest)}` : ''}`);
+      return H('div.kasten.ok.ergebnis.einstufung-ergebnis', { role: 'status' }, H('b', T.kopf(titel)), ` ${T.ergebnis(e.aufgaben, e.bekannt, tage)}${rest > 0 ? ` ${T.morgen(rest)}` : ''}`,
+        H('i.ergebnis-stempel', { 'aria-hidden': 'true' }));
     });
   }
 

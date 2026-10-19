@@ -50,7 +50,7 @@
     abschluss: {
       /** Text, wenn eine Runde fertig ist, der Tagesauftrag aber noch nicht (sonst gilt Rueckmeldung.texte.abschluss). */
       runde: (b, ertrag) => {
-        const n = b.aufgaben || 0, morgen = b.morgen > 0 ? ` ${b.morgen === 1 ? '1 Aufgabe kommt' : `${b.morgen} Aufgaben kommen`} morgen wieder.` : '';
+        const n = b.aufgaben || 0, morgen = b.morgen > 0 ? ` ${b.morgen === 1 ? '1 Aufgabe übst' : `${b.morgen} Aufgaben übst`} du morgen zum Festigen.` : '';
         const gewinn = ertrag && ertrag.length ? ` Ertrag: ${ertrag.map(x => `${x.name} +${x.menge}`).join(', ')}.` : ' Ertrag: keiner.';
         return `Runde beendet: ${mz(n, 'Aufgabe', 'Aufgaben')}, ${b.ersterVersuch || 0} beim ersten Versuch.${morgen}${gewinn}`;
       },

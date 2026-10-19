@@ -11,54 +11,12 @@
   const L = (g.Lernwelt = g.Lernwelt || {});
   const E = (L.Eltern = L.Eltern || {});
 
-  const STIL = `
-.eltern { max-width: 880px; }
-.eltern-kopf { display: flex; align-items: flex-start; justify-content: space-between; gap: var(--a3); margin-bottom: var(--a4); }
-.eltern-banner { display: grid; gap: var(--a2); }
-.eltern-banner:not(:empty) { margin-bottom: var(--a4); }
-.eltern-banner .kasten p + p { margin-top: 4px; }
-.eltern-reiter { display: flex; flex-wrap: wrap; gap: var(--a1); margin-bottom: var(--a4); border-bottom: 1px solid var(--linie); }
-.eltern-reiter button { min-height: var(--ziel); padding: 0 var(--a4); border: 0; border-bottom: 3px solid transparent; background: transparent; color: var(--tinte-leise); font-weight: 600; }
-.eltern-reiter button[aria-selected="true"] { color: var(--tinte); border-bottom-color: var(--akzent); }
-.eltern-punkt { display: inline-block; width: 8px; height: 8px; margin-left: 6px; border-radius: 50%; background: var(--akzent-warm); vertical-align: middle; }
-.eltern-inhalt { display: grid; gap: var(--a4); min-width: 0; }
-.eltern-kachel h4 { font-size: var(--t-text); }
-.eltern-zeile { display: flex; flex-wrap: wrap; align-items: center; gap: var(--a2); }
-.eltern-werte { display: grid; grid-template-columns: minmax(120px, 210px) minmax(0, 1fr); gap: 6px var(--a4); margin: 0; }
-.eltern-werte + p { margin-top: var(--a3); }
-.eltern-werte dt { color: var(--tinte-leise); }
-.eltern-werte dd { margin: 0; overflow-wrap: anywhere; }
-.eltern-feld { display: grid; gap: 4px; max-width: 360px; }
-.eltern-feld > span { font-size: var(--t-klein); color: var(--tinte-leise); }
-.eltern-feld input, .eltern-feld select, .eltern-zeile select, .eltern-text { min-height: var(--ziel); padding: 8px 12px; border: 1px solid var(--linie); border-radius: var(--radius); background: var(--flaeche); color: var(--tinte); }
-.eltern-text { display: block; width: 100%; font: 12.5px/1.4 ui-monospace, Menlo, Consolas, monospace; resize: vertical; overflow-wrap: anywhere; -webkit-user-select: text; user-select: text; }
-.eltern-meldung { min-height: 1.4em; margin-top: var(--a3); font-size: var(--t-klein); color: var(--tinte-leise); }
-.eltern-meldung.ok { color: var(--ok-text); }
-.eltern-meldung.fehler { color: var(--fehler-text); }
-label.knopf { position: relative; }
-.eltern-pin { max-width: 380px; margin: var(--a5) auto; align-items: center; text-align: center; }
-.eltern-pin .kachel-fuss { flex-wrap: wrap; justify-content: center; }
-.eltern-punkte { display: flex; gap: 14px; }
-.eltern-punkte i { width: 16px; height: 16px; border: 2px solid var(--akzent); border-radius: 50%; }
-.eltern-punkte i.an { background: var(--akzent); }
-.eltern-fehler { min-height: 1.4em; color: var(--fehler-text); }
-@media (max-width: 600px) { .eltern-werte { grid-template-columns: minmax(0, 1fr); gap: 0; } .eltern-werte dd { margin-bottom: var(--a2); } }
-`;
-
+  /* Gestaltung: app/stil/eltern.css (ruhiger Grund im Modus «eltern» der Hülle, Kacheln in der Form der Tafel ohne Glas, Schalter «Klänge»). */
   const holt = name => { try { return g[name] || null; } catch (e) { return null; } };
   const datum = iso => { const m = /^(\d{4})-(\d{2})-(\d{2})/.exec(String(iso || '')); return m ? `${m[3]}.${m[2]}.${m[1]}` : 'unbekannt'; };
   const z2 = n => String(n).padStart(2, '0');
   const zeitpunkt = iso => { const d = new Date(iso); return iso && !Number.isNaN(d.getTime()) ? `${datum(L.Tag.heute(d))}, ${z2(d.getHours())}:${z2(d.getMinutes())} Uhr` : 'unbekannt'; };
   const zahl = n => String(Math.round(Number(n) || 0)).replace(/\B(?=(\d{3})+(?!\d))/g, '’');
-
-  function stil(k) {
-    const d = k.dok;
-    if (!d || !d.head || (d.getElementById && d.getElementById('eltern-stil'))) return;
-    const s = d.createElement('style');
-    s.setAttribute('id', 'eltern-stil');
-    s.textContent = STIL;
-    d.head.append(s);
-  }
 
   /** Standard-Download: Blob, Link mit download-Attribut, Klick. Der Link entfällt danach, die Adresse nach einer Minute. */
   function laden(k, name, text) {
@@ -131,7 +89,32 @@ label.knopf { position: relative; }
       h('p.hinweis', 'Der Vorname bleibt im Gerät und steht in der Sicherungsdatei.'),
       gesperrt ? h('p.hinweis', 'Der Lernstand ist nur lesbar. Änderungen werden nicht gespeichert.') : '');
   }
-  const einstellungen = k => k.h('div.eltern-inhalt', profilKachel(k), L.ElternStimmen ? L.ElternStimmen.kachel(k) : '', L.ElternPin ? L.ElternPin.kachel(k) : '');
+  /** Schalter «Klänge» und «Musik» (E-19, Umbauplan 2.13 und 3.5, G18): role=switch mit aria-checked, schreibt einstellungen.<feld> über Zustand.aendere
+      und schaltet den Klangdienst (an bzw. musikAn). Standard an, ein Lernstand ohne Feld gilt als an. «Klänge» ist dieselbe Einstellung wie der
+      Klangschalter im HUD (aus heisst ganz still, auch ohne Musik). Der Schalter ändert sich an Ort und Stelle, der Reiter bleibt stehen. */
+  function schalterKachel(k, s) {
+    const h = k.h, gesperrt = k.gesperrt(), istAn = () => ((k.Z.hole() || {}).einstellungen || {})[s.feld] !== false;
+    const wort = h('span.eltern-schalter-wort'), schalter = h('button.schalter.eltern-schalter', { type: 'button', role: 'switch', 'aria-label': s.titel, disabled: gesperrt },
+      h('span.eltern-schalter-bahn', { 'aria-hidden': 'true' }), wort);
+    const zeige = an => { schalter.setAttribute('aria-checked', an ? 'true' : 'false'); wort.textContent = an ? 'An' : 'Aus'; };
+    schalter.addEventListener('click', () => {
+      if (k.gesperrt()) return;
+      const neu = !istAn();
+      k.Z.aendere(z => { z.einstellungen = z.einstellungen || {}; z.einstellungen[s.feld] = neu; });
+      try { if (L.Klang && typeof L.Klang[s.dienst] === 'function') L.Klang[s.dienst](neu); } catch (e) { /* ohne Klangdienst bleibt nur die Einstellung */ }
+      try { if (L.Huelle && typeof L.Huelle.aktualisiere === 'function') L.Huelle.aktualisiere(); } catch (e) { /* das HUD zeichnet beim nächsten Wechsel */ }
+      zeige(istAn());
+      k.meldung(neu ? s.an : s.aus, 'ok');
+    });
+    zeige(istAn());
+    return k.kachel(s.titel, h('div.eltern-zeile', schalter), h('p.hinweis', s.hinweis),
+      gesperrt ? h('p.hinweis', 'Der Lernstand ist nur lesbar. Änderungen werden nicht gespeichert.') : '');
+  }
+  const KLAENGE = { feld: 'klang', dienst: 'an', titel: 'Klänge', an: 'Die Klänge sind an.', aus: 'Die Klänge sind aus.',
+    hinweis: 'Kurze Klänge bei Antworten, beim Bauen und beim Forschen. Während einer Aufgabe läuft kein Meeresrauschen. Der Klangschalter oben rechts in der Lernwelt ändert dieselbe Einstellung, aus heisst dort ganz still, auch ohne Musik.' };
+  const MUSIK = { feld: 'musik', dienst: 'musikAn', titel: 'Musik', an: 'Die Musik ist an.', aus: 'Die Musik ist aus.',
+    hinweis: 'Leise Musik in der Welt: beim ersten Öffnen einmal das Titelstück, danach eine ruhige Schleife. Während einer Aufgabe und im Abschluss pausiert sie. Die Klänge bleiben davon unberührt.' };
+  const einstellungen = k => k.h('div.eltern-inhalt', profilKachel(k), schalterKachel(k, KLAENGE), schalterKachel(k, MUSIK), L.ElternStimmen ? L.ElternStimmen.kachel(k) : '', L.ElternPin ? L.ElternPin.kachel(k) : '');
 
   // ---- Gerüst -------------------------------------------------------------------------------------------------------
   function baue(k) {
@@ -174,7 +157,6 @@ label.knopf { position: relative; }
   function zeige(huelle, opt = {}) {
     if (!huelle || huelle.nodeType !== 1) throw new Error('Eltern.zeige: huelle muss ein DOM-Element sein');
     const k = kontext(huelle, opt);
-    stil(k);
     const ende = () => {
       if (!k.offen) return;
       k.offen = false;

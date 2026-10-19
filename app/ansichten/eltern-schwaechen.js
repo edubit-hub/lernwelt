@@ -7,22 +7,7 @@
   const L = (g.Lernwelt = g.Lernwelt || {});
 
   const TAGE = 14, MAX_CODES = 6, MAX_AUFGABEN = 8;
-  const STIL = `
-.sw-liste { display: grid; gap: var(--a2); margin: var(--a2) 0 0; padding: 0; list-style: none; }
-.sw-liste li { display: grid; gap: 2px; padding: var(--a2) var(--a3); border: 1px solid var(--linie); border-radius: var(--radius); background: var(--flaeche); overflow-wrap: anywhere; }
-.sw-teil { display: grid; gap: var(--a2); margin-top: var(--a4); }
-.sw-teil h4 { font-size: var(--t-text); }
-.sw-begleitung { margin: 0; padding-left: var(--a5); display: grid; gap: var(--a2); }
-`;
-
-  function stil(k) {
-    const d = k.dok;
-    if (!d || !d.head || (d.getElementById && d.getElementById('eltern-schwaechen-stil'))) return;
-    const s = d.createElement('style');
-    s.setAttribute('id', 'eltern-schwaechen-stil');
-    s.textContent = STIL;
-    d.head.append(s);
-  }
+  /* Gestaltung: app/stil/eltern.css (sw-*). */
 
   const name = code => { const t = String(code).replace(/-/g, ' '); return t.charAt(0).toUpperCase() + t.slice(1); };
 
@@ -67,7 +52,6 @@
 
   function bau(k) {
     const h = k.h, doc = k.Z.hole();
-    stil(k);
     const ids = [...L.registry.module.keys()].filter(id => doc.module[id] && doc.module[id].aktiv === true && (L.katalog || []).some(e => e.id === id));
     return h('div.eltern-inhalt', h('p.klein', 'Hier steht, wobei das Kind im Moment Mühe hat und wie Sie es begleiten können. Die Zahlen zählen seit Beginn, die Liste zeigt nur Fehlerarten der letzten 14 Tage.'),
       ids.length ? ids.map(id => karte(k, id)) : k.kasten('hilfe', 'Kein Modul aktiv', 'Schalten Sie im Reiter «Module» ein Modul ein. Danach erscheinen hier die Fehlerarten.'));

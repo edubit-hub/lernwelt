@@ -9,7 +9,8 @@
   const D = () => L.WeltDaten, T = () => L.Texte.welt;
   const objekt = o => o !== null && typeof o === 'object' && !Array.isArray(o);
   const eigen = (o, k) => (objekt(o) && Object.hasOwn(o, k) ? o[k] : undefined);
-  const zeile = (ok, text, fehlt) => ({ ok, text, fehlt: ok ? '' : fehlt });
+  /** weg: Angabe für den Weg (welt-weg.js): { art: 'epoche'|'forschung'|'wissen'|'platz', ziel?, bereich? }. Sie ändert nichts an ok, text und fehlt. */
+  const zeile = (ok, text, fehlt, weg) => ({ ok, text, fehlt: ok ? '' : fehlt, ...(weg ? { weg } : {}) });
   const punkt = s => (/[.:]$/.test(s) ? s : `${s}.`);
   const mengen = (k, o) => D().posten(k, o).map(p => `${p.menge} ${p.name}`);
   /** «3 Stein», «3 Stein und 1 Holz», «3 Stein, 1 Holz und 2 Erz». */
@@ -21,7 +22,7 @@
     if (!e) return null;
     const tor = D().knoten(k, e.tor), name = e.name || e.id;
     const offen = L.Welt.epocheOffen(k.thema, k.stand, id);
-    return zeile(offen, offen ? T().epocheOffen(name) : T().epocheNein(name, tor ? tor.name : null),T().epocheZu(name, tor ? tor.name : null));
+    return zeile(offen, offen ? T().epocheOffen(name) : T().epocheNein(name, tor ? tor.name : null),T().epocheZu(name, tor ? tor.name : null), { art: 'epoche', ziel: tor ? tor.id : null });
   }
 
   /** Was beim Wissen fehlt, in der Sprache des Kindes: «1 Wissenspunkt in «Zahlen»». Die Zeile zeigt den Fortschritt, dieser Teil die Meldung. */
@@ -36,13 +37,13 @@
 
   function forschungZeile(k, id) {
     const f = D().knoten(k, id), name = f ? f.name : id, ok = D().erforscht(k, id), grund = f ? knotenGrund(k, f) : '';
-    return zeile(ok, ok ? T().forschungErforscht(name) : T().forschungNein(name), T().forschungFehlt(name, grund));
+    return zeile(ok, ok ? T().forschungErforscht(name) : T().forschungNein(name), T().forschungFehlt(name, grund), { art: 'forschung', ziel: id });
   }
 
   /** Eine Wissenszeile: der Fortschritt als Text (auch wenn erfüllt), bei fehlendem Wissen der Satz dazu. */
   function wissenZeile(bereich, hat, braucht) {
     const h = Math.min(hat, braucht), text = bereich ? T().wissenBereich(D().bereichName(bereich), h, braucht) : T().wissenSumme(h, braucht);
-    return zeile(hat >= braucht, text, T().esFehlt(wissenSatz(bereich, hat, braucht)));
+    return zeile(hat >= braucht, text, T().esFehlt(wissenSatz(bereich, hat, braucht)), { art: 'wissen', bereich: bereich || null });
   }
 
   /** Alle Wissensbedingungen und die Epoche eines Knotens als Voraussetzungszeilen. */
@@ -62,7 +63,7 @@
     if (!s) return { id, stufe: st, max: b && b.stufen ? b.stufen.length : 0, kosten: [], bedingungen: [], moeglich: false, grund: T().hoechsteStufe, voll: true };
     const kosten = D().posten(k, s.kosten), bed = [epocheZeile(k, b.epoche)], fo = s.braucht ?? b.braucht;
     if (fo) bed.push(forschungZeile(k, fo));
-    if (st === 0) { const frei = L.Welt.plaetze(k.thema, k.stand).frei.length > 0; bed.push(zeile(frei, T().platzFrei, T().keinPlatz)); }
+    if (st === 0) { const frei = L.Welt.plaetze(k.thema, k.stand).frei.length > 0; bed.push(zeile(frei, T().platzFrei, T().keinPlatz, { art: 'platz' })); }
     const bedingungen = bed.filter(Boolean), r = D().probe(k, 'baue', id);
     return { id, stufe: st + 1, max: b.stufen.length, kosten, bedingungen, moeglich: r.ok, grund: r.ok ? '' : grundText(bedingungen, kosten) || r.grund, voll: false };
   }

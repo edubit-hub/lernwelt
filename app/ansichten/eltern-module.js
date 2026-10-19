@@ -8,32 +8,9 @@
   'use strict';
   const L = (g.Lernwelt = g.Lernwelt || {});
 
-  const STIL = `
-.mod-liste { display: grid; gap: var(--a4); }
-.mod-kopf { display: flex; flex-wrap: wrap; align-items: center; gap: var(--a2); }
-.mod-kopf h3 { margin-right: var(--a2); }
-.mod-details { margin-top: var(--a3); }
-.mod-details summary { min-height: var(--ziel); display: flex; align-items: center; cursor: pointer; font-weight: 600; }
-.mod-themen { display: grid; gap: var(--a2); margin: var(--a2) 0 0; padding: 0; list-style: none; }
-.mod-themen li { display: grid; gap: 4px; padding: var(--a2) var(--a3); border: 1px solid var(--linie); border-radius: var(--radius); background: var(--flaeche); }
-.mod-themen li > div { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--a2); }
-.anp { display: grid; gap: var(--a3); margin-top: var(--a3); }
-.anp h4 { font-size: var(--t-text); }
-.anp-zeile { max-width: none; }
-.anp-zeile input { max-width: 120px; }
-`;
+  /* Gestaltung: app/stil/eltern.css (mod-*, anp*). */
   const FACH_REIHE = ['mathe', 'deutsch', 'englisch', 'nmg'];
   const ENTWURF = 'Entwurf: Lösungswege noch nicht mit dem Lehrmittel abgeglichen.';
-
-  function stil(k) {
-    const d = k.dok;
-    if (L.ElternAnpassung) L.ElternAnpassung.schalterStil(k);
-    if (!d || !d.head || (d.getElementById && d.getElementById('eltern-module-stil'))) return;
-    const s = d.createElement('style');
-    s.setAttribute('id', 'eltern-module-stil');
-    s.textContent = STIL;
-    d.head.append(s);
-  }
 
   const eintraege = () => (L.katalog || []).slice().sort((a, b) => (FACH_REIHE.indexOf(a.fach) - FACH_REIHE.indexOf(b.fach)) || String(a.titel).localeCompare(String(b.titel)));
   const imManifest = id => !!(L.manifest && L.manifest.module && L.manifest.module[id]);
@@ -107,7 +84,6 @@
 
   function bau(k) {
     const h = k.h, wurzel = h('div.eltern-inhalt'), liste = h('div.mod-liste'), z = { offen: new Set(), neustart: new Set() };
-    stil(k);
     const zeichne = () => liste.replaceChildren(...eintraege().map(e => karte(k, e, z, zeichne)));
     wurzel.append(h('p.klein', 'Module sind die Themenpakete im Tagesauftrag. Entwürfe lassen sich bewusst einschalten, sie sind als Entwurf gekennzeichnet.'),
       L.ElternLehrmittel ? L.ElternLehrmittel.kachel(k, zeichne) : '', liste);

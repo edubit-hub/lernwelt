@@ -1,0 +1,139 @@
+/* app/stil/buehne.css: die Bühne hinter allen Ansichten (app/welt/buehne*.js, Umbauplan 3.3, Vorbild docs/mockup/richtung-a/a-welt.css und a-stil.css).
+   Ebenen, Schleier (keine, leicht, stark), Ortsschilder und Marken als antippbare Knöpfe ab 44 px und die ruhige Bewegung des Lebens.
+   Bewegt wird nur über transform und opacity, keine Filter. ruhig und prefers-reduced-motion halten jede Umgebungsbewegung an.
+   Farben nur über Tokens aus tokens.css, den Meeresgrund (.lagune) setzt die CSS-Datei des Welt-Themas. */
+.buehne-ebene { position: absolute; inset: 0; overflow: hidden; overflow: clip; background: var(--meer);
+  -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
+.buehne-ebene > .lagune, .buehne-ebene > .voegel, .buehne-ebene > .licht, .buehne-ebene > .schleier { position: absolute; inset: 0; pointer-events: none; }
+.buehne-kamera { position: absolute; left: 0; top: 0; transform-origin: 0 0; transition: transform var(--dauer-kamera) var(--kurve-raum); }
+.buehne-kamera.faehrt { will-change: transform; }
+.buehne-kamera.sofort { transition: none; }
+.buehne-welt { position: relative; }
+.buehne-welt > .ebene { position: absolute; left: 0; top: 0; pointer-events: none; }
+.buehne-welt > .ebene > svg { display: block; }
+.buehne-ebene .stueck { position: absolute; overflow: hidden; pointer-events: none; }
+.buehne-ebene .stueck > svg { display: block; }
+
+/* Licht und Schleier am Bildschirm: Sonne oben links, Tiefe unten rechts; der Schleier dämpft die Welt hinter Aufgaben und Büchern */
+.buehne-ebene > .licht { background: radial-gradient(95% 75% at 6% -6%, var(--sonne), var(--sonne-aus) 62%), radial-gradient(85% 80% at 104% 108%, var(--tiefe), var(--tiefe-aus) 62%); }
+.buehne-ebene > .schleier { opacity: 0; transition: opacity var(--dauer-tafel) ease; background: radial-gradient(70% 70% at 50% 50%, var(--schleier-mitte), var(--schleier-rand)); }
+.buehne-ebene[data-schleier="leicht"] > .schleier { opacity: .55; }
+.buehne-ebene[data-schleier="stark"] > .schleier { opacity: .7; }   /* während einer Runde: die Insel bleibt ruhig und gedämpft sichtbar */
+
+/* Antippbar: Bauplätze und Orte auf der Insel, nur wenn Marken gelten */
+.buehne-ebene[data-marken="orte"] .insel .bauplatz, .buehne-ebene[data-marken="plaetze"] .insel .bauplatz,
+.buehne-ebene[data-marken="orte"] .insel .ort, .buehne-ebene[data-marken="plaetze"] .insel .ort { pointer-events: auto; cursor: pointer; }
+.buehne-ebene .insel svg, .buehne-ebene .insel .bauplatz, .buehne-ebene .insel .ort { pointer-events: none; outline: none; }
+.buehne-ebene .bauplatz .ring { opacity: 0; transition: opacity var(--dauer) ease; }
+.buehne-ebene .bauplatz.gewaehlt .ring, .buehne-ebene .bauplatz:focus-visible .ring { opacity: 1; }
+/* Während des Baus (buehne-bau.js) treten Ring und Stufenschild zurück: das Haus steht allein im Bild */
+.buehne-ebene.baut .bauplatz .ring, .buehne-ebene.baut[data-marken] .bn-stufe.zeigen { opacity: 0; transition: opacity var(--dauer) ease; }
+.buehne-ebene .bauplatz .bau { transition: opacity var(--dauer) ease-out; }
+@media (hover: hover) { .buehne-ebene[data-marken="plaetze"] .bauplatz:hover .ring { opacity: .6; } }
+
+/* Wasser: Lichtreflexe in Isometrie-Richtung, Funkeln nahe der Küste, Schaumsaum */
+.buehne-ebene .reflex { position: absolute; height: 4px; margin-top: -2px; border-radius: 2px; opacity: 0; transform-origin: 0 50%;
+  background: linear-gradient(90deg, var(--weiss-a00), var(--weiss-a95) 35%, var(--weiss-a95) 65%, var(--weiss-a00)); animation: bn-reflex var(--dauer-welle) ease-in-out infinite; }
+@keyframes bn-reflex { 0% { opacity: 0; transform: rotate(26.57deg) translateX(-18px) scaleX(.6); } 40% { opacity: .85; transform: rotate(26.57deg) translateX(0) scaleX(1); }
+  70% { opacity: .5; } 100% { opacity: 0; transform: rotate(26.57deg) translateX(24px) scaleX(.7); } }
+.buehne-ebene .funke { position: absolute; width: 16px; height: 16px; margin: -8px 0 0 -8px; opacity: 0; animation: bn-funkeln var(--dauer-welle) ease-in-out infinite;
+  background: radial-gradient(closest-side, var(--weiss-a95) 0 30%, var(--weiss-a00) 100%); clip-path: polygon(50% 0, 60% 40%, 100% 50%, 60% 60%, 50% 100%, 40% 60%, 0 50%, 40% 40%); }
+@keyframes bn-funkeln { 0%, 100% { opacity: 0; transform: scale(.3); } 6% { opacity: .95; transform: scale(1); } 13% { opacity: 0; transform: scale(.4); } }
+.buehne-ebene .schaum-saum { position: absolute; animation: bn-schaum var(--dauer-welle) ease-in-out infinite alternate; }
+.buehne-ebene .schaum-saum svg { display: block; }
+@keyframes bn-schaum { from { opacity: .35; transform: translate(-2px, 0); } to { opacity: .95; transform: translate(2px, 3px); } }
+
+/* Wiegende Bäume am Ufer */
+.buehne-ebene .baum-wiege { overflow: visible; transform-origin: 50% 87%; animation: bn-wiegen var(--dauer-wiege) ease-in-out infinite alternate; }
+@keyframes bn-wiegen { from { transform: rotate(-1.4deg); } to { transform: rotate(1.4deg); } }
+
+/* Boote: fahren hin und zurück, wenden am Ziel; eines schaukelt am Steg */
+.buehne-ebene .boot { position: absolute; width: 0; height: 0; animation: bn-fahrt var(--dauer-boot) linear infinite; }
+.buehne-ebene .boot-rumpf { position: absolute; left: -60px; top: -70px; width: 120px; height: 100px; animation: bn-wenden var(--dauer-boot) linear infinite; }
+.buehne-ebene .boot-rumpf > svg:last-child { position: absolute; left: 0; top: 0; }
+.buehne-ebene .boot .kiel { position: absolute; left: -64px; top: 52px; opacity: .8; }
+.buehne-ebene .boot-rumpf.links { transform: scaleX(-1); animation-name: bn-wenden-l; }
+@keyframes bn-fahrt { 0% { transform: translate(0, 0); } 47%, 50% { transform: translate(var(--dx), var(--dy)); } 97%, 100% { transform: translate(0, 0); } }
+@keyframes bn-wenden { 0%, 48.5% { transform: scaleX(1); } 49%, 98.5% { transform: scaleX(-1); } 99%, 100% { transform: scaleX(1); } }
+@keyframes bn-wenden-l { 0%, 48.5% { transform: scaleX(-1); } 49%, 98.5% { transform: scaleX(1); } 99%, 100% { transform: scaleX(-1); } }
+.buehne-ebene .boot-fest { position: absolute; width: 0; height: 0; }
+.buehne-ebene .schaukeln { position: absolute; left: -60px; top: -76px; width: 120px; height: 100px; transform-origin: 50% 80%; animation: bn-schaukeln var(--dauer-wiege) ease-in-out infinite alternate; }
+@keyframes bn-schaukeln { from { transform: rotate(-1.6deg); } to { transform: rotate(1.8deg) translateY(2px); } }
+
+/* Rauch, Nebel, Wolken mit Schatten */
+.buehne-ebene .puff { position: absolute; width: 30px; height: 30px; margin: -15px 0 0 -15px; border-radius: 50%; opacity: 0;
+  background: radial-gradient(closest-side, var(--weiss-a95), var(--weiss-a55) 55%, var(--weiss-a00)); animation: bn-rauch var(--dauer-wiege) ease-out infinite; }
+@keyframes bn-rauch { 0% { transform: translate(0, 0) scale(.45); opacity: 0; } 15% { opacity: .9; } 100% { transform: translate(22px, -120px) scale(2.1); opacity: 0; } }
+.buehne-ebene .nebel { position: absolute; border-radius: 50%; background: radial-gradient(closest-side, var(--nebel), var(--nebel-aus)); }
+.buehne-ebene .wolke, .buehne-ebene .wolkenschatten .schatten { position: absolute; width: 640px; height: 260px; transform-origin: 0 0; animation: bn-wolkenzug var(--dauer-wolke) linear infinite; }
+.buehne-ebene .wolke { opacity: .72;
+  background: radial-gradient(closest-side, var(--weiss-a95), var(--weiss-a55) 62%, var(--weiss-a00)) 0 90px / 300px 170px no-repeat,
+    radial-gradient(closest-side, var(--weiss-a95), var(--weiss-a55) 60%, var(--weiss-a00)) 150px 10px / 330px 230px no-repeat,
+    radial-gradient(closest-side, var(--weiss-a95), var(--weiss-a55) 60%, var(--weiss-a00)) 330px 70px / 300px 180px no-repeat; }
+.buehne-ebene .wolkenschatten .schatten { background: radial-gradient(closest-side, var(--wolkenschatten), var(--wolkenschatten-aus)) 0 90px / 300px 170px no-repeat,
+    radial-gradient(closest-side, var(--wolkenschatten), var(--wolkenschatten-aus)) 150px 10px / 330px 230px no-repeat,
+    radial-gradient(closest-side, var(--wolkenschatten), var(--wolkenschatten-aus)) 330px 70px / 300px 180px no-repeat; }
+@keyframes bn-wolkenzug { from { transform: translateX(0) scale(var(--gr, 1)); } to { transform: translateX(var(--weg)) scale(var(--gr, 1)); } }
+
+/* Vögel: Silhouetten, ein kleiner Schwarm quer über den Bildschirm */
+.buehne-ebene > .voegel { overflow: hidden; transition: opacity var(--dauer-tafel) ease; }
+.buehne-ebene .schwarm { position: absolute; left: 0; top: 0; animation: bn-schwarm calc(var(--dauer-wolke) / 2) linear infinite; animation-delay: calc(var(--dauer-wolke) / -3); }
+.buehne-ebene .vogel { position: absolute; width: 26px; height: 12px; }
+.buehne-ebene .vogel b { position: absolute; inset: 0; display: block; animation: bn-fluegel calc(var(--dauer) * 4) ease-in-out infinite alternate; }
+.buehne-ebene .vogel svg { display: block; }
+@keyframes bn-fluegel { from { transform: scaleY(1); } to { transform: scaleY(.35) translateY(2px); } }
+@keyframes bn-schwarm { 0% { transform: translate(-120px, 38vh); } 100% { transform: translate(calc(100vw + 120px), 12vh); } }
+
+/* Ruhig (Aufgabe) und weniger Bewegung: alles steht, die Vögel sind fort */
+.buehne-ebene.ruhig .amb { animation-play-state: paused; }
+/* Während der Kamerafahrt steht das Umfeld kurz still: der Browser setzt dann nur die eine Ebene neu zusammen (Nachbesserung 2, flüssige Fahrt auf dem iPad) */
+.buehne-kamera.faehrt .amb { animation-play-state: paused; }
+.buehne-ebene.ruhig > .voegel { opacity: 0; }
+@media (prefers-reduced-motion: reduce) {
+  .buehne-ebene .amb { animation: none; }
+  .buehne-ebene > .voegel { display: none; }
+  .buehne-kamera, .buehne-ebene > .schleier { transition: none; }
+}
+
+/* Routen des Hafens erscheinen nur, wenn eine Ansicht sie setzt */
+.buehne-ebene .ebene.routen { opacity: 0; transition: opacity var(--dauer-tafel) ease; }
+.buehne-ebene.mit-routen .ebene.routen { opacity: 1; }
+
+/* ---- Marken: bleiben gleich gross, egal wie nah die Kamera ist (--inv) ------------------------------------------------- */
+.buehne-ebene .ebene.marken { --inv: 1; }
+.buehne-ebene .bn-marke { position: absolute; margin: 0; border: 0; font: inherit; color: var(--tinte); opacity: 0; pointer-events: none;
+  transform: translate(-50%, -100%) scale(var(--inv)); transform-origin: 50% 100%; transition: opacity var(--dauer-tafel) ease; -webkit-tap-highlight-color: transparent; }
+.buehne-ebene[data-marken="orte"] .bn-schild, .buehne-ebene[data-marken="plaetze"] .bn-siegel, .buehne-ebene[data-marken="plaetze"] .bn-stufe.zeigen,
+.buehne-ebene.mit-routen .bn-route, .buehne-ebene[data-marken="plaetze"] .bn-schild.warm { opacity: 1; pointer-events: auto; }   /* ein warmes Schild («Neu möglich») bleibt auch über den Plätzen sichtbar */
+.buehne-ebene[data-marken="plaetze"] .bn-stufe.zeigen { pointer-events: none; }
+.buehne-ebene .ebene.marken .bn-schild.verdeckt, .buehne-ebene .ebene.marken .bn-marke.verdeckt { opacity: 0; pointer-events: none; }   /* liegt unter HUD, Dock oder Tafel oder am Rand angeschnitten (buehne-marken.js) */
+.buehne-ebene .bn-schild, .marke-ort, .buehne-ebene .bn-route { display: flex; align-items: center; gap: 8px; min-height: var(--ziel); padding: 5px 14px 5px 5px; border-radius: 999px;
+  background: var(--weiss-a88, var(--glas)); box-shadow: var(--schatten-marke, var(--schatten-schwebend)); text-align: left; cursor: pointer; font-family: var(--schrift-rund); }
+.buehne-ebene .bn-route { border-radius: 16px; }
+.buehne-ebene .bn-schild::after { content: ""; position: absolute; left: 50%; bottom: -6px; width: 12px; height: 12px; margin-left: -6px; background: var(--weiss-a88, var(--glas)); transform: rotate(45deg); border-radius: 2px; z-index: -1; }
+.buehne-ebene .bn-schild-bild { width: 36px; height: 36px; border-radius: 50%; background: var(--akzent-hell); display: grid; place-items: center; flex: none; overflow: hidden; }
+.buehne-ebene .bn-schild-text { display: flex; flex-direction: column; line-height: 1.12; white-space: nowrap; }
+.buehne-ebene .bn-schild-text b { font-weight: 700; font-size: 15px; }
+.buehne-ebene .bn-schild-text small { font-weight: 600; font-size: 14px; color: var(--tinte-leise); }
+.buehne-ebene .bn-schild-text small:empty { display: none; }
+.buehne-ebene .bn-schild.warm small, .buehne-ebene .bn-route.warm small { color: var(--warm-tinte, var(--tinte-leise)); }
+.buehne-ebene .bn-schild.warm .bn-schild-bild { background: var(--warm-hell, var(--akzent-hell)); }
+.buehne-ebene .bn-route.zu { color: var(--tinte-leise); }
+.buehne-ebene .bn-route.gewaehlt { box-shadow: 0 0 0 3px var(--akzent), var(--schatten-marke, var(--schatten-schwebend)); }
+.buehne-ebene .bn-siegel { width: 46px; height: 46px; padding: 0; border-radius: 50%; display: grid; place-items: center; cursor: pointer; transform: translate(-50%, -50%) scale(var(--inv));
+  background: var(--warm-hell, var(--grund)); color: var(--warm-icon, var(--akzent-warm)); box-shadow: 0 0 0 4px var(--warm-a30, var(--linie)), var(--schatten-marke, var(--schatten-schwebend)); }
+.buehne-ebene .bn-siegel { color: var(--tinte-leise); background: var(--flaeche); box-shadow: 0 0 0 4px var(--tinte-a10), var(--schatten-marke, var(--schatten-schwebend)); }
+.buehne-ebene .bn-siegel-nr { position: absolute; left: 50%; bottom: -16px; display: grid; place-items: center; height: 22px; padding: 0 8px; border-radius: 999px; white-space: nowrap; transform: translateX(-50%);   /* «Epoche 2» statt einer Zahl, die wie ein Preis wirkt */
+  background: var(--warm-hell, var(--grund)); color: var(--warm-tinte, var(--tinte)); font: 800 12px var(--schrift-rund); box-shadow: 0 0 0 2px var(--flaeche); }
+/* Warmer Pfeil: hier lässt sich jetzt bauen oder ausbauen (ruhig, ohne Bewegung); am gewählten Platz tritt er zurück */
+.buehne-ebene .bn-pfeil { width: 44px; height: 44px; padding: 0; border-radius: 50%; display: grid; place-items: center; cursor: pointer; transform: translate(-50%, -100%) scale(var(--inv));   /* sitzt auf dem First, nicht schwebend darüber */
+  background: var(--akzent-warm); color: var(--flaeche); box-shadow: 0 0 0 5px var(--warm-a30), var(--schatten-marke, var(--schatten-schwebend)); }
+.buehne-ebene[data-marken="plaetze"] .bn-pfeil { opacity: 1; pointer-events: auto; }
+.buehne-ebene[data-marken="plaetze"] .bn-pfeil.still { opacity: 0; pointer-events: none; }
+.buehne-ebene .bn-stufe { display: flex; align-items: center; gap: 8px; height: 38px; padding: 0 12px; border-radius: 12px; background: var(--flaeche); box-shadow: var(--schatten-marke, var(--schatten-schwebend));
+  font: 800 15px var(--schrift-rund); white-space: nowrap; }
+.buehne-ebene .bn-balken { display: inline-flex; gap: 3px; align-items: flex-end; }
+.buehne-ebene .bn-balken i { width: 7px; height: 16px; border-radius: 2px; background: var(--spur); }
+.buehne-ebene .bn-balken i:nth-child(1) { height: 9px; } .buehne-ebene .bn-balken i:nth-child(2) { height: 13px; }
+.buehne-ebene .bn-balken i.voll { background: var(--akzent); }
+.buehne-ebene .bn-marke:focus-visible { outline: 3px solid var(--akzent); outline-offset: 2px; }

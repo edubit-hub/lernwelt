@@ -1,0 +1,134 @@
+/* app/stil/logbuch.css: Stil der Ansicht «Logbuch» als aufgeschlagenes Buch (docs/gestaltung-umbau.md 2.12, Vorbild docs/mockup/richtung-a/a-logbuch.js und a-tafeln.css).
+   aside.tafel.tafel-buch.logbuch-tafel > .tafel-rumpf > .logbuch.buch > nav.buch-reiter (nur hoch) + .buch-blatt > section.buch-seite.links (Woche: .log-raster mit vier
+   Kacheln .stat, Bestwerte) und .buch-seite.rechts (Wissensstand, Sammlung mit .vitrine und .plaketten). Quer zwei Seiten mit Falz, hoch eine Seite mit Reitern.
+   Nur Token aus tokens.css, color-mix nur auf Token. Die Effekt-Plakette der Pillen heisst .fx-plakette (effekte.css). logbuch.css lädt vor tafel.css: Regeln für die
+   Tafel nennen deshalb drei Klassen. */
+
+/* ---- Buch ------------------------------------------------------------------------------------------------------- */
+.tafel.tafel-buch.logbuch-tafel { width: min(1060px, calc(100% - 2 * var(--rand))); border-radius: 26px; background: var(--papier-buch); box-shadow: var(--schatten-karte), inset 0 0 0 1px var(--papier-rand); }
+.tafel.logbuch-tafel .tafel-kopf { padding: 16px 14px 4px 30px; }
+.tafel.logbuch-tafel .tafel-titel { font: 800 27px/1.15 var(--schrift-rund); letter-spacing: -.01em; }   /* keine Serife in den Kinderansichten */
+.tafel.logbuch-tafel .tafel-rumpf { overflow: hidden; padding: 0; }
+.logbuch.buch { display: flex; flex: 1; flex-direction: column; min-height: 0; }
+.logbuch .buch-reiter { display: none; }
+.logbuch .buch-blatt { position: relative; display: grid; flex: 1; grid-template-columns: repeat(2, minmax(0, 1fr)); min-height: 0; }
+.logbuch .buch-blatt::before { content: ''; position: absolute; z-index: 1; top: 0; bottom: 0; left: 50%; width: 30px; margin-left: -15px; pointer-events: none;
+  background: linear-gradient(90deg, transparent, var(--tinte-a04) 40%, var(--tinte-a10) 50%, var(--tinte-a04) 60%, transparent); }
+.logbuch .buch-seite { display: grid; align-content: start; gap: 18px; min-height: 0; overflow: auto; overscroll-behavior: contain; -webkit-overflow-scrolling: touch; padding: 8px 30px 24px;
+  background-image: repeating-linear-gradient(transparent 0 33px, var(--papier-rand) 33px 34px); background-attachment: local; }
+.logbuch .buch-seite.links { padding-right: 34px; }
+.logbuch .buch-seite.rechts { padding-left: 34px; }
+.logbuch .buch-teil { display: grid; gap: 8px; }
+.logbuch .titel { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 2px var(--a2); }
+.logbuch .wissen > .titel span { flex-basis: 100%; text-align: left; }
+.logbuch .titel h3 { margin: 0; font: 800 21px/1.2 var(--schrift-rund); color: var(--tinte); }
+.logbuch .titel span { font-size: 13px; color: var(--tinte-leise); text-align: right; }
+.logbuch h4 { margin: 4px 0 0; font: 700 12.5px var(--schrift-rund); letter-spacing: .08em; text-transform: uppercase; color: var(--akzent-dunkel); }
+.logbuch .buch-unter { margin: -12px 0 0; color: var(--tinte-leise); }
+.logbuch .leer-hinweis { margin: 0; color: var(--tinte-leise); }
+
+/* ---- Woche: vier Kacheln mit Minidiagramm, die sieben Tage davor leise dahinter ------------------------------------- */
+/* Quer eine Kachel je Zeile, Zahlen links, Diagramm rechts: jede Säule bleibt so mindestens 44 px breit zum Antippen */
+.logbuch .log-raster { display: grid; grid-template-columns: minmax(0, 1fr); gap: 10px; }
+.logbuch .log-raster > .kachel.stat { display: grid; grid-template-columns: 96px minmax(0, 1fr); grid-template-rows: auto auto 1fr; gap: 0 12px; padding: 8px 8px 6px 12px;
+  border: 0; border-radius: 16px; background: var(--weiss-a75); box-shadow: inset 0 0 0 1px var(--papier-rand); }
+.logbuch .log-raster > .stat > .kopf2 { grid-column: 1 / -1; }
+.logbuch .log-raster > .stat > .gross { grid-column: 1; }
+.logbuch .log-raster > .stat > .vgl { grid-column: 1; align-self: start; }
+.logbuch .log-raster > .stat > .diagramm { grid-column: 2; grid-row: 2 / 4; }
+.logbuch .stat .kopf2 { display: flex; justify-content: space-between; align-items: baseline; gap: var(--a2); min-height: 18px; }
+.logbuch .log-raster .stat h3 { margin: 0; font: 700 13px var(--schrift-rund); color: var(--tinte-leise); }
+.logbuch .stat .ablesung { font-size: 12.5px; color: var(--tinte); text-align: right; }
+.logbuch .stat .gross { margin-top: 2px; font: 800 30px/1.1 var(--schrift-rund); letter-spacing: -.01em; }
+.logbuch .stat .gross small { margin-left: 3px; font-size: 14px; font-weight: 700; letter-spacing: 0; color: var(--tinte-leise); }
+.logbuch .stat .vgl { font-size: 12.5px; color: var(--tinte-leise); }
+.logbuch .stat .diagramm svg { display: block; width: 100%; height: auto; margin-top: 4px; overflow: visible; }
+.logbuch .lg-svg text { font-family: var(--schrift-rund); fill: var(--tinte-leise); font-size: 10.5px; }
+.logbuch .lg-svg text.heute { fill: var(--tinte); font-weight: 700; }
+.logbuch .lg-svg text.wert { fill: var(--tinte); font-size: 11.5px; font-weight: 700; }
+.logbuch .lg-achse { stroke: var(--papier-rand); stroke-width: 1.5; }
+.logbuch .lg-flaeche { fill: transparent; }
+.logbuch .saeule { outline: none; cursor: pointer; }
+.logbuch .saeule .s { fill: var(--akzent); fill-opacity: .78; }
+.logbuch .saeule.heute .s { fill: var(--akzent-warm); fill-opacity: 1; }
+.logbuch .saeule:focus-visible .s { fill: var(--akzent-dunkel); }
+.logbuch .lg-vor-saeulen { pointer-events: none; }
+.logbuch .lg-vor-saeulen .v { fill: none; stroke: var(--tinte-leise); stroke-width: 2; stroke-dasharray: 3 2.5; stroke-linecap: round; }
+.logbuch .lg-vor { fill: none; stroke: var(--tinte-a20); stroke-width: 1.5; stroke-dasharray: 3 4; stroke-linecap: round; }
+.logbuch .lg-flaeche-linie { fill: var(--akzent); fill-opacity: .1; }
+.logbuch .lg-linie { fill: none; stroke: var(--akzent); stroke-width: 2; stroke-linejoin: round; stroke-linecap: round; }
+.logbuch .lg-punkt { fill: var(--akzent); stroke: var(--papierweiss); stroke-width: 2; }
+.logbuch .saeule.heute .lg-punkt { fill: var(--akzent-warm); }
+
+/* ---- Bestwerte gegen sich selbst ----------------------------------------------------------------------------------- */
+.logbuch .best-liste { display: grid; }
+.logbuch .best-liste .eintrag { display: grid; grid-template-columns: 76px minmax(0, 1fr); align-items: baseline; gap: 10px; padding: 6px 0; border-top: 1px solid var(--papier-rand); }
+.logbuch .best-liste .w { font: 800 21px/1.15 var(--schrift-rund); }
+.logbuch .best-liste .w small { font-size: 12.5px; font-weight: 700; color: var(--tinte-leise); }
+.logbuch .best-liste .b { display: flex; justify-content: space-between; align-items: baseline; gap: var(--a2); font-size: 13.5px; color: var(--tinte-leise); }
+.logbuch .best-liste .neu { font: 700 12.5px var(--schrift-rund); color: var(--warm-tinte); white-space: nowrap; }
+
+/* ---- Wissensstand je Bereich --------------------------------------------------------------------------------------- */
+.logbuch .stand-block { border-top: 1px solid var(--papier-rand); }
+.logbuch .stand-block:first-of-type { border-top: 0; }
+.logbuch .stand-gruppe { display: flex; justify-content: space-between; align-items: center; gap: var(--a3); min-height: var(--ziel); padding: 4px 0; cursor: pointer; list-style: none; }
+.logbuch .stand-gruppe::-webkit-details-marker { display: none; }
+.logbuch .stand-gruppe::after { content: ''; flex: none; width: 8px; height: 8px; margin: 0 4px 3px var(--a2); border-right: 2px solid var(--tinte-leise); border-bottom: 2px solid var(--tinte-leise); transform: rotate(45deg); }
+.logbuch .stand-block[open] > .stand-gruppe::after { margin-bottom: -3px; transform: rotate(-135deg); }
+.logbuch .stand-gruppe b { font-family: var(--schrift-rund); }
+.logbuch .stand-gruppe .klein { margin-left: auto; text-align: right; }
+.logbuch .stand-zeile { display: grid; grid-template-columns: minmax(0, 1fr) 70px minmax(112px, auto); gap: 12px; align-items: center; min-height: 38px; padding: 3px 0; border-top: 1px dashed var(--papier-rand); }
+.logbuch .stand-zeile .n { font: 500 15px/1.25 var(--schrift-rund); }
+.logbuch .stand-zeile small { display: block; font: 500 12.5px var(--schrift-rund); color: var(--tinte-leise); }
+.logbuch .stand-zeile .z { font-size: 13.5px; text-align: right; line-height: 1.25; }
+.logbuch .skala { display: flex; gap: 3px; }
+.logbuch .skala i { flex: 1; height: 9px; border-radius: 3px; background: var(--lampe-aus); opacity: .45; }
+.logbuch .skala i[class] { opacity: 1; }
+.logbuch .skala i.s1 { background: var(--akzent-hell); }
+.logbuch .skala i.s2 { background: var(--akzent-mitte); }
+.logbuch .skala i.s3 { background: color-mix(in srgb, var(--akzent) 55%, var(--akzent-mitte)); }
+.logbuch .skala i.s4 { background: var(--akzent); }
+.logbuch .skala i.s5 { background: var(--akzent-dunkel); }
+
+/* ---- Sammlung: Vitrine mit Fundstücken und Plaketten ---------------------------------------------------------------- */
+.logbuch .vitrine { display: grid; grid-template-columns: repeat(auto-fill, minmax(118px, 1fr)); gap: 10px; padding: 10px; border-radius: 18px; background: var(--weiss-a55); box-shadow: inset 0 0 0 1px var(--papier-rand), inset 0 -4px 0 var(--papier-rand); }
+.logbuch .vitrine .fach { display: grid; justify-items: center; gap: 6px; margin: 0; text-align: center; }
+.logbuch .fach-bild { display: grid; place-items: center; width: 100%; height: 78px; border-radius: 14px; background: radial-gradient(110% 110% at 40% 30%, var(--weiss-a95), var(--weiss-a30)); }
+.logbuch .fach-bild svg { width: 92px; height: 66px; }
+.logbuch .fach figcaption { display: grid; gap: 1px; }
+.logbuch .fach figcaption b { font: 700 14px/1.2 var(--schrift-rund); }
+.logbuch .fach figcaption small { font-size: 12.5px; line-height: 1.25; color: var(--tinte-leise); }
+.logbuch .fach.leer figcaption b { color: var(--tinte-leise); }
+.fund-svg.umriss { opacity: .38; }
+.logbuch .plaketten { display: grid; gap: 8px; }
+.logbuch .plaketten .plakette { display: flex; align-items: center; gap: 12px; padding: 8px 12px 8px 8px; border-radius: 16px; background: var(--weiss-a55); box-shadow: inset 0 0 0 1px var(--papier-rand); }
+.logbuch .plaketten .plakette .t { font: 500 15px/1.3 var(--schrift-rund); }
+.logbuch .plaketten .plakette .t small { display: block; margin-top: 2px; font: 500 12.5px var(--schrift-rund); color: var(--tinte-leise); }
+.logbuch .abzeichen, .logbuch .abzeichen svg { flex: none; width: 44px; height: 44px; }
+.logbuch .pl-rand { stroke: var(--messing); stroke-width: 2; }
+.logbuch .pl-sicher { fill: var(--stein); }
+.logbuch .pl-gefestigt { fill: var(--sand); }
+.logbuch .pl-fund { fill: var(--meer); }
+.logbuch .pl-leer { fill: none; stroke: var(--tinte-leise); stroke-dasharray: 4 4; }
+.logbuch .pl-innen { fill: none; stroke: var(--tinte); stroke-opacity: .25; stroke-width: 1.5; }
+.logbuch .pl-haken { fill: none; stroke: var(--tinte); stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+
+/* ---- Hochformat: eine Seite, Reiter oben ------------------------------------------------------------------------------ */
+@media (orientation: portrait) {
+  .tafel.tafel-buch.logbuch-tafel { width: auto; height: min(56dvh, calc(100% - var(--hud-raum) - var(--dock-raum))); }   /* die Insel bleibt darüber sichtbar */
+  .tafel.logbuch-tafel .tafel-kopf { padding-left: 24px; }
+  .logbuch .log-raster { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .logbuch .log-raster > .kachel.stat { display: flex; flex-direction: column; padding: 10px 12px 8px; }
+  .logbuch .buch-reiter { display: flex; flex: none; gap: 6px; padding: 4px 18px 10px; border-bottom: 1px solid var(--papier-rand); }
+  .logbuch .buch-reiter .reiter { min-height: var(--ziel); padding: 0 18px; border: 0; border-radius: 999px; background: var(--tinte-a06); color: var(--tinte-leise); font: 700 15px var(--schrift-rund); cursor: pointer; }
+  .logbuch .buch-reiter .reiter.an { background: var(--akzent); color: var(--flaeche); }
+  .logbuch .buch-blatt { display: block; overflow: auto; overscroll-behavior: contain; -webkit-overflow-scrolling: touch;
+    background-image: repeating-linear-gradient(transparent 0 33px, var(--papier-rand) 33px 34px); background-attachment: local; }
+  .logbuch .buch-blatt::before { display: none; }
+  .logbuch .buch-seite, .logbuch .buch-seite.links, .logbuch .buch-seite.rechts { overflow: visible; padding: 12px 24px 18px; background: none; }
+  .logbuch .buch-seite.rechts { padding-top: 0; }
+}
+
+/* Ohne Tafel (eingebettet, Fehlerfall): die Inhalte stehen in der Ansicht */
+.welt-seite > .kopf { display: flex; align-items: baseline; flex-wrap: wrap; gap: 4px var(--a4); margin-bottom: var(--a3); }
+.welt-seite > .buch .buch-blatt { gap: var(--a4); }

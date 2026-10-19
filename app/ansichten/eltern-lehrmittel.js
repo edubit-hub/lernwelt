@@ -6,23 +6,7 @@
   'use strict';
   const L = (g.Lernwelt = g.Lernwelt || {});
 
-  const STIL = `
-.lm-faecher { display: flex; flex-wrap: wrap; gap: var(--a3); }
-.lm-faecher .eltern-feld { flex: 1 1 200px; max-width: none; }
-.lm-liste { display: grid; gap: var(--a2); margin: var(--a3) 0 0; padding: 0; list-style: none; }
-.lm-liste li { display: grid; gap: 4px; padding: var(--a2) var(--a3); border: 1px solid var(--linie); border-radius: var(--radius); background: var(--flaeche); }
-.lm-liste li > div { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--a2); }
-`;
-
-  function stil(k) {
-    const d = k.dok;
-    if (L.ElternAnpassung) L.ElternAnpassung.schalterStil(k);
-    if (!d || !d.head || (d.getElementById && d.getElementById('eltern-lehrmittel-stil'))) return;
-    const s = d.createElement('style');
-    s.setAttribute('id', 'eltern-lehrmittel-stil');
-    s.textContent = STIL;
-    d.head.append(s);
-  }
+  /* Gestaltung: app/stil/eltern.css (lm-*). */
 
   const wochenText = v => (v.ab ? `ab Schulwoche ${v.ab}${v.abDatum ? ` (${L.Eltern.datum(v.abDatum)})` : ''}` : 'ohne bekannte Woche');
 
@@ -63,7 +47,6 @@
   function kachel(k, aenderung) {
     const h = k.h, gesperrt = k.gesperrt(), wurzel = h('div'), ausgewaehlt = new Set();
     let offen = false, erstmals = true;
-    stil(k);
     const zeichne = () => {
       const wahl = L.Lehrmittel.stand(k.Z.hole()), bekannt = Object.values(wahl).some(w => w !== L.Lehrmittel.UNBEKANNT);
       const felder = Object.entries(L.Lehrmittel.FAECHER).map(([fach, name]) => {

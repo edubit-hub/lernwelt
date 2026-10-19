@@ -1,0 +1,90 @@
+/* app/stil/effekte.css: Aussehen der Ereigniseffekte (app/ui/effekte.js, Umbauplan 3.4, E-18) und der 3D-Druck von Knöpfen und Tasten.
+   Die Bewegung selbst läuft in effekte.js über die Web Animations API, damit Aufnahmen sie über document.getAnimations() einfrieren
+   können. Hier stehen deshalb keine Keyframes, nur Form und Ton der erzeugten Teile, der Druck über :active und die Regel für
+   reduzierte Bewegung. Farben nur aus den Token (tokens.css), Töne des Welt-Themas nur mit Rückfallwert. Zeiten nur aus --dauer*.
+   Klassen: flug-ebene (Hülle), flug-objekt, fx-plakette (fx-plakette-plus, fx-plakette-minus, fx-plakette-innen; eigener Name
+   neben den Plaketten der Sammlung im Logbuch), leuchten (leuchten-ok,
+   leuchten-akzent, leuchten-warm, leuchten-innen), puls-ring (warm), haken-zeichen (haken-ecke, haken-grund, haken-strich),
+   siegel-effekt (siegel-haelfte links und rechts, siegel-ring), partikel (partikel-staub, partikel-funken, dunkel). */
+
+/* Ebene für Flüge, Plaketten und Lichter: über allem, fängt nie eine Berührung */
+.flug-ebene { position: fixed; inset: 0; z-index: 50; overflow: hidden; pointer-events: none; }
+
+/* Erzeugte Teile liegen absolut in ihrer Ebene, die Lage setzt das Skript über left, top und transform */
+.flug-objekt, .fx-plakette, .leuchten, .puls-ring, .siegel-effekt, .partikel { position: absolute; left: 0; top: 0; pointer-events: none; }
+.flug-objekt { display: flex; align-items: center; justify-content: center; line-height: 0; }
+.flug-objekt > svg { display: block; }
+
+/* Plakette an der Pille: «+8» steigt auf, «−10» fällt ab */
+.fx-plakette {
+  padding: 2px 9px; border-radius: 999px; z-index: 1;
+  font-family: var(--schrift-rund); font-size: var(--t-klein); font-weight: 800; line-height: 1.25;
+  font-variant-numeric: tabular-nums; white-space: nowrap;
+  color: var(--flaeche); box-shadow: var(--schatten-marke);
+}
+.fx-plakette-plus { background: var(--akzent); }
+.fx-plakette-minus { background: var(--warm-tinte); }
+.fx-plakette-innen { left: auto; top: auto; right: -6px; bottom: calc(100% - 10px); }
+/* Satz am Ort (Bauplatz): ruhiger als die Plakette, in der Tinte der Seite */
+.fx-ortstext { padding: 6px 14px; font-size: var(--t-text); color: var(--tinte); background: var(--flaeche); box-shadow: var(--schatten-karte); }
+.fx-ortstext.warm { background: var(--warm-flaeche); color: var(--warm-text); box-shadow: var(--schatten-karte), inset 0 0 0 1.5px var(--warm-kante); }
+
+/* Kurzes Aufleuchten über einer Antwort oder Karte */
+.leuchten { border-radius: var(--radius); }
+.leuchten-ok { background: radial-gradient(farthest-side, var(--ok-a00), var(--ok-a30)); box-shadow: 0 0 0 3px var(--ok-a30); }
+.leuchten-akzent { background: radial-gradient(farthest-side, var(--akzent-a00), var(--akzent-a30)); box-shadow: 0 0 0 3px var(--akzent-a30); }
+.leuchten-warm { background: radial-gradient(farthest-side, var(--warm-a00), var(--warm-a30)); box-shadow: 0 0 0 3px var(--warm-a30); }
+.leuchten-innen { right: 0; bottom: 0; border-radius: inherit; }
+
+/* Lichtpuls der Freischaltung: weicher Ring */
+.puls-ring {
+  border-radius: 50%; border: 3px solid var(--akzent-a30);
+  background: radial-gradient(closest-side, var(--akzent-a00) 55%, var(--akzent-a30));
+}
+.puls-ring.warm { border-color: var(--warm-a30); background: radial-gradient(closest-side, var(--warm-a00) 55%, var(--warm-a30)); }
+
+/* Häkchen: grüner Grund, weisser Strich, der sich zeichnet (Strichlänge 15 im viewBox 24, Endzustand gezeichnet) */
+.haken-zeichen { display: inline-block; width: 1.6em; height: 1.6em; vertical-align: middle; overflow: visible; transform-origin: 50% 50%; pointer-events: none; }
+.haken-zeichen.haken-ecke { position: absolute; right: -14px; top: -14px; width: 40px; height: 40px; z-index: 1; }
+.haken-grund { fill: var(--ok); }
+.haken-strich { fill: none; stroke: var(--flaeche); stroke-width: 2.6; stroke-linecap: round; stroke-linejoin: round; stroke-dasharray: 15; stroke-dashoffset: 0; }
+
+/* Siegel, das sich öffnet: zwei Hälften aus warmem Papier mit Rand, dazu ein Ring */
+.siegel-haelfte {
+  position: absolute; inset: 0; border-radius: 50%;
+  background: var(--warm-hell); border: 2px solid var(--warm-tief); box-shadow: inset 0 0 0 5px var(--warm-linie);
+}
+.siegel-haelfte.links { clip-path: inset(0 50% 0 0); }
+.siegel-haelfte.rechts { clip-path: inset(0 0 0 50%); }
+.siegel-ring { position: absolute; inset: -6px; border-radius: 50%; border: 3px solid var(--warm-a30); }
+
+/* Splitter: eckiger Staub beim Bauen (Töne des Welt-Themas, sonst Sand und Holz), runde Funken beim Freischalten */
+.partikel { border-radius: 2px; }
+.partikel-staub { background: var(--staub-hell, var(--sand)); box-shadow: inset -2px -2px 0 var(--staub, var(--beige-tief)); }
+.partikel-staub.dunkel { background: var(--staub, var(--holz)); box-shadow: inset -2px -2px 0 var(--erde-tief, var(--tinte-a20)); }
+.partikel-funken { border-radius: 50%; background: var(--warm-hoch); box-shadow: 0 0 0 2px var(--warm-a30); }
+.partikel-funken.dunkel { background: var(--akzent-warm); }
+
+/* 3D-Druck: Knöpfe und Tasten stehen auf einer Kante (--schatten-knopf) und geben beim Drücken nach: der Knopf sinkt, die Kante schrumpft */
+.knopf:not(.leise):not(:disabled):not(.gesperrt), .taste:not(:disabled) {
+  box-shadow: var(--schatten-knopf);
+  transition: transform var(--dauer) var(--kurve-raus), box-shadow var(--dauer) var(--kurve-raus);
+}
+.knopf.primaer:not(:disabled):not(.gesperrt), .taste-ok:not(:disabled) {
+  box-shadow: inset 0 2px 0 var(--weiss-a30), 0 5px 0 var(--kante-akzent), 0 10px 18px var(--akzent-a30);
+}
+.knopf.gefahr:not(:disabled):not(.gesperrt) { box-shadow: inset 0 0 0 1px var(--fehler), 0 5px 0 var(--kante-weiss), 0 10px 18px var(--tinte-a10); }
+.knopf:not(.leise):not(:disabled):not(.gesperrt):active, .taste:not(:disabled):active {
+  transform: translateY(4px);
+  box-shadow: inset 0 0 0 1px var(--tinte-a08), 0 1px 0 var(--kante-weiss), 0 3px 8px var(--tinte-a10);
+  transition-duration: calc(var(--dauer) / 3);
+}
+.knopf.primaer:not(:disabled):not(.gesperrt):active, .taste-ok:not(:disabled):active {
+  box-shadow: inset 0 2px 0 var(--weiss-a30), 0 1px 0 var(--kante-akzent), 0 3px 8px var(--akzent-a30);
+}
+
+/* Reduzierte Bewegung: kein Versatz beim Drücken (die Kante zeigt den Druck), keine Teilchen. Die Skripte blenden nur noch ein. */
+@media (prefers-reduced-motion: reduce) {
+  .knopf:not(.leise):not(:disabled):not(.gesperrt):active, .taste:not(:disabled):active { transform: none; transition: none; }
+  .flug-objekt, .partikel, .puls-ring, .siegel-effekt { display: none; }
+}

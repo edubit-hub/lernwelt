@@ -1,0 +1,138 @@
+/* app/stil/abschluss.css: der Abschluss als Logbuchseite (docs/gestaltung-umbau.md 2.8, Paket A3, Vorbild docs/mockup/richtung-b/b-seiten.css «Logbuch»).
+   Mit Bühne: section.ansicht.abschluss-ansicht wird zur durchlässigen Fläche über der Insel, darin aside.tafel.tafel-buch.abschluss-tafel (quer rechts,
+   hoch als Blatt von unten über dem Dock). Ohne Bühne steht .abschluss-seite schlicht in der Glasfläche der Ansicht.
+   Teile: .abschluss-kicker (Datum), .kasten.ergebnis (Satz des Laufs als Kopf), .abschluss-stempel (SVG), .abschluss-ertrag > .ertrag-zeile (.ertrag-muenze,
+   .ertrag-wort, .ertrag-linie, .ertrag-zahl), .abschluss-unterwegs, .abschluss-neu (.neu-bild, .neu-text, .neu-knopf), .abschluss-knoepfe, .abschluss-flug (Flugobjekt).
+   Nur Token aus tokens.css, Töne der Rohstoffe über --tint mit Rückfall. abschluss.css lädt vor basis.css, huelle.css und tafel.css (alphabetisch):
+   wo eine Regel dort etwas überschreibt, nennt der Selektor genug Klassen. Bewegung läuft über die Web Animations API in abschluss.js. */
+
+/* ---- Fläche und Tafel mit Bühne ------------------------------------------------------------------------------------ */
+.app[data-modus="welt"] .ansicht.abschluss-ansicht {
+  inset: 0; width: auto; margin: 0; padding: 0; border-radius: 0; background: none; box-shadow: none; overflow: visible; pointer-events: none;
+}
+.tafel.tafel-buch.abschluss-tafel {
+  left: auto; right: calc(env(safe-area-inset-right) + var(--rand)); bottom: auto; width: min(560px, 50vw); max-height: calc(100% - var(--hud-raum) - var(--dock-raum));
+  margin: 0; opacity: 1; transform: none; transition: none;
+  border-radius: 26px; pointer-events: auto;
+  background: repeating-linear-gradient(180deg, var(--weiss-a00) 0 33px, var(--papier-rand) 33px 34px) 0 58px / 100% calc(100% - 58px) no-repeat, var(--papier-buch);
+  box-shadow: var(--schatten-karte), inset 7px 0 0 var(--papier-rand);
+}
+.abschluss-tafel > .abschluss-seite { flex: 1; min-height: 0; overflow: auto; padding: 22px 26px 18px 30px; -webkit-overflow-scrolling: touch; overscroll-behavior: contain; }
+
+/* ---- Seite ------------------------------------------------------------------------------------------------------- */
+.abschluss-seite { display: flex; flex-direction: column; }
+.abschluss-kicker { margin-bottom: 8px; }
+.abschluss { position: relative; display: flex; flex: 1; flex-direction: column; gap: 14px; max-width: 680px; }
+.abschluss-titel { margin: 0 0 4px; padding-right: 112px; font: 800 30px/1.1 var(--schrift-rund); letter-spacing: -.01em; color: var(--tinte); }
+.abschluss .kasten.ergebnis { margin: 0; padding: 0 112px 0 0; border: 0; border-radius: 0; background: none; font-size: var(--t-text); color: var(--tinte-leise); }
+/* Der Kopf des Satzes («Runde beendet:») steht nur für Vorleser: der Titel darüber sagt es ohne Doppelpunkt */
+.abschluss .kasten.ergebnis > b:first-child { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+.abschluss .kicker { margin-bottom: 6px; }
+
+/* Stempel «Eingetragen»: liegt schräg oben rechts, Tinte in Akzentdunkel, Fehlstellen über die Maske */
+.abschluss-stempel { position: absolute; top: -4px; right: -6px; width: 112px; height: 112px; color: var(--akzent-dunkel); opacity: .86; transform: rotate(-10deg); pointer-events: none; }
+.abschluss-stempel > svg { display: block; width: 100%; height: 100%; overflow: visible; }
+.abschluss-stempel .st-grund { fill: var(--flaeche); }
+.abschluss-stempel .st-loch { fill: var(--tinte); }
+.abschluss-stempel .st-ring { fill: none; stroke: currentColor; }
+.abschluss-stempel .st-oben { font: 800 19px var(--schrift-rund); letter-spacing: 3.2px; fill: currentColor; }
+.abschluss-stempel .st-unten { font: 700 14px var(--schrift-rund); letter-spacing: 2.4px; fill: currentColor; }
+.abschluss-stempel .st-stern { fill: currentColor; fill-opacity: .22; }
+.abschluss-stempel .st-datum { font: 800 25px var(--schrift-rund); fill: currentColor; }
+
+/* Ertrag je Rohstoff: Objekt, Wort, gepunktete Linie, Zahl */
+.abschluss-ertrag { display: grid; gap: 6px; }
+.ertrag-zeile { display: flex; align-items: center; gap: 14px; min-height: 56px; }
+.ertrag-muenze {
+  display: grid; place-items: center; flex: none; width: 52px; height: 52px; border-radius: 50%;
+  background: radial-gradient(120% 120% at 35% 25%, var(--flaeche) 0%, var(--tint, var(--akzent-hell)) 62%);
+  box-shadow: inset 0 -3px 0 var(--tinte-a08), inset 0 0 0 1px var(--tinte-a08), 0 0 0 4px var(--warm-hell);
+}
+.ertrag-muenze > .objekt > svg { width: 34px; height: 34px; }
+.ertrag-wort { font: 700 21px var(--schrift-rund); }
+.ertrag-linie { flex: 1; min-width: 24px; height: 0; border-bottom: 2px dotted var(--tinte-a20); }
+.ertrag-zahl { font: 800 32px/1 var(--schrift-rund); font-variant-numeric: tabular-nums; color: var(--ok-text); }
+
+/* Unterwegs: Themenstufen und Tor als kurze Zeilen */
+.abschluss-unterwegs { display: grid; gap: 4px; }
+.abschluss-stufe, .abschluss-tor { margin: 0; font-size: var(--t-text); line-height: 1.45; }
+.abschluss-tor { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 12px; color: var(--tinte-leise); }
+
+/* Karte «Neu möglich»: Miniatur des Orts, Satz, Ort und Knopf, warm statt laut */
+.abschluss-neu {
+  display: flex; flex-wrap: wrap; align-items: center; gap: 10px 14px; padding: 14px 16px; border-radius: 20px;
+  background: var(--warm-flaeche); box-shadow: inset 0 0 0 1.5px var(--warm-kante);
+}
+.neu-bild { display: grid; place-items: center; flex: none; width: 60px; height: 60px; border-radius: 16px; background: var(--flaeche); box-shadow: inset 0 0 0 1px var(--warm-linie); }
+.neu-bild > svg { width: 52px; height: 52px; }
+.neu-text { flex: 1 1 200px; min-width: 0; }
+.abschluss-neu .kicker { margin: 0; color: var(--warm-tinte); }
+.neu-titel { margin: 2px 0 0; font: 800 19px/1.25 var(--schrift-rund); color: var(--tinte); }
+.neu-ort { margin: 2px 0 0; font-size: var(--t-klein); color: var(--tinte-leise); }
+.knopf.neu-knopf { flex: none; min-height: var(--ziel); margin-left: auto; }
+
+.abschluss-tor.bereit { color: var(--warm-tinte); font-weight: 700; }
+.abschluss-tor.abschluss-wissen { color: var(--tinte-leise); }
+.abschluss-neu.als-naechstes .knopf.neu-knopf { min-width: 0; }
+
+/* Nachbesserung 2: Satz zum Festigen als eigene Zeile, kleine Karte zum Ziel, grosser Knopf «Nächste Runde», «Zum Start» leise */
+.ergebnis-festigen { display: block; margin-top: 4px; }
+.neu-bild.neu-karte { position: relative; width: 104px; height: 68px; place-items: stretch; background: var(--warm-hell); }
+.neu-karte > .nk-route { position: absolute; inset: 0; width: 100%; height: 100%; }
+.nk-weg { fill: none; stroke: var(--warm-tief); stroke-width: 2.5; stroke-dasharray: 5 5; stroke-linecap: round; }
+.nk-hier { fill: var(--akzent); stroke: var(--flaeche); stroke-width: 2; }
+.nk-ziel { position: absolute; right: -4px; top: -10px; width: 52px; height: 52px; }
+.nk-ziel > svg { width: 100%; height: 100%; }
+.knopf.abschluss-runde { display: flex; flex-direction: column; align-items: flex-start; justify-content: center; gap: 2px; min-height: 64px; padding: 8px 20px; text-align: left; }
+.knopf.abschluss-runde > b { font: 800 19px/1.2 var(--schrift-rund); }
+.knopf.abschluss-runde > small { font-size: var(--t-klein); font-weight: 600; opacity: .9; }
+.abschluss-knoepfe .knopf.leise { align-self: center; }
+
+/* Quer: aufgeschlagenes Buch mit Bund, links Satz, Ertrag und Unterwegs, rechts der nächste Schritt und die Knöpfe (Vorbild B) */
+@media (orientation: landscape) {
+  .tafel.tafel-buch.abschluss-tafel { width: min(720px, 58vw); }
+  .abschluss-tafel .abschluss { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); column-gap: 48px; align-content: start; max-width: none; }
+  .abschluss-tafel .abschluss > * { grid-column: 1; }
+  .abschluss-tafel .abschluss > .abschluss-neu { grid-column: 2; grid-row: 1 / span 3; align-self: start; margin-top: 104px; flex-direction: column; align-items: flex-start; }   /* darüber der Stempel */
+  .abschluss-tafel .abschluss > .abschluss-knoepfe { grid-column: 2; grid-row: 4 / span 2; align-self: end; flex-direction: column; }
+  .abschluss-tafel .abschluss > .abschluss-neu .knopf.neu-knopf { width: 100%; margin-left: 0; }
+  .abschluss-tafel .abschluss > .abschluss-neu .neu-text { flex: none; width: 100%; }   /* in der Spalte keine Grundhöhe: die Karte bleibt kurz, die Knöpfe stehen im Buch */
+  .abschluss-tafel .abschluss > .kasten.ergebnis, .abschluss-tafel .abschluss-titel { padding-right: 0; }
+  .abschluss-tafel .abschluss::before { content: ''; position: absolute; top: -70px; bottom: -16px; left: 50%; width: 22px; margin-left: -11px; pointer-events: none;
+    background: linear-gradient(90deg, var(--weiss-a00), var(--tinte-a08) 40%, var(--tinte-a14) 50%, var(--tinte-a08) 60%, var(--weiss-a00)); }
+}
+
+/* Knöpfe unten auf der Seite */
+.abschluss-knoepfe { display: flex; flex-wrap: wrap; gap: var(--a3); margin-top: auto; padding-top: 10px; }
+.abschluss-tafel .abschluss-knoepfe .knopf { flex: 1 1 auto; }
+.abschluss-tafel .abschluss-knoepfe .knopf.leise { flex: 0 0 auto; }
+
+/* Platzhalter «Siedlung folgt» (nur ohne Bühne und ohne Siedlung). Die Insel färbt start.css. */
+.kachel.abschluss-siedlung { flex-direction: row; align-items: center; gap: var(--a5); border-style: dashed; background: transparent; }
+.abschluss-siedlung .insel { flex: none; width: 160px; height: auto; }
+.abschluss-siedlung p + p { margin-top: var(--a1); }
+
+/* Flugobjekt des Ertrags in der Flugebene der Effekte */
+.flug-objekt > .abschluss-flug {
+  display: grid; place-items: center; width: 40px; height: 40px; border-radius: 50%;
+  background: radial-gradient(120% 120% at 35% 25%, var(--flaeche) 0%, var(--tint, var(--akzent-hell)) 62%); box-shadow: var(--schatten-marke);
+}
+.abschluss-flug > .objekt > svg { width: 28px; height: 28px; }
+
+/* ---- Hochformat: Blatt von unten, so knapp, dass die Insel darüber sichtbar bleibt ------------------------------------------ */
+@media (orientation: portrait) {
+  .tafel.tafel-buch.abschluss-tafel {
+    top: auto; bottom: var(--dock-raum); left: calc(env(safe-area-inset-left) + var(--rand)); right: calc(env(safe-area-inset-right) + var(--rand)); width: auto; height: auto;
+    max-height: calc(100% - var(--hud-raum) - var(--dock-raum)); background-position: 0 50px, 0 0;
+  }
+  .abschluss-tafel > .abschluss-seite { padding: 6px 24px 16px 28px; }
+  .abschluss { gap: 10px; max-width: none; }
+  .abschluss .kasten.ergebnis { padding-right: 96px; }
+  .abschluss .kasten.ergebnis > b:first-child { font-size: 25px; }
+  .abschluss-stempel { width: 96px; height: 96px; }
+  .abschluss-ertrag { grid-template-columns: 1fr 1fr; column-gap: 28px; }
+  .abschluss-ertrag > .kicker { grid-column: 1 / -1; }
+  .ertrag-zeile { min-height: 52px; }
+  .ertrag-zahl { font-size: 28px; }
+  .kachel.abschluss-siedlung { flex-direction: column; align-items: flex-start; }
+}

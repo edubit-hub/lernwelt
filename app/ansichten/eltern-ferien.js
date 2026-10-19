@@ -8,22 +8,8 @@
 
   const MODI = [['auto', 'Nach Kalender'], ['an', 'Ein'], ['aus', 'Aus']];
   const MAX_EIGENE = 10;
-  const STIL = `
-.fe-liste { display: grid; gap: var(--a2); margin: var(--a2) 0; padding: 0; list-style: none; }
-.fe-liste li { padding: var(--a2) var(--a3); border: 1px solid var(--linie); border-radius: var(--radius); background: var(--flaeche); }
-.fe-liste li > div { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--a2); }
-`;
+  /* Gestaltung: app/stil/eltern.css (fe-*, gedrückte Schalter). */
   const gueltig = t => typeof t === 'string' && L.Tag.gueltig(t);
-
-  function stil(k) {
-    const d = k.dok;
-    if (L.ElternAnpassung) L.ElternAnpassung.schalterStil(k);
-    if (!d || !d.head || (d.getElementById && d.getElementById('eltern-ferien-stil'))) return;
-    const s = d.createElement('style');
-    s.setAttribute('id', 'eltern-ferien-stil');
-    s.textContent = STIL;
-    d.head.append(s);
-  }
 
   const statusText = (k, lage) => {
     const d = L.Eltern.datum;
@@ -57,7 +43,6 @@
   /** Die Karte «Ferien». */
   function kachel(k) {
     const h = k.h, wurzel = h('div'), gesperrt = k.gesperrt();
-    stil(k);
     const zeichne = () => {
       const doc = k.Z.hole(), e = L.Ferien.einstellung(doc), lage = L.Ferien.lage(doc, k.heute());
       const bis = h('input', { type: 'date', 'aria-label': 'Ferienmodus bis', value: e.bis, disabled: gesperrt });

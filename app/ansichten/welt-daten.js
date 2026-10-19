@@ -33,6 +33,12 @@
   const posten = (k, kosten) => Object.entries(objekt(kosten) ? kosten : {}).filter(([, n]) => n > 0)
     .map(([id, menge]) => { const hat = saldo(k, id); return { id, name: name(k, id), symbol: symbol(k, id), menge, hat, fehlt: Math.max(0, menge - hat) }; });
 
+  /** Was fehlt, als kurzer Text: «7 Stein» oder «7 Stein, 2 Holz». */
+  const fehltText = zeilen => (zeilen || []).filter(p => p.fehlt > 0).map(p => `${p.fehlt} ${p.name}`).join(', ');
+  /** Der Stand der fehlenden Posten: «33 von 40 Stein» (Nachbesserung 2: eindeutiger als «noch 7 Stein»). Ohne hat und menge wie fehltText. */
+  const standText = zeilen => (zeilen || []).filter(p => p.fehlt > 0)
+    .map(p => (Number.isFinite(p.menge) && Number.isFinite(p.hat) ? `${Math.min(p.hat, p.menge)} von ${p.menge} ${p.name}` : `${p.fehlt} ${p.name}`)).join(', ');
+
   /** Wie oft sich ein Posten bezahlen lässt (für «Alles»). */
   const maxMenge = zeilen => (zeilen.length ? Math.min(...zeilen.map(p => Math.floor(p.hat / p.menge))) : 0);
 
@@ -59,7 +65,11 @@
     let nr = 0;
     es.forEach((e, i) => { if (L.Welt.epocheOffen(k.thema, k.stand, e.id)) nr = i; });
     const tor = es[nr + 1] && knoten(k, es[nr + 1].tor), w = tor ? wissenStand(k, tor)[0] : null;
-    return { nr: nr + 1, id: es[nr].id, name: es[nr].name || es[nr].id, tor: tor ? { id: tor.id, name: tor.name, hat: w ? w.hat : 0, braucht: w ? w.braucht : 0 } : null };
+    if (!tor) return { nr: nr + 1, id: es[nr].id, name: es[nr].name || es[nr].id, tor: null };
+    const kosten = posten(k, tor.kosten), fehlt = kosten.filter(p => p.fehlt > 0), wissenOk = !w || w.hat >= w.braucht;
+    // zustand: «wissen» (es fehlt Wissen), «material» (Wissen voll, es fehlt Material) oder «bereit» (Tor lässt sich erforschen)
+    return { nr: nr + 1, id: es[nr].id, name: es[nr].name || es[nr].id,
+      tor: { id: tor.id, name: tor.name, hat: w ? w.hat : 0, braucht: w ? w.braucht : 0, kosten, fehlt, zustand: !wissenOk ? 'wissen' : fehlt.length ? 'material' : 'bereit' } };
   }
 
   /** Bauplätze der offenen Epochen: { belegt, gesamt }. */
@@ -82,8 +92,10 @@
     const anteil = f => { const w = wissenStand(k, f); return w.length ? Math.min(...w.map(x => (x.braucht ? Math.min(1, x.hat / x.braucht) : 1))) : 1; };
     const gesetzt = knoten(k, eigen(k.stand, 'ziel')), f = gesetzt && !erforscht(k, gesetzt.id) ? gesetzt : offen.reduce((b, x) => (!b || anteil(x) > anteil(b) ? x : b), null);
     if (!f) return null;
-    const w = wissenStand(k, f), massgeblich = w.find(x => !x.ok) || w[0] || null;
-    return { id: f.id, name: f.name, gesetzt: f === gesetzt, wissen: massgeblich };
+    const w = wissenStand(k, f), massgeblich = w.find(x => !x.ok) || w[0] || null, kosten = posten(k, f.kosten), fehlt = kosten.filter(p => p.fehlt > 0);
+    // zustand sagt, was als Nächstes zu tun ist: Wissen sammeln, Material sammeln oder erforschen
+    const zustand = w.some(x => !x.ok) ? 'wissen' : fehlt.length ? 'material' : 'bereit';
+    return { id: f.id, name: f.name, gesetzt: f === gesetzt, wissen: massgeblich, kosten, fehlt, zustand, tor: liste(k.thema.epochen).some(e => e.tor === f.id) };
   }
 
   /** Eine Welt-Aktion ausführen: erst der Probelauf auf einer Kopie, dann (nur bei ok) die echte Aktion im Rückruf von Zustand.aendere. Gibt das Ergebnis der Engine zurück. */
@@ -121,6 +133,6 @@
   /** Der Name eines Sammlungsstücks im Welt-Thema, sonst die Kennung. */
   const sammlungName = (k, id) => (liste(k.thema.sammlung).find(s => s && s.id === id) || {}).name || id;
 
-  L.WeltDaten = { kontext, name, symbol, knoten, epoche, bauteile, stufe, erforscht, saldo, probe, heute, posten, maxMenge, ressourcen, wissenStand, epocheStand, plaetzeStand,
+  L.WeltDaten = { kontext, name, symbol, knoten, epoche, bauteile, stufe, erforscht, saldo, probe, heute, posten, fehltText, standText, maxMenge, ressourcen, wissenStand, epocheStand, plaetzeStand,
     moeglich, ausbauIds, ziel, aktion, setzeZiel, zuwachs, bereichName, bereichModule, datum, sammlungName };
 })(globalThis);

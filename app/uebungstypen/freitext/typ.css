@@ -1,19 +1,20 @@
-/* app/uebungstypen/freitext/typ.css: Schreiben und Selbstkontrolle des Typs «freitext». Tasten gestaltet app/stil/tastenfeld.css, Knöpfe und Kästen
-   app/stil/basis.css. Farben und Masse kommen aus app/stil/tokens.css. Die Anzeige der Tastatur ist hier mehrzeilig, weil eine Antwort aus
-   mehreren Sätzen bestehen darf. Ein abgehaktes Kriterium trägt an und ein Häkchen im Kästchen (nicht nur Farbe). */
+/* app/uebungstypen/freitext/typ.css: Schreiben und Selbstkontrolle des Typs «freitext» (docs/gestaltung-umbau.md 2.6: Papierzeile, Tastatur).
+   Tasten gestaltet app/stil/tastenfeld.css, Knöpfe und Kästen app/stil/basis.css, Farben und Masse kommen aus app/stil/tokens.css. Die Anzeige
+   der Tastatur ist hier eine mehrzeilige Papierfläche mit Linien, weil eine Antwort aus mehreren Sätzen bestehen darf. Ein abgehaktes
+   Kriterium trägt an und ein Häkchen im Kästchen (nicht nur Farbe). */
 .uebung-freitext {
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: var(--a4);
   width: 100%;
-  max-width: 780px;
+  max-width: 820px;
   margin: 0 auto;
   color: var(--tinte);
   touch-action: manipulation;
 }
-.uebung-freitext .aufgabe { margin: 0; text-align: center; font-size: var(--t-seite); line-height: 1.3; font-variant-numeric: normal; }
-.uebung-freitext .hinweis { margin: 0; text-align: center; }
+.uebung-freitext .aufgabe { margin: 0; text-align: center; font: 800 var(--t-seite)/1.3 var(--schrift-rund); font-variant-numeric: normal; }
+.uebung-freitext .hinweis { margin: 0; text-align: center; color: var(--tinte-leise); }
 
 .uebung-freitext .tastatur-anzeige {                   /* mehrzeilig: der Text bricht um, die Schreibstelle folgt dem letzten Zeichen */
   display: block;
@@ -21,32 +22,35 @@
   max-height: 168px;
   padding: var(--a3) var(--a4);
   overflow-y: auto;
+  border: 0;
+  border-radius: 14px;
+  background: var(--papier-buch) repeating-linear-gradient(transparent 0, transparent calc(1.45em - 1px), var(--papier-rand) calc(1.45em - 1px), var(--papier-rand) 1.45em);
+  background-position: 0 var(--a3);
+  box-shadow: inset 0 0 0 1px var(--papier-rand), 0 3px 0 var(--papier-rand);
   white-space: pre-wrap;
   overflow-wrap: anywhere;
-  font-size: var(--t-gross);
-  line-height: 1.45;
+  font: 600 var(--t-gross)/1.45 var(--schrift-rund);
 }
 .uebung-freitext .tastatur-anzeige::after { display: inline-block; vertical-align: text-bottom; }
 
-.uebung-freitext .kasten { width: 100%; padding: var(--a3) var(--a4); border: 1px solid var(--linie); background: var(--flaeche); }
+.uebung-freitext .kasten { width: 100%; padding: var(--a3) var(--a4); border: 0; border-radius: 14px; background: var(--papier-buch); box-shadow: inset 0 0 0 1px var(--papier-rand); }
 .uebung-freitext .kasten .text { margin: var(--a1) 0 0; font-size: var(--t-text); line-height: 1.45; white-space: pre-wrap; overflow-wrap: anywhere; }
 .uebung-freitext .kasten.muster { border-left: 4px solid var(--akzent); }
 
-.uebung-freitext .kriterien { display: grid; gap: var(--a2); width: 100%; }
+.uebung-freitext .kriterien { display: grid; gap: var(--a3); width: 100%; }
 .uebung-freitext .kriterium {
   display: flex;
   align-items: center;
   gap: var(--a3);
   min-height: var(--taste-hoehe);
+  margin-bottom: 4px;
   padding: var(--a2) var(--a4);
-  border: 1.5px solid var(--stein);
-  border-radius: var(--radius);
-  background: var(--flaeche);
-  box-shadow: var(--schatten-taste);
+  border: 0;
+  border-radius: 14px;
+  background: linear-gradient(var(--flaeche), var(--taste-oben));
+  box-shadow: var(--schatten-knopf);
   color: var(--tinte);
-  font: inherit;
-  font-size: var(--t-text);
-  line-height: 1.35;
+  font: 600 var(--t-text)/1.35 var(--schrift-rund);
   text-align: left;
   touch-action: manipulation;
   -webkit-user-select: none;
@@ -60,13 +64,13 @@
   justify-content: center;
   width: 28px;
   height: 28px;
-  border: 1.5px solid var(--stein);
-  border-radius: 6px;
+  border: 2px solid var(--akzent-mitte);
+  border-radius: 8px;
   background: var(--flaeche);
   color: var(--flaeche);
 }
 .uebung-freitext .kriterium .ico { width: 20px; height: 20px; opacity: 0; }
-.uebung-freitext .kriterium.an { border-color: var(--akzent); background: var(--akzent-hell); }
+.uebung-freitext .kriterium.an { background: var(--akzent-hell); box-shadow: inset 0 0 0 2px var(--akzent), 0 4px 0 var(--kante-akzent); }
 .uebung-freitext .kriterium.an .kaestchen { border-color: var(--akzent); background: var(--akzent); }
 .uebung-freitext .kriterium.an .ico { opacity: 1; }
-.uebung-freitext .kriterium:active { border-color: var(--akzent); }
+.uebung-freitext .kriterium:active { background: var(--akzent-hell); }

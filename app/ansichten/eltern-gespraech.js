@@ -7,24 +7,8 @@
   'use strict';
   const L = (g.Lernwelt = g.Lernwelt || {});
 
-  const STIL = `
-.gesp-karte { position: relative; height: 340px; overflow: hidden; border-radius: var(--radius); background: var(--meer, #d6e6ef); }
-.gesp-karte .welt-karte, .gesp-karte svg { display: block; width: 100%; height: 100%; }
-.gesp-karte .bauplatz.frei circle, .gesp-karte .bauplatz.frei path[d^="M-9 0H9"] { display: none; }   /* das Plus lädt zum Bauen ein, hier gibt es nichts zu bauen */
-.gesp-wahl { min-height: 1.5em; margin-top: var(--a2); }
-.gesp-liste { display: grid; gap: var(--a2); margin: var(--a2) 0 0; padding: 0; list-style: none; }
-.gesp-liste li { padding: var(--a2) var(--a3); border: 1px solid var(--linie); border-radius: var(--radius); background: var(--flaeche); }
-`;
+  /* Gestaltung: app/stil/eltern.css (gesp-*). */
   let karteAlt = null;                                                 // die zuletzt gezeichnete Karte, wird beim nächsten Zeichnen und beim Schliessen freigegeben
-
-  function stil(k) {
-    const d = k.dok;
-    if (!d || !d.head || (d.getElementById && d.getElementById('eltern-gespraech-stil'))) return;
-    const s = d.createElement('style');
-    s.setAttribute('id', 'eltern-gespraech-stil');
-    s.textContent = STIL;
-    d.head.append(s);
-  }
 
   /** Genau drei Gesprächsanlässe aus dem Stand der Welt (kx aus WeltDaten.kontext). Fehlt ein Stand, springt eine allgemeine Frage ein. */
   function anlaesse(kx) {
@@ -50,7 +34,6 @@
 
   function bau(k) {
     const h = k.h, wurzel = h('div.eltern-inhalt'), kx = L.WeltDaten.kontext(k.Z.hole(), k.opt.weltThema);
-    stil(k);
     if (karteAlt) { try { karteAlt.zerstoere(); } catch (e) { /* schon weg */ } karteAlt = null; }
     if (!kx) { wurzel.append(k.kasten('hilfe', 'Keine Siedlung', 'Es ist keine Welt geladen. Sobald das Kind eine Siedlung hat, erscheint sie hier zum Lesen.')); return wurzel; }
     const box = h('div.gesp-karte', { role: 'img', 'aria-label': 'Die Siedlung des Kindes, nur zum Lesen' }), wahl = h('p.gesp-wahl.klein', { role: 'status', 'aria-live': 'polite' }, 'Tippen Sie einen Platz an, um zu sehen, was dort steht.');

@@ -6,28 +6,7 @@
   'use strict';
   const L = (g.Lernwelt = g.Lernwelt || {});
 
-  const STIL = `
-.pr-liste { display: grid; gap: var(--a4); }
-.pr-kopf { display: flex; flex-wrap: wrap; align-items: center; gap: var(--a2); }
-.pr-ampel { padding: var(--a2) var(--a3); border: 1px solid var(--linie); border-left-width: 6px; border-radius: var(--radius); background: var(--flaeche); margin-bottom: var(--a3); }
-.pr-gruen { border-left-color: var(--ok); }
-.pr-gelb { border-left-color: var(--akzent-warm); }
-.pr-rot { border-left-color: var(--fehler); }
-.pr-risiken { margin: var(--a2) 0 var(--a3); padding-left: var(--a5); }
-.pr-teil { display: grid; gap: var(--a2); margin-top: var(--a4); padding-top: var(--a3); border-top: 1px solid var(--linie); }
-.pr-teil h4 { font-size: var(--t-text); }
-.pr-verlauf { margin: 0; padding-left: var(--a5); }
-`;
-
-  function stil(k) {
-    const d = k.dok;
-    if (L.ElternAnpassung) L.ElternAnpassung.schalterStil(k);
-    if (!d || !d.head || (d.getElementById && d.getElementById('eltern-pruefung-stil'))) return;
-    const s = d.createElement('style');
-    s.setAttribute('id', 'eltern-pruefung-stil');
-    s.textContent = STIL;
-    d.head.append(s);
-  }
+  /* Gestaltung: app/stil/eltern.css (pr-*, gedrückte Schalter). */
 
   const lagen = k => {
     const doc = k.Z.hole(), heute = k.heute();
@@ -87,7 +66,6 @@
 
   function bau(k) {
     const h = k.h, liste = lagen(k);
-    stil(k);
     return h('div.eltern-inhalt', L.ElternFerien ? L.ElternFerien.kachel(k) : '',
       liste.length ? h('div.pr-liste', liste.map(l => karte(k, l))) : k.kasten('hilfe', 'Kein Modul aktiv', 'Schalten Sie im Reiter «Module» ein Modul ein. Danach lässt sich hier ein Prüfungsdatum setzen.'));
   }

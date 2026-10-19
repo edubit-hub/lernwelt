@@ -50,6 +50,21 @@
     };
   };
 
+  /** Katalog aus dem eingebauten Beispiel eines Übungstyps (nur für die Vorschau, die nichts schreibt): so lässt sich ein Typ zeigen, für den kein
+      aktives Modul Aufgaben hat (Freitext). Schlüssel «beispiel/<id>», Thema = Typ. → { eintraege: [{ key, typ }], suche, thema, aufgabenVon, modul } oder null. */
+  D.beispielKatalog = function beispielKatalog(typ) {
+    const def = L.registry.typen.get(typ), b = def && def.beispiel;
+    if (!b || !Array.isArray(b.aufgaben) || !b.aufgaben.length) return null;
+    const liste = b.aufgaben.map(a => ({ ...a, modul: 'beispiel', thema: typ, key: `beispiel/${a.id}` }));
+    return {
+      eintraege: liste.map(a => ({ key: a.key, typ })),
+      modul: () => null,
+      suche: key => { const a = liste.find(x => x.key === key); return a ? { aufgabe: a } : { grund: `Aufgabe «${key}» gibt es nicht` }; },
+      thema: () => { throw new Error('Beispiel ohne Thema'); },
+      aufgabenVon: () => liste.slice()
+    };
+  };
+
   // ---- Lernstand ---------------------------------------------------------------------------------------------
   /** Lesen und Schreiben des Lernstands für eine Runde. Ohne schreibt (Herausforderung, Vorschau) bleibt jede Änderung in einer Kopie,
       die nur diese Runde sieht, und der Zustand wird nie angefasst. */

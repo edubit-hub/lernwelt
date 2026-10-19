@@ -23,6 +23,26 @@
   --flachwasser: #D3E9ED; /* eine Zelle Wasser um das Land */
   --meer-hell: #CDE6EB;   /* Mitte des Meeres */
   --meer-tief: #B4D4DB;   /* Rand des Meeres */
+
+  /* Meer der Bühne (Umbauplan 3.9, aus docs/mockup/richtung-a/a-tokens.css) */
+  --see-mitte: #CFEBEC;  --see-zwischen: #B4DBE1;  --see-rand: #8FC2CE;
+  --see-flach: #DDF2EF;  --see-lagune: #C3E6E6;    --see-tief: #5E98A6;
+  --see-schatten: #2E5E6B;
+
+  /* Rohstoffe: Töne der Objekte (Iso.objekt) und Grund der Pillen und Münzen (--*-tint) */
+  --rs-stein: #AEB8C2;   --rs-stein-hell: #DCE2E7;  --stein-tint: #E1E7EC;
+  --rs-holz: #B98A5A;    --rs-holz-stirn: #EBD3A8;  --holz-tint: #F2DFC4;
+  --rs-handel: #D7A24A;  --rs-handel-reif: #8A6634; --handel-tint: #F6E7BF;  --handelsgut-tint: #F6E7BF;
+  --rs-proben: #9CCFC0;  --rs-proben-blatt: #5E9C6E; --proben-tint: #D5EEE4;
+
+  /* Welt: Gras, Erde und Staub der Bühne */
+  --gras-licht: #C2DEAE;  --gras-tief: #8DB67E;  --gras-mesa: #B6D5A0;  --erde-tief: #8F7A55;  --erde-saum: #6E6046;
+  --staub-hell: #EDE3C8;  --staub: #CDB98C;
+}
+
+/* Meeresgrund der Bühne (app/welt/buehne.js): ruhiges Wasser mit etwas Tiefe zum Rand */
+.buehne-ebene .lagune {
+  background: radial-gradient(130% 95% at 46% 44%, var(--see-mitte) 0%, var(--see-zwischen) 50%, var(--see-rand) 100%);
 }
 
 /* Hintergrund der Karte: etwas Tiefe im Meer. div.welt-karte, damit die Regel gegen die Grundregel in render.js gewinnt. */

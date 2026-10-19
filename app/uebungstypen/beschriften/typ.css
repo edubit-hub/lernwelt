@@ -1,13 +1,14 @@
-/* app/uebungstypen/beschriften/typ.css: Bild, Punkte und Beschriftungen des Typs «beschriften». Farben und Masse kommen aus app/stil/tokens.css.
-   Die Punkte liegen mit left und top in Prozent über dem Bild (die Fläche ist genau so gross wie das Bild). Ein Punkt ist 48 px gross zum Antippen,
-   sichtbar ist der Kreis mit der Nummer. Gewählt: gefüllt, belegt: helle Fläche, nach «Prüfen» richtig oder falsch (Rand und Farbe, im Text ein Zeichen). */
+/* app/uebungstypen/beschriften/typ.css: Bild, Punkte und Beschriftungen des Typs «beschriften» (docs/gestaltung-umbau.md 2.6: Bild auf Papier,
+   Marken als Nummern). Farben und Masse kommen aus app/stil/tokens.css. Das Bild liegt auf einem Papierblatt, die Punkte liegen mit left und
+   top in Prozent darüber (die Fläche ist genau so gross wie das Bild). Ein Punkt ist 48 px gross zum Antippen, sichtbar ist die runde Marke mit
+   der Nummer. Gewählt: gefüllt, belegt: helle Fläche, nach «Prüfen» richtig (grün mit Häkchen) oder falsch (neutral in --tinte-leise, kein Rot). */
 .uebung-beschriften {
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: var(--a4);
   width: 100%;
-  max-width: 680px;
+  max-width: 720px;
   margin: 0 auto;
   color: var(--tinte);
   touch-action: manipulation;
@@ -20,10 +21,11 @@
   position: relative;
   display: inline-block;
   max-width: 100%;
+  padding: var(--a3);
   line-height: 0;
-  border: 1px solid var(--linie);
-  border-radius: var(--radius);
-  background: var(--flaeche);
+  border-radius: 18px;
+  background: var(--papier-buch);
+  box-shadow: inset 0 0 0 1px var(--papier-rand), 0 3px 0 var(--papier-rand);
 }
 .uebung-beschriften .bildflaeche img {
   display: block;
@@ -33,11 +35,11 @@
   max-width: 100%;
   max-height: 44vh;
   max-height: 44dvh;
-  border-radius: var(--radius);
+  border-radius: 10px;
   pointer-events: none;
   -webkit-user-drag: none;
 }
-.uebung-beschriften .punkte { position: absolute; inset: 0; pointer-events: none; }
+.uebung-beschriften .punkte { position: absolute; inset: var(--a3); pointer-events: none; }
 .uebung-beschriften .punkt {
   position: absolute;
   display: flex;
@@ -64,15 +66,14 @@
   align-items: center;
   justify-content: center;
   flex: none;
-  width: 30px;
-  height: 30px;
+  width: 32px;
+  height: 32px;
   border: 2px solid var(--akzent);
   border-radius: 50%;
   background: var(--flaeche);
   color: var(--akzent-dunkel);
-  box-shadow: var(--schatten-chip);
-  font-size: var(--t-text);
-  font-weight: 650;
+  box-shadow: 0 2px 0 var(--kante-weiss), var(--schatten-chip);
+  font: 800 var(--t-text) var(--schrift-rund);
   font-variant-numeric: tabular-nums;
 }
 .uebung-beschriften .punkt.belegt .nr,
@@ -82,9 +83,9 @@
 .uebung-beschriften .punkt.richtig .nr,
 .uebung-beschriften .label.richtig .nr { border-color: var(--ok); background: var(--ok-text); color: var(--flaeche); }
 .uebung-beschriften .punkt.falsch .nr,
-.uebung-beschriften .label.falsch .nr { border-color: var(--fehler); background: var(--fehler-text); color: var(--flaeche); }
+.uebung-beschriften .label.falsch .nr { border-style: dashed; border-color: var(--tinte-leise); background: var(--beige-flaeche); color: var(--tinte-leise); }
 
-.uebung-beschriften .labels { display: flex; flex-wrap: wrap; justify-content: center; gap: var(--a2); }
+.uebung-beschriften .labels { display: flex; flex-wrap: wrap; justify-content: center; gap: var(--a3); }
 .uebung-beschriften .label {
   position: relative;
   display: inline-flex;
@@ -92,30 +93,32 @@
   gap: var(--a2);
   min-height: var(--taste-hoehe);
   max-width: 100%;
+  margin-bottom: 5px;
   padding: var(--a2) var(--a4);
-  border: 1.5px solid var(--stein);
-  border-radius: var(--radius);
-  background: var(--flaeche);
-  box-shadow: var(--schatten-taste);
+  border: 0;
+  border-radius: 14px;
+  background: linear-gradient(var(--flaeche), var(--taste-oben));
+  box-shadow: var(--schatten-knopf);
   color: var(--tinte);
-  font: inherit;
-  font-size: var(--t-gross);
-  line-height: 1.3;
+  font: 700 var(--t-gross)/1.3 var(--schrift-rund);
   cursor: pointer;
+  transition: transform var(--dauer) var(--kurve-raus);
   touch-action: manipulation;
   -webkit-user-select: none;
   user-select: none;
   -webkit-touch-callout: none;
   -webkit-tap-highlight-color: transparent;
 }
-.uebung-beschriften .label[aria-disabled="true"] { color: var(--tinte-leise); }                  /* noch ist kein Punkt gewählt */
-.uebung-beschriften .label.belegt { border-color: var(--akzent-mitte); background: var(--akzent-hell); }
+.uebung-beschriften .label:active { transform: translateY(3px); }
+.uebung-beschriften .label[aria-disabled="true"] { color: var(--tinte); box-shadow: inset 0 0 0 1.5px var(--tinte-a14); border-style: dashed; }   /* wartend, nicht gesperrt: erst einen Punkt wählen */
+.uebung-beschriften .label.belegt { background: var(--akzent-hell); box-shadow: inset 0 0 0 2px var(--akzent-mitte), 0 4px 0 var(--kante-weiss); }
 .uebung-beschriften .label:disabled { cursor: default; color: var(--tinte); }
-.uebung-beschriften .label.richtig { border-color: var(--ok); box-shadow: inset 0 0 0 1.5px var(--ok); }
-.uebung-beschriften .label.falsch { border-color: var(--fehler); box-shadow: inset 0 0 0 1.5px var(--fehler); }
+.uebung-beschriften .label.richtig { background: var(--flaeche); box-shadow: inset 0 0 0 3px var(--ok), 0 4px 0 var(--ok-kante); }
+.uebung-beschriften .label.falsch { background: var(--beige-flaeche); color: var(--tinte-leise); box-shadow: none; outline: 2px dashed var(--tinte-leise); outline-offset: -4px; }
 .uebung-beschriften .label.richtig::after,
-.uebung-beschriften .label.falsch::after { font-size: var(--t-text); }
+.uebung-beschriften .label.falsch::after { font-size: var(--t-gross); }
 .uebung-beschriften .label.richtig::after { content: "\2713"; color: var(--ok-text); }
-.uebung-beschriften .label.falsch::after { content: "\2717"; color: var(--fehler-text); }
+.uebung-beschriften .label.falsch::after { content: "\2717"; color: var(--tinte-leise); }
 
 .uebung-beschriften .leiste { display: flex; justify-content: center; }
+@media (prefers-reduced-motion: reduce) { .uebung-beschriften .label { transition: none; } .uebung-beschriften .label:active { transform: none; } }

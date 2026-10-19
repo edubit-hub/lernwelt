@@ -1,5 +1,6 @@
 /* app/pruefung/inhalt-welt.js: Prüfung eines Welt-Thema (Teil von inhalt.js, Architektur 7.5 und 9.4): Aufbau, Budget aus weltregeln.budget,
-   ein Rohstoff für jedes Fach der Module, alle Texte vorhanden, Verweise innerhalb des Themas gültig.
+   ein Rohstoff für jedes Fach der Module, alle Texte vorhanden, Verweise innerhalb des Themas gültig. Dazu die freiwilligen Gestaltungsdaten der Bühne
+   (orte mit Name, Himmelsrichtung und Formenliste, kamera mit vier Zahlen und Zoom höchstens 1,8, leben mit Obergrenzen, bild der Sammlung).
    Lernwelt.Pruefung.pruefeWelt(welt, ctx) → [{ stufe: 'fehler', ort, text, regel }], alles sind Fehler (Regel «welt», Eszett: «eszett»).
    ctx: { faecher (Fächer der aktiven Module, Standard: alle Fächer der registrierten Module), budget (Standard: weltregeln.budget) }.
    Die Datei hängt beim Laden von keiner anderen ab. */
@@ -126,8 +127,38 @@
       }
     }
 
+    for (const [id, s] of gruppen.sammlung) if (objekt(s) && s.bild !== undefined && !formenliste(s.bild)) f(`sammlung.${id}.bild`, 'Formenliste erwartet ([[Form, Angaben], ...])');
+    buehne(welt, f);
+
     for (const r of P.pruefeTexte(P.texteIn(welt, 'welt'), { ton: false })) f(r.ort, r.text, r.regel);
     return R;
+  }
+
+  // Gestaltung der Bühne (Umbauplan 3.3): orte, kamera und leben sind freiwillig, aber wenn vorhanden, dann vollständig
+  const ORTE = ['forschung', 'hafen', 'tor', 'lager'], LAGEN = ['nord', 'nordost', 'ost', 'suedost', 'sued', 'suedwest', 'west', 'nordwest'];
+  const KAMERA = ['start', 'siedlung', 'forschung', 'hafen', 'logbuch', 'aufgabe'], LEBEN = { boote: 3, wolken: 5, voegel: 4 };
+  const formenliste = v => Array.isArray(v) && v.length > 0 && v.every(e => Array.isArray(e) && text(e[0]) && (e[1] === undefined || objekt(e[1])));
+  function buehne(welt, f) {
+    const eintraege = (feld, erlaubt) => {
+      if (welt[feld] === undefined) return [];
+      if (!objekt(welt[feld])) { f(feld, 'Objekt erwartet'); return []; }
+      return Object.entries(welt[feld]).filter(([id]) => erlaubt.includes(id) || void f(`${feld}.${id}`, `unbekannt, erlaubt sind ${erlaubt.join(', ')}`));
+    };
+    for (const [id, o] of eintraege('orte', ORTE)) {
+      if (!objekt(o)) { f(`orte.${id}`, 'Objekt erwartet'); continue; }
+      if (!text(o.name)) f(`orte.${id}.name`, 'Text fehlt');
+      if (!LAGEN.includes(o.lage)) f(`orte.${id}.lage`, `Himmelsrichtung erwartet (${LAGEN.join(', ')})`);
+      if (!formenliste(o.bild)) f(`orte.${id}.bild`, 'Formenliste erwartet ([[Form, Angaben], ...])');
+    }
+    for (const [id, k] of eintraege('kamera', KAMERA)) {
+      for (const fmt of ['quer', 'hoch']) {
+        const e = objekt(k) ? k[fmt] : null, ort = `kamera.${id}.${fmt}`;
+        if (!Array.isArray(e) || e.length !== 4 || !['insel', 'siedlung', ...ORTE].includes(e[0]) || !e.slice(1).every(zahl)) { f(ort, 'erwartet [Ziel, Faktor, Anker x, Anker y], Ziel insel, siedlung oder ein Ort'); continue; }
+        if (e[1] <= 0 || e[1] > 1.8) f(ort, 'der Faktor liegt über 0 und höchstens bei 1,8');
+        if (e[2] < 0 || e[2] > 1 || e[3] < 0 || e[3] > 1) f(ort, 'die Anker liegen zwischen 0 und 1');
+      }
+    }
+    for (const [id, n] of eintraege('leben', Object.keys(LEBEN))) if (!Number.isInteger(n) || n < 0 || n > LEBEN[id]) f(`leben.${id}`, `ganze Zahl von 0 bis ${LEBEN[id]} erwartet`);
   }
 
   P.pruefeWelt = pruefeWelt;
