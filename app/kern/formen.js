@@ -38,7 +38,8 @@
 
   form('paar', 'Element und Kategorie oder Partner, gleiche rechte Werte bilden eine Kategorie', i => [
     ...pflicht(i, { links: [text, 'ist kein Text'], rechts: [text, 'ist kein Text'] }),
-    ...(fehlt(i.gruppe) || text(i.gruppe) ? [] : ['inhalt.gruppe ist kein Text'])
+    ...(fehlt(i.gruppe) || text(i.gruppe) ? [] : ['inhalt.gruppe ist kein Text']),
+    ...(fehlt(i.frage) || text(i.frage) ? [] : ['inhalt.frage ist kein Text'])
   ]);
 
   form('satz', 'Satz oder Wort, Lücken als {wort}, im Diktat trennt | die Abschnitte', i => {

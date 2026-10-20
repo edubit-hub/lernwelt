@@ -52,7 +52,7 @@ Lernwelt.modul({
     { id: 'silben-trennen', titel: 'Silben gliedern und trennen', ziele: ['lz2', 'lz7'],
       leiter: [{ box: 0, typ: 'multiple-choice' }],                  // Erkennen: bleibt unter Box 5, V-AP18c-01
       generator: { name: 'deutsch-rechtschreibung/silben' } },
-    { id: 'wortstamm-wortfamilie', titel: 'Wortstamm und Wortfamilie', ziele: ['lz3'],
+    { id: 'wortstamm-wortfamilie', titel: 'Wortstamm und Wortfamilie', ziele: ['lz3'], frage: 'Welcher Wortstamm steckt in diesem Wort?',
       leiter: [{ box: 0, typ: 'zuordnen', ersatz: 'multiple-choice' }],     // Sortieren: bleibt unter Box 5, V-AP18c-01
       generator: { name: 'deutsch-rechtschreibung/wortstamm' } },
     { id: 'ie-regel', titel: 'ie-Regel und sp-/st-Schreibung', ziele: ['lz4', 'lz7'], voraussetzung: ['silben-trennen'],

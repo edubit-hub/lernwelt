@@ -80,7 +80,7 @@ Lernwelt.modul({
           hilfe: { weg: 'pruefen', schritte: ['Das grosse Holzstück ist grösser und schwerer als die Münze und schwimmt trotzdem.', 'Ein Stoff schwimmt oder sinkt in Wasser, je nachdem, was für ein Stoff er ist. Ein Stück Holz schwimmt, ein Stück Metall oder Stein sinkt.'] } }
       ] },
 
-    { id: 'magnet', titel: 'Magnet', ziele: ['lz2'], einfuehrung: 'erklaerung',      // Beispiele sind Allgemeinwissen (wahrscheinlich), Prinzip belegt (NMG.3.3.d)
+    { id: 'magnet', titel: 'Magnet', ziele: ['lz2'], einfuehrung: 'erklaerung', frage: 'Zieht ein Magnet das an?',      // Beispiele sind Allgemeinwissen (wahrscheinlich), Prinzip belegt (NMG.3.3.d)
       leiter: [{ box: 0, typ: 'multiple-choice' }, { box: 2, typ: 'zuordnen', ersatz: 'multiple-choice' }],
       hilfe: { weg: 'pruefen', schritte: ['Vermute zuerst, ob der Magnet den Gegenstand anzieht.', 'Der Magnet zieht nur bestimmte Metalle an, zum Beispiel Eisen und Stahl.', 'Nicht jedes Metall ist magnetisch: Kupfer und Aluminium zieht der Magnet nicht an. Holz, Glas und Gummi auch nicht.'] },
       aufgaben: { tabelle: { form: 'paar', spalten: ['id', 'links', 'rechts'], zeilen: [
@@ -95,7 +95,7 @@ Lernwelt.modul({
         ['mag-radierer',  'Radiergummi',             'Wird nicht angezogen']
       ] } } },
 
-    { id: 'schwimmen', titel: 'Schwimmen und sinken', ziele: ['lz2'], einfuehrung: 'erklaerung',   // Ergebnisse sind Allgemeinwissen (wahrscheinlich), Prinzip belegt (NMG.3.3.d)
+    { id: 'schwimmen', titel: 'Schwimmen und sinken', ziele: ['lz2'], einfuehrung: 'erklaerung', frage: 'Schwimmt das oder sinkt es?',   // Ergebnisse sind Allgemeinwissen (wahrscheinlich), Prinzip belegt (NMG.3.3.d)
       leiter: [{ box: 0, typ: 'multiple-choice' }, { box: 2, typ: 'zuordnen', ersatz: 'multiple-choice' }],
       hilfe: { weg: 'pruefen', schritte: ['Vermute zuerst und überlege, warum.', 'Lege den Gegenstand vorsichtig ins Wasser und schau, was passiert.', 'Ob etwas schwimmt, hängt vor allem vom Stoff ab und nicht nur von Grösse oder Gewicht: Ein grosses Stück Holz schwimmt, eine kleine Münze sinkt.'] },
       aufgaben: { tabelle: { form: 'paar', spalten: ['id', 'links', 'rechts'], zeilen: [
@@ -110,7 +110,7 @@ Lernwelt.modul({
         ['sch-muenze',     'Münze',                        'sinkt im Wasser']
       ] } } },
 
-    { id: 'zustaende', titel: 'Fest, flüssig, gasförmig', ziele: ['lz3'], einfuehrung: 'erklaerung',    // Begriffe belegt (Kommentar zur Stoffe-Einheit), Beispiele eigene Wahl
+    { id: 'zustaende', titel: 'Fest, flüssig, gasförmig', ziele: ['lz3'], einfuehrung: 'erklaerung', frage: 'Ist das fest, flüssig oder gasförmig?',    // Begriffe belegt (Kommentar zur Stoffe-Einheit), Beispiele eigene Wahl
       leiter: [{ box: 0, typ: 'multiple-choice' }, { box: 2, typ: 'zuordnen', ersatz: 'multiple-choice' }],
       hilfe: { weg: 'zustand', schritte: ['Fest: Der Stoff behält seine Form, auch wenn du ihn in ein anderes Gefäss legst.', 'Flüssig: Der Stoff nimmt die Form des Gefässes an und lässt sich giessen.', 'Gasförmig: Der Stoff füllt den ganzen Raum aus, den er bekommt, und ist meistens unsichtbar.', 'Wasser kommt in allen drei Zuständen vor: als Eis, als Wasser und als Wasserdampf.'] },
       aufgaben: { tabelle: { form: 'paar', spalten: ['id', 'links', 'rechts'], zeilen: [

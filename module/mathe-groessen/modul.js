@@ -78,7 +78,7 @@ Lernwelt.modul({
       generator: { name: 'mathe-groessen/umwandeln', params: { stufen: ['kg-g'] } } },
     { id: 'masse-rechnen', titel: 'Rechnen mit Längen und Gewichten', ziele: ['lz7'], voraussetzung: ['laenge-m-cm'],
       generator: { name: 'mathe-groessen/masse-rechnen', params: {} } },
-    { id: 'einheit-waehlen', titel: 'Die passende Längeneinheit wählen', ziele: ['lz8'],
+    { id: 'einheit-waehlen', titel: 'Die passende Längeneinheit wählen', ziele: ['lz8'], frage: 'Mit welcher Einheit gibt man das an?',
       // Auswahl und Zuordnen lassen Raten zu: Aufgaben dieses Themas erreichen höchstens Box 4 (Warnung leiter-raten, siehe README).
       // Längen und Gewichte sind getrennte Themen, damit die Ablenker (die Einheiten der Geschwisteraufgaben) zur Grössenart passen.
       leiter: [{ box: 0, typ: 'zuordnen', ersatz: 'multiple-choice' }, { box: 2, typ: 'multiple-choice' }],
@@ -102,7 +102,7 @@ Lernwelt.modul({
         ['ew-zug-bern',       'Entfernung von Zug nach Bern',      'km', 'laenge'],
         ['ew-zuerich-bern',   'Länge der Strecke Zürich–Bern',     'km', 'laenge']
       ] } } },
-    { id: 'einheit-gewicht', titel: 'Die passende Gewichtseinheit wählen', ziele: ['lz8'],
+    { id: 'einheit-gewicht', titel: 'Die passende Gewichtseinheit wählen', ziele: ['lz8'], frage: 'Mit welcher Einheit gibt man das an?',
       leiter: [{ box: 0, typ: 'zuordnen', ersatz: 'multiple-choice' }, { box: 2, typ: 'multiple-choice' }],
       hilfe: { weg: 'einheit-vorstellung', schritte: [
         'Überlege, wie schwer die Sache ungefähr ist.',
@@ -149,7 +149,7 @@ Lernwelt.modul({
     { id: 'hohlmass-l-dl', titel: 'Liter und Deziliter umwandeln', ziele: ['lz14'], aktiv: false,
       geltung: 'Die Hohlmasse gehören nach der Jahresplanung in den späteren Teil des Schuljahres. Die Lehrperson weiss, wann das Thema in der Klasse dran ist.',
       generator: { name: 'mathe-groessen/umwandeln', params: { stufen: ['l-dl'] } } },
-    { id: 'hohlmass-einheit', titel: 'Liter oder Deziliter', ziele: ['lz14'], aktiv: false,
+    { id: 'hohlmass-einheit', titel: 'Liter oder Deziliter', ziele: ['lz14'], aktiv: false, frage: 'Mit welcher Einheit gibt man das an?',
       geltung: 'Die Hohlmasse gehören nach der Jahresplanung in den späteren Teil des Schuljahres. Die Lehrperson weiss, wann das Thema in der Klasse dran ist.',
       leiter: [{ box: 0, typ: 'zuordnen', ersatz: 'multiple-choice' }, { box: 2, typ: 'multiple-choice' }],
       hilfe: { weg: 'einheit-vorstellung', schritte: [

@@ -3,7 +3,7 @@
    vollwertiges Modulobjekt, das die App wie jedes andere Modul übt (Tagesauftrag, Prüfungsplan, Boxen). Reine Funktionen: kein Zustand, keine Oberfläche.
    Liste: { id, titel, fach: 'deutsch' | 'englisch', pruefung: null | 'JJJJ-MM-TT', bis: null | 'JJJJ-MM-TT', erstellt, geaendert, eintraege: [{ wort, bedeutung?, satz? }] }.
    Aufgaben-IDs stammen aus dem normalisierten Wort (w-hund, s-hund): Bedeutung, Satz und Gross-/Kleinschreibung zu ändern kostet keinen Fortschritt.
-   Deutsch: Thema «woerter» (diktat, form satz) und «saetze» (lueckentext, nur wo das Wort im Beispielsatz steht). Englisch: «woerter» (karteikarten, hoeren,
+   Deutsch: Thema «woerter» (diktat, form satz) und «saetze» (lueckentext, nur wo das Wort im Beispielsatz steht). Englisch: «woerter» (hoeren,
    zuordnen, diktat, form wortkarte) und «saetze» wie im Deutschen. Das Modul bleibt Entwurf, es gibt keine Lösungswege (wege leer). */
 (function (g) {
   'use strict';
@@ -91,7 +91,7 @@
     }
     const n = woerter.length, anzahl = Math.max(1, Math.min(n, GRENZEN.pruefAnzahl));
     const leiter = de ? [{ box: 0, typ: 'diktat' }]                         // ohne Ton kein Diktat: die Aufgabe bleibt dann fällig (diktat hat keinen Ersatz)
-      : [{ box: 0, typ: 'karteikarten' }, { box: 1, typ: 'hoeren' }, ...(n >= GRENZEN.minEnglisch ? [{ box: 2, typ: 'zuordnen' }] : []), { box: 3, typ: 'diktat' }];
+      : [{ box: 0, typ: 'hoeren' }, ...(n >= GRENZEN.minEnglisch ? [{ box: 2, typ: 'zuordnen' }] : []), { box: 3, typ: 'diktat' }];   // ab Box 0 mit Eingabe, keine Karteikarten (19.10.2026)
     const themen = [{ id: 'woerter', titel: de ? 'Wörter schreiben' : 'Wörter lernen', ziele: ['lz1'], einfuehrung: de ? 'vortest' : 'erklaerung', leiter, hilfeVerzicht: true, aufgaben: woerter }];
     if (saetze.length) themen.push({ id: 'saetze', titel: 'Sätze mit Lücke', ziele: ['lz1'], einfuehrung: 'vortest', leiter: [{ box: 0, typ: 'lueckentext' }], hilfeVerzicht: true, aufgaben: saetze });
     const modul = {

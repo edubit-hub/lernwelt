@@ -41,11 +41,12 @@ Lernwelt.modul({
   },
 
   themen: [
-    // Lernziel 1: Satzglieder den Fragen zuordnen. Erst eine Karte je Satzglied, dann Zuordnen, dann die Frage im ganzen Satz.
+    // Lernziel 1: Satzglieder den Fragen zuordnen. Erst Zuordnen (Satzteil ohne Satz), dann die Frage im ganzen Satz.
     { id: 'fragen', titel: 'Welche Frage passt?', ziele: ['lz1'], einfuehrung: 'erklaerung',
       generator: { name: 'deutsch-satzbau/fragen' },
-      leiter: [{ box: 0, typ: 'karteikarten' }, { box: 1, typ: 'zuordnen', ersatz: 'multiple-choice' }],
-      leiterRatenVerzicht: 'Vier Felder und Gruppen von drei bis sechs Karten: Die Chance, alle zu erraten, ist klein. Die Karteikarten zeigen die Lösung zuerst, die Fragen im Satz im nächsten Thema prüfen ohne Rateweg.' },
+      frage: 'Welche Frage passt zu diesem Satzteil?',
+      leiter: [{ box: 0, typ: 'zuordnen', ersatz: 'multiple-choice' }],
+      leiterRatenVerzicht: 'Vier Felder und Gruppen von drei bis sechs Karten: Die Chance, alle zu erraten, ist klein. Die Rückmeldung zeigt jede falsche Karte mit der richtigen Frage, die Fragen im Satz im nächsten Thema prüfen dasselbe noch einmal.' },
     { id: 'fragen-im-satz', titel: 'Frage im Satz', ziele: ['lz1', 'lz4'], voraussetzung: ['fragen'],
       generator: { name: 'deutsch-satzbau/fragen-im-satz' },
       leiterRatenVerzicht: 'Nur Auswahlfragen mit vier Antworten, Raten gelingt mit einer Chance von 1 zu 4. Das Zuordnen im Thema davor und die Fragen nach den Satzgliedern im Thema danach prüfen dasselbe aus einer anderen Richtung.' },

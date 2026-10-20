@@ -56,7 +56,7 @@
         richtig: { text: i[antwort], aufgabe: a.id }, falsche: rng.mische(sib).map(s => ({ text: s.inhalt[antwort], aufgabe: s.id })) };
     },
 
-    paar: (a, ctx, rng) => ({ kopf: a.inhalt.links, hinweis: 'Was passt dazu?', richtig: { text: a.inhalt.rechts },
+    paar: (a, ctx, rng) => ({ kopf: a.inhalt.links, hinweis: text(a.inhalt.frage) ? a.inhalt.frage : 'Was passt dazu?', richtig: { text: a.inhalt.rechts },   // frage: Frage des Themas (modul-schema 3.5)
       falsche: rng.mische(geschwister(ctx, a)).map(s => ({ text: s.inhalt.rechts })) })
   };
 

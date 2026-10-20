@@ -1,5 +1,5 @@
 /* module/mathe-einmaleins/generator-zehner.js: Aufgaben des Themas «zehner» (Zehner-Einmaleins: mal und durch, mal 10 und durch 10 an der Stellenwerttafel,
-   100 und 1000 teilen). Rechenaufgaben der Form rechnung, geübt über karteikarten, multiple-choice und eingabe. Die Brücke zum kleinen Einmaleins läuft über den
+   100 und 1000 teilen). Rechenaufgaben der Form rechnung, geübt über multiple-choice und eingabe. Die Brücke zum kleinen Einmaleins läuft über den
    Stellenwert (3 · 4 Zehner sind 12 Zehner), nicht über die Regel «Nullen anhängen». Das Thema steht auf aktiv: false (nur in einem Lehrmittelprofil Kern, R44),
    die Eltern schalten es ein. Reine Berechnung: kein Zustand, keine Oberfläche, kein Zufall, keine Uhr. Gleiche Parameter ergeben denselben Bestand. */
 (function (g) {

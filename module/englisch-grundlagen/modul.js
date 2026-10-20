@@ -38,10 +38,9 @@ Lernwelt.modul({
   },
 
   standard: {
-    einfuehrung: 'erklaerung',                            // Wörter lassen sich nicht erraten: zuerst zeigen, nach drei anderen Paketen abfragen
-    leiter: [                                             // erkennen vor erinnern. Ohne Option «schreiben» steigen die Aufgaben bis Box 4 (sicher), siehe README
-      { box: 0, typ: 'karteikarten' },
-      { box: 1, typ: 'hoeren',   ersatz: 'multiple-choice' },                  // ohne Ton: Wort lesen und Bild oder Bedeutung wählen
+    einfuehrung: 'erklaerung',                            // Wörter lassen sich nicht erraten: kein Vortest, nach einem Fehler kommt das Wort nach drei anderen Paketen wieder
+    leiter: [                                             // erkennen vor erinnern, ab Box 0 mit Eingabe (keine Karteikarten, 19.10.2026). Ohne Option «schreiben» steigen die Aufgaben bis Box 4 (sicher), siehe README
+      { box: 0, typ: 'hoeren',   ersatz: 'multiple-choice' },                  // ohne Ton: Wort lesen und Bild oder Bedeutung wählen
       { box: 2, typ: 'zuordnen', ersatz: 'multiple-choice' },                  // Gruppen von 3 bis 6 Wörtern, sonst Ersatz
       { box: 4, typ: 'diktat',   ersatz: 'multiple-choice', wenn: 'schreiben' }
     ],

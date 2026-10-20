@@ -106,13 +106,18 @@
     } catch (e) { k.fehler('generator', th.ort, `pool wirft einen Fehler: ${e.message}`); }
   }
 
-  /** Übungstypen mit Auswahl (multiple-choice) brauchen Ablenker: wortkarte und paar eines Themas müssen mindestens zwei verschiedene Antworten haben. */
+  /** Übungstypen mit Auswahl (multiple-choice) brauchen Ablenker: wortkarte und paar eines Themas müssen mindestens zwei verschiedene Antworten haben.
+      Jede Aufgabe verlangt eine Eingabe, die die App prüft (Entscheid vom 19.10.2026): Eine Auswahl ohne falsche Antwort zeigte die Aufgabe nur an und ist ein Fehler.
+      Eine paar-Aufgabe braucht eine Frage (inhalt.frage oder frage des Themas), sonst weiss das Kind nicht, was es mit dem Wort tun soll. */
   function ablenker(k, th) {
     const von = form => th.aufgaben.filter(a => a.form === form && k.objekt(a.inhalt));
     const verschieden = (liste, feld) => new Set(liste.map(a => a.inhalt[feld]).filter(k.text)).size;
     const karten = von('wortkarte'), paare = von('paar');
-    if (karten.length && (verschieden(karten, 'mutter') < 2 || verschieden(karten, 'fremd') < 2)) k.warnung('ablenker', th.ort, 'wortkarte: weniger als zwei verschiedene Wörter, eine Auswahl hat dann keine falsche Antwort und zeigt die Aufgabe nur an');
-    if (paare.length && verschieden(paare, 'rechts') < 2) k.warnung('ablenker', th.ort, 'paar: weniger als zwei verschiedene rechte Werte, eine Auswahl hat dann keine falsche Antwort und zeigt die Aufgabe nur an');
+    if (karten.length && (verschieden(karten, 'mutter') < 2 || verschieden(karten, 'fremd') < 2)) k.fehler('ablenker', th.ort, 'wortkarte: weniger als zwei verschiedene Wörter, eine Auswahl hat dann keine falsche Antwort und zeigt die Aufgabe nur an');
+    if (paare.length && verschieden(paare, 'rechts') < 2) k.fehler('ablenker', th.ort, 'paar: weniger als zwei verschiedene rechte Werte, eine Auswahl hat dann keine falsche Antwort und zeigt die Aufgabe nur an');
+    if (th.roh.frage !== undefined && !k.text(th.roh.frage)) k.fehler('frage', `${th.ort}.frage`, 'frage ist kein Text');
+    const ohne = paare.filter(a => !k.text(a.inhalt.frage));
+    if (ohne.length) k.fehler('frage', th.ort, `${ohne.length} paar-Aufgaben ohne Frage (zum Beispiel «${ohne[0].id}»): frage im Thema angeben, etwa «Welche Wortart ist das?». Ohne Frage ist für das Kind unklar, was zu tun ist`);
   }
 
   /**

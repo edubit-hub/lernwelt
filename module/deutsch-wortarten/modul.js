@@ -51,7 +51,7 @@ Lernwelt.modul({
   },
 
   themen: [
-    { id: 'wortarten', titel: 'Nomen, Verb oder Adjektiv', ziele: ['lz1'],
+    { id: 'wortarten', titel: 'Nomen, Verb oder Adjektiv', ziele: ['lz1'], frage: 'Welche Wortart ist dieses Wort?',
       generator: { name: 'deutsch-wortarten/wortarten' },
       leiter: [{ box: 0, typ: 'multiple-choice' }, { box: 2, typ: 'zuordnen', ersatz: 'multiple-choice' }] },
     { id: 'im-satz', titel: 'Wortarten im Satz finden', ziele: ['lz1'], voraussetzung: ['wortarten'],

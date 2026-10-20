@@ -1,5 +1,5 @@
 /* module/deutsch-satzbau/gen-fragen.js: Satzglieder den Fragen zuordnen (Form paar) und die Frage zu einem markierten Satzglied wählen (Form auswahl).
-   Thema «fragen»: ein Satzglied ohne Satz, dazu die Antwort Wer?, Verb, Wann? oder Wo? (Karteikarte, danach Zuordnen). Die Karten beginnen alle klein, damit der
+   Thema «fragen»: ein Satzglied ohne Satz, dazu die Antwort Wer?, Verb, Wann? oder Wo? (Zuordnen, Ersatz Auswahl, die Frage steht im Thema). Die Karten beginnen alle klein, damit der
    grosse Anfangsbuchstabe von «Der Hund» keine Antwort verrät. Thema «fragen-im-satz»: der ganze Satz, ein Satzglied in «Guillemets», vier Antworten.
    Die Fehlercodes der falschen Antworten stehen im Modul: wer-verb-verwechselt, wann-wo-verwechselt, satzglied-falsch. Die Sätze liefert saetze.js.
    Reine Berechnung: kein Zustand, keine Oberfläche, kein Zufall (instanz bekommt den Zufall von aussen), keine Uhr. */

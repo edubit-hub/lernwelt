@@ -35,10 +35,9 @@ Lernwelt.modul({
   },
 
   standard: {
-    einfuehrung: 'erklaerung',                        // Wortschatz lässt sich nicht erraten: zuerst zeigen, nach drei anderen Paketen abfragen
-    leiter: [
-      { box: 0, typ: 'karteikarten' },
-      { box: 1, typ: 'hoeren', ersatz: 'multiple-choice' },
+    einfuehrung: 'erklaerung',                        // Wortschatz lässt sich nicht erraten: kein Vortest, nach einem Fehler kommt das Wort nach drei anderen Paketen wieder
+    leiter: [                                         // ab Box 0 mit Eingabe: hören und wählen (Entscheid vom 19.10.2026: keine Karteikarten)
+      { box: 0, typ: 'hoeren', ersatz: 'multiple-choice' },
       { box: 2, typ: 'zuordnen', ersatz: 'multiple-choice' },
       { box: 4, typ: 'diktat', wenn: 'schreiben', ersatz: 'multiple-choice' }
     ],

@@ -170,8 +170,9 @@ Lernwelt.modul({
 
     // ---- Lernziel 3: Menschen und Preis ------------------------------------------------------------------------------------------------
     { id: 'menschen', titel: 'Die Menschen hinter der Pasta', ziele: ['lz3'], einfuehrung: 'erklaerung',
-      leiter: [{ box: 0, typ: 'karteikarten' }, { box: 1, typ: 'zuordnen', ersatz: 'multiple-choice' }],
-      leiterRatenVerzicht: 'Acht Berufe mit je einer eigenen Arbeit: Beim Zuordnen von drei bis sechs Karten ist die Chance, alle zu erraten, klein. Die Karteikarten zeigen die Lösung zuerst.',
+      frage: 'Welche Arbeit macht diese Person?',
+      leiter: [{ box: 0, typ: 'zuordnen', ersatz: 'multiple-choice' }],
+      leiterRatenVerzicht: 'Acht Berufe mit je einer eigenen Arbeit: Beim Zuordnen von drei bis sechs Karten ist die Chance, alle zu erraten, klein. Die Rückmeldung zeigt jede falsche Karte mit der richtigen Arbeit.',
       hilfe: { weg: 'menschen', schritte: [
         'An der Pasta arbeiten viele Menschen: auf dem Feld, beim Transport, im Lager, in der Mühle, in der Fabrik und im Laden.',
         'Jeder Beruf hat eine eigene Arbeit. Frage dich, in welchem Schritt vom Korn zur Pasta die Person arbeitet.'] },
@@ -226,8 +227,9 @@ Lernwelt.modul({
 
     // ---- Lernziel 4: Weissmehl und Vollkornmehl -----------------------------------------------------------------------------------------
     { id: 'mehl', titel: 'Weissmehl und Vollkornmehl', ziele: ['lz4'], einfuehrung: 'erklaerung',
-      leiter: [{ box: 0, typ: 'karteikarten' }, { box: 1, typ: 'zuordnen', ersatz: 'multiple-choice' }],
-      leiterRatenVerzicht: 'Drei Felder und Gruppen von drei bis sechs Karten: Die Chance, alle zu erraten, ist klein. Die Karteikarten zeigen die Lösung zuerst, die Sätze im Thema «Mehl in ganzen Sätzen» prüfen ohne Rateweg.',
+      frage: 'Gehört das zum Weissmehl, zum Vollkornmehl oder zu beiden Mehlen?',
+      leiter: [{ box: 0, typ: 'zuordnen', ersatz: 'multiple-choice' }],
+      leiterRatenVerzicht: 'Drei Felder und Gruppen von drei bis sechs Karten: Die Chance, alle zu erraten, ist klein. Die Rückmeldung zeigt jede falsche Karte mit dem richtigen Mehl, die Sätze im Thema «Mehl in ganzen Sätzen» prüfen ohne Rateweg.',
       hilfe: { weg: 'mehl', schritte: [
         'Ein Weizenkorn hat drei Teile: die Schale (Kleie), den Mehlkörper und den Keimling.',
         'Weissmehl besteht nur aus dem Mehlkörper. Schale und Keimling sind entfernt, darum ist es hell.',
@@ -302,8 +304,9 @@ Lernwelt.modul({
 
     // ---- Lernziel 5: nachhaltig einkaufen ---------------------------------------------------------------------------------------------
     { id: 'nachhaltig', titel: 'Nachhaltig einkaufen', ziele: ['lz5'], einfuehrung: 'erklaerung',
-      leiter: [{ box: 0, typ: 'karteikarten' }, { box: 1, typ: 'zuordnen', ersatz: 'multiple-choice' }],
-      leiterRatenVerzicht: 'Nur zwei Felder, bei einer einzelnen Karte liegt die Chance bei 1 zu 2. Gruppen von drei bis sechs Karten und die Fragen im Thema danach mildern das. Die Karteikarten zeigen die Lösung zuerst.',
+      frage: 'Ist das nachhaltiger oder weniger nachhaltig?',
+      leiter: [{ box: 0, typ: 'zuordnen', ersatz: 'multiple-choice' }],
+      leiterRatenVerzicht: 'Nur zwei Felder, bei einer einzelnen Karte liegt die Chance bei 1 zu 2. Gruppen von drei bis sechs Karten und die Fragen im Thema danach mildern das. Die Rückmeldung zeigt jede falsche Karte mit der richtigen Antwort.',
       hilfe: { weg: 'nachhaltig', schritte: [
         'Nachhaltig einkaufen heisst: Natur und Menschen schonen, damit auch später genug da ist.',
         'Hilfreich sind kurze Transportwege (Getreide aus der Schweiz oder der Region), Labels wie die Bio-Knospe und wenig, wiederverwertbare Verpackung.',
@@ -379,8 +382,9 @@ Lernwelt.modul({
 
     // ---- Lernziele 6 und 7: Lebensmittelpyramide ---------------------------------------------------------------------------------------
     { id: 'pyramide', titel: 'Die Lebensmittelpyramide', ziele: ['lz6'], einfuehrung: 'erklaerung',
-      leiter: [{ box: 0, typ: 'karteikarten' }, { box: 1, typ: 'zuordnen', ersatz: 'multiple-choice' }],
-      leiterRatenVerzicht: 'Sechs Stufen und Gruppen von drei bis sechs Karten: Die Chance, alle zu erraten, ist klein. Die Karteikarten zeigen die Lösung zuerst, die Sätze im Thema danach prüfen ohne Rateweg.',
+      frage: 'Auf welche Stufe der Lebensmittelpyramide gehört das?',
+      leiter: [{ box: 0, typ: 'zuordnen', ersatz: 'multiple-choice' }],
+      leiterRatenVerzicht: 'Sechs Stufen und Gruppen von drei bis sechs Karten: Die Chance, alle zu erraten, ist klein. Die Rückmeldung zeigt jede falsche Karte mit der richtigen Stufe, die Sätze im Thema danach prüfen ohne Rateweg.',
       hilfe: { weg: 'pyramide', schritte: [
         'Die Pyramide hat sechs Stufen. Ganz unten stehen die Getränke ohne Zucker, zum Beispiel Wasser und ungesüsster Tee.',
         'Darüber folgen Gemüse und Früchte, dann Getreide und Kartoffeln, zum Beispiel Brot, Pasta, Reis und Kartoffeln.',

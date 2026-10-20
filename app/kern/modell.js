@@ -87,6 +87,7 @@
         key: `${modul.id}/${a.id}`, modul: modul.id, thema: th.id, fach: modul.fach, bereich: modul.bereich };
       const hilfe = a.hilfe ?? (a.hilfeVerzicht ? undefined : th.hilfe);
       if (hilfe === undefined) delete aufgabe.hilfe; else aufgabe.hilfe = hilfe;
+      if (a.form === 'paar' && typeof th.frage === 'string' && !(a.inhalt && a.inhalt.frage)) aufgabe.inhalt = { ...a.inhalt, frage: th.frage };   // Frage des Themas (modul-schema 3.5)
       if (th.generator) aufgabe.generator = th.generator.name;
       return aufgabe;
     });
@@ -97,7 +98,8 @@
     const gen = aufgabe.generator && L.registry.generatoren.get(aufgabe.generator);
     if (!gen || typeof gen.instanz !== 'function') return aufgabe;
     const neu = gen.instanz(aufgabe, L.Zufall.aus(`${aufgabe.key}|${tag}`));
-    return { ...aufgabe, ...neu, id: aufgabe.id, key: aufgabe.key, modul: aufgabe.modul, thema: aufgabe.thema };
+    const frage = aufgabe.form === 'paar' && aufgabe.inhalt && aufgabe.inhalt.frage, inhalt = neu && neu.inhalt;
+    return { ...aufgabe, ...neu, ...(frage && inhalt && !inhalt.frage ? { inhalt: { ...inhalt, frage } } : {}), id: aufgabe.id, key: aufgabe.key, modul: aufgabe.modul, thema: aufgabe.thema };
   }
 
   /** Eintrag der Leiter für eine Box: der mit der grössten box, die höchstens der Box der Aufgabe entspricht und deren «wenn» erfüllt ist.

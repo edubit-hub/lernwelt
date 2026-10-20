@@ -87,7 +87,7 @@ Lernwelt.modul({
     // Nur in einem Lehrmittelprofil Kern (R44): standardmässig aus, die Eltern schalten die Themen ein (anpassbar: themen.*.aktiv).
     { id: 'zehner',    titel: 'Zehner-Einmaleins',     ziele: ['lz10', 'lz11'], voraussetzung: ['r7-8'], einfuehrung: 'erklaerung', aktiv: false,   // Karte: mathe-zehner-einmaleins
       geltung: 'Im Zahlenbuch 3 (Neuausgabe) kommt das Zehner-Einmaleins im Block Multiplikation und Division, etwa ab März 2027. Andere Lehrmittel ordnen es anders: Die Lehrperson sagt, wann es dran ist.',
-      leiter: [{ box: 0, typ: 'karteikarten' }, { box: 1, typ: 'multiple-choice' }, { box: 2, typ: 'eingabe' }],
+      leiter: [{ box: 0, typ: 'multiple-choice' }, { box: 2, typ: 'eingabe' }],   // ab Box 0 mit Eingabe, keine Karteikarten (19.10.2026)
       generator: { name: 'mathe-einmaleins/zehner', params: {} } },
     // TODO: Teilen mit Rest. Schreib- und Sprechweise («17 : 5 = 3 Rest 2») sind für kein Lehrmittel belegt (R44). Das Thema zeigt keine Schreibweise,
     // es lässt nur erkennen, ob eine Teilaufgabe aufgeht. Es bleibt aus, bis die Lehrperson sagt, wie die Klasse es führt.

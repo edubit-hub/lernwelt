@@ -108,8 +108,9 @@
         const vorrat = H('div.vorrat', { role: 'group', 'aria-label': 'Karten' });
         const flaechen = H(`div.felder.spalten-${felder.length === 2 || felder.length === 4 ? 2 : 3}`, { role: 'group', 'aria-label': 'Felder' });
         const pruefen = H('button.knopf.primaer.gross.pruefen', { type: 'button', disabled: true, onclick: pruefe }, 'Prüfen');
-        const hinweis = karten.every(k => k.feld.bild) ? 'Tippe ein Wort an und dann das passende Bild.'
-          : karten.every(k => k.feld.aufgabe) ? 'Tippe ein Wort an und dann das Wort, das dazugehört.' : 'Tippe eine Karte an und dann das Feld, in das sie gehört.';
+        const fragen = [...new Set(karten.map(k => (k.a.inhalt && k.a.inhalt.frage) || ''))], frage = fragen.length === 1 && text(fragen[0]) ? `${fragen[0].trim()} ` : '';   // gemeinsame Frage des Themas zuerst
+        const hinweis = frage + (karten.every(k => k.feld.bild) ? 'Tippe ein Wort an und dann das passende Bild.'
+          : karten.every(k => k.feld.aufgabe) ? 'Tippe ein Wort an und dann das Wort, das dazugehört.' : 'Tippe eine Karte an und dann das Feld, in das sie gehört.');
 
         function zeichne() {
           vorrat.replaceChildren(...reihe.filter(i => ort[i] === null).map(karte));

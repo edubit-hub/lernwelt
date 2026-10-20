@@ -161,7 +161,7 @@ Lernwelt.modul({
           hilfe: { weg: 'frueher', schritte: ['Was Menschen zum Leben brauchen, hat sich nicht geändert: Nahrung, Wärme und Schutz.', 'Geändert hat sich, wie sie das bekommen: früher durch Jagen und Sammeln, heute oft durch Einkaufen und Heizen.'] } }
       ] },
 
-    { id: 'frueher-heute', titel: 'Früher und heute', ziele: ['lz3'], einfuehrung: 'erklaerung',
+    { id: 'frueher-heute', titel: 'Früher und heute', ziele: ['lz3'], einfuehrung: 'erklaerung', frage: 'Wann gab es das: in der Altsteinzeit, heute oder früher und heute?',
       leiter: [{ box: 0, typ: 'multiple-choice' }, { box: 2, typ: 'zuordnen', ersatz: 'multiple-choice' }],
       hilfe: { weg: 'frueher', schritte: ['Frage dich: Gab es das in der Altsteinzeit? Gibt es das heute? Oder beides?', 'Was Menschen zum Leben brauchen, ist früher und heute gleich: Nahrung, Wasser, Wärme und Schutz. Wie sie es bekommen, hat sich verändert.'] },
       aufgaben: { tabelle: { form: 'paar', spalten: ['id', 'links', 'rechts'], zeilen: [
@@ -252,7 +252,7 @@ Lernwelt.modul({
           hilfe: { weg: 'geschichte', schritte: ['Bei einer fiktiven Geschichte darf sich jemand alles ausdenken.', 'Bei einer realen Geschichte muss es stimmen und man muss es belegen können.'] } }
       ] },
 
-    { id: 'epochen', titel: 'Vorschau: Steinzeit, Antike, Mittelalter, Neuzeit', ziele: ['lz6'], einfuehrung: 'erklaerung',
+    { id: 'epochen', titel: 'Vorschau: Steinzeit, Antike, Mittelalter, Neuzeit', ziele: ['lz6'], einfuehrung: 'erklaerung', frage: 'Zu welcher Epoche gehört das?',
       aktiv: false,
       geltung: 'Die Epochen Steinzeit, Antike, Mittelalter und Neuzeit gehören im Lehrplan zur Stufe am Ende der 6. Klasse. Ob die Klasse sie schon behandelt, weiss die Lehrperson.',
       leiter: [{ box: 0, typ: 'multiple-choice' }, { box: 2, typ: 'zuordnen', ersatz: 'multiple-choice' }],

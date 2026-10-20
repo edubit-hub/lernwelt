@@ -8,6 +8,9 @@
   const T = (P.teile = P.teile || {});
 
   const FREIWILLIG = ['blitzrechnen'];                  // gilt auch, solange der Typ noch nicht registriert ist
+  // Typen ohne Eingabe, die die App prüft: Das Kind dreht nur um und denkt nach. Sie stehen nie in einer Leiter oder im Prüfungsformat (Entscheid vom 19.10.2026).
+  const OHNE_EINGABE = ['karteikarten'];
+  const ohneEingabe = (k, ort, id) => { if (OHNE_EINGABE.includes(id)) k.fehler('ohne-eingabe', ort, `Übungstyp «${id}» verlangt keine Eingabe, die die App prüft: Jede Aufgabe braucht eine Eingabe mit Rückmeldung. Den nächsten Typ der Leiter ab Box 0 nehmen`); };
   const STAENDE = ['basis', 'sicher', 'gefestigt'];
 
   const eig = def => (def && def.eigenschaften) || {};
@@ -39,6 +42,7 @@
     for (const [id, def] of typen) {
       if (!def) k.fehler('leiter-typ', ort, `Übungstyp «${id}» fehlt`);
       if (freiwillig(id, def)) k.fehler('freiwillig', ort, `Freiwilliger Typ «${id}» steht in der Leiter: Tempo-Runden gehören in tempo, nie in eine Leiter`);
+      ohneEingabe(k, ort, id);
     }
 
     const formen = new Map();                           // Form → IDs der Aufgaben
@@ -91,6 +95,7 @@
       const def = reg.typen.get(teil.typ);
       if (!k.text(teil.typ) || (!def && !FREIWILLIG.includes(teil.typ))) k.fehler('pruefungsformat', ort, `Übungstyp «${teil.typ}» fehlt`);
       if (k.text(teil.typ) && freiwillig(teil.typ, def)) k.fehler('freiwillig', ort, `Freiwilliger Typ «${teil.typ}» steht im Prüfungsformat`);
+      if (k.text(teil.typ)) ohneEingabe(k, ort, teil.typ);
       if (def) for (const form of new Set(aufgaben.map(a => a.form))) if (reg.formen.has(form) && !(eig(def).akzeptiert || []).includes(form)) k.fehler('pruefungsformat', ort, `Übungstyp «${teil.typ}» akzeptiert Form «${form}» nicht`);
     });
   }
