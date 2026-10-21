@@ -161,6 +161,6 @@
     return { waehle, tun, zustand: z, tafel, schliesse() { rahmen.schliesse(); if (tafel) tafel.schliesse(); else wurzel.remove(); } };
   }
 
-  L.Ansichten.forschung = { id: 'forschung', get titel() { return L.Texte.welt.menue.forschung; }, icon: 'forschung', dock: 40,
+  L.Ansichten.forschung = { id: 'forschung', welt: 'archipel', get titel() { return L.Texte.welt.menue.forschung; }, icon: 'forschung', dock: 40,
     buehne: { kamera: 'forschung', schleier: 'keine', marken: 'orte' }, zeige };
 })(globalThis);

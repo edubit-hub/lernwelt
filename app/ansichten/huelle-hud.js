@@ -31,7 +31,10 @@
     const z = { ids: null, pillen: new Map(), ziel: null };
     const ring = H('span.medaille-ring', { 'aria-hidden': 'true' }), nr = H('b.medaille-nr'), kick = H('small'), name = H('b'), tor = H('em');
     // Die Medaille ist zugleich der Weg zurück zur ganzen Insel (Ansicht «start», ohne eigenen Eintrag im Dock)
-    const medaille = H('button.hud-medaille', { type: 'button', 'data-ansicht': 'start', onclick: () => { if (L.Klang && L.Klang.spiele) sicher(() => L.Klang.spiele('taste')); api.gehe('start'); } },
+    // Fachinseln: auf dem Start führt die Medaille zur Wahl der Insel (Ansicht «inseln»), sonst zurück zur ganzen Insel
+    const inselModus = () => sicher(() => !!(L.InselDaten && L.InselDaten.aktiv()), false);
+    const ziel = () => (inselModus() && sicher(() => L.Huelle.aktuell(), null) === 'start' ? 'inseln' : 'start');
+    const medaille = H('button.hud-medaille', { type: 'button', 'data-ansicht': 'start', onclick: () => { if (L.Klang && L.Klang.spiele) sicher(() => L.Klang.spiele('taste')); api.gehe(ziel()); } },
       H('span.medaille-zurueck', { 'aria-hidden': 'true' }, H('span.ico.ico-pfeil'), H('span', T().inselZurueck)), ring, H('span.medaille-text', kick, name, tor));   // «Insel» nur ausserhalb des Starts (huelle.css)
     const zielOrt = H('div.hud-ziel-ort'), links = H('div.hud-links', medaille, zielOrt);
     const pillen = H('div.hud-pillen', { role: 'group', 'aria-label': T().vorrat }), modus = H('span.modus');
@@ -73,6 +76,17 @@
       medaille.setAttribute('aria-label', `${T().medaille(e.nr, e.name, torText)}. ${T().zurInsel}`);
     }
 
+    /** Medaille der Fachinseln: Ring mit der Zahl der ausgebauten Areale, «Insel», Name des Fachs, «2 von 6 Arealen ausgebaut». */
+    function zeichneInsel(m) {
+      const TI = L.Texte.inseln, stand = TI.ausgebaut(m.ausgebaut, m.areale);
+      medaille.hidden = false;
+      nr.textContent = String(m.ausgebaut); kick.textContent = TI.medailleKick; name.textContent = m.name; tor.textContent = stand; tor.hidden = false;
+      tor.setAttribute('data-zustand', '');
+      const wert = ring.querySelector && ring.querySelector('.ring-wert');
+      if (wert && wert.setAttribute) wert.setAttribute('stroke-dasharray', `${(RING * m.anteil).toFixed(1)} ${RING.toFixed(1)}`);
+      medaille.setAttribute('aria-label', ziel() === 'inseln' ? TI.medaille(m.name, stand) : TI.medailleZurInsel(m.name, stand));
+    }
+
     function neuePille(x) {
       const zahl = H('span.res-zahl'), plus = H('span.res-plus'), nameEl = H('span.res-name', x.name);
       const p = H('div.pille.res', { 'data-rohstoff': x.id, style: `--tint: var(--${x.symbol}-tint, var(--akzent-hell))` }, objekt(x.symbol), H('span.res-wert', zahl, nameEl), plus);
@@ -98,8 +112,9 @@
       /** Medaille, Pillen und Schlüssel neu. k: Welt-Kontext (WeltDaten.kontext), ohne Angabe selbst geholt. */
       zeichne(k) {
         const kk = k === undefined ? sicher(() => (D() ? D().kontext() : null), null) : k;
-        zeichneMedaille(kk ? sicher(() => D().epocheStand(kk), null) : null);
-        zeichnePillen(kk);
+        const insel = inselModus() ? sicher(() => L.InselDaten.medaille(), null) : null;
+        if (insel) zeichneInsel(insel); else zeichneMedaille(kk ? sicher(() => D().epocheStand(kk), null) : null);
+        zeichnePillen(insel ? null : kk);
         const hinweis = elternHinweis();
         eltern.replaceChildren(schluessel, hinweis ? H('i.start-punkt', { 'aria-hidden': 'true' }) : '');
         eltern.setAttribute('aria-label', hinweis ? L.Texte.start.elternMitHinweis : L.Texte.start.elternBeschriftung);

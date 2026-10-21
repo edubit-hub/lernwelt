@@ -153,5 +153,20 @@
     return L.Sitzung.mischen(schwach, rng).map(k => ({ key: k.key, grund: 'extra' }));
   }
 
-  L.Lernplan = { heute, aktive, kandidaten, lagen, verteilung, plane, runden, tagesauftrag, zusatz, fachName, zustandVon };
+  /** Eine Runde zu einem Thema (Fachinseln, «Üben» im Areal): zuerst das Fällige, dann bis zu `neu` neue Aufgaben (leichte zuerst), dann die mit niedriger Box.
+      Aufgaben, die heute schon dran waren, fehlen. Ein Thema, das die Eltern abgeschaltet haben, gibt eine leere Liste. → [{ key, grund }] */
+  function themaRunde(modulId, themaId, { anzahl = 10, neu = 5 } = {}, Z = L.Zustand) {
+    const doc = Z.hole(), tag = heute(doc), modul = L.registry.module.get(modulId);
+    if (!modul || !(modul.themen || []).some(t => t.id === themaId)) return [];
+    const md = (doc.module && doc.module[modulId]) || {}, zs = md.aufgaben || {}, t = L.Modell.thema(modul, themaId, md.anpassung);
+    if (t.aktiv === false) return [];
+    const k = L.Modell.aufgaben(modul, themaId).map(a => { const z = zs[a.id]; return { a, z, box: z ? z.box || 0 : 0, frisch: !z }; })
+      .filter(x => !x.z || x.z.zuletzt !== tag);
+    const faellig = k.filter(x => !x.frisch && L.Wiederholung.faellig(x.z, tag));
+    const neue = k.filter(x => x.frisch).sort((x, y) => (x.a.schwierigkeit || 1) - (y.a.schwierigkeit || 1)).slice(0, neu);
+    const rest = k.filter(x => !x.frisch && !faellig.includes(x)).sort((x, y) => x.box - y.box);
+    return [...faellig, ...neue, ...rest].slice(0, anzahl).map(x => ({ key: x.a.key, grund: x.frisch ? 'neu' : faellig.includes(x) ? 'faellig' : 'extra' }));
+  }
+
+  L.Lernplan = { heute, aktive, kandidaten, lagen, verteilung, plane, runden, tagesauftrag, zusatz, themaRunde, fachName, zustandVon };
 })(globalThis);

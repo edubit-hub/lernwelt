@@ -1,0 +1,41 @@
+/* app/stil/inselzeit.css: die Inselzeit (E-2110-01, app/ansichten/inselzeit.js). Oben die Zeitleiste und «Zur Insel», unten der Hinweis und die
+   Knöpfe zur Lage, am Ende eine Karte unten. Die Ansicht liegt durchsichtig über der ganzen Bühne und lässt Tipps zur Leinwand durch, nur
+   ihre Teile nehmen sie an. Nur Token aus tokens.css, Knöpfe mindestens 44 px (--ziel). */
+
+.app[data-modus="welt"] .ansicht[data-ansicht="inselzeit"] {
+  inset: 0; width: auto; margin: 0; padding: 0; border-radius: 0; background: none; box-shadow: none; overflow: hidden; pointer-events: none;
+}
+
+/* ---- Oben: Zeitleiste und der Weg zurück ---------------------------------------------------------------------------- */
+.iz-oben { position: absolute; top: calc(env(safe-area-inset-top) + var(--a4)); left: calc(env(safe-area-inset-left) + var(--a4));
+  right: calc(env(safe-area-inset-right) + var(--a4)); display: flex; align-items: center; justify-content: space-between; gap: var(--a3); }
+.iz-zeit { display: flex; align-items: center; gap: var(--a3); min-height: var(--ziel); padding: 0 18px; border-radius: 999px;
+  background: var(--glas-hud); box-shadow: var(--schatten-hud); }
+.iz-name { font: 700 var(--t-text)/1 var(--schrift-rund); color: var(--tinte); }
+.iz-leiste { position: relative; width: 132px; height: 10px; border-radius: 999px; background: var(--spur); overflow: hidden; }
+.iz-fuellung { position: absolute; inset: 0; border-radius: inherit; background: var(--akzent); transition: transform var(--dauer-tafel) linear; }
+.iz-zurueck { pointer-events: auto; min-height: var(--ziel); background: var(--glas-hud); box-shadow: var(--schatten-hud); }
+
+/* ---- Unten: Hinweis und Knöpfe ------------------------------------------------------------------------------------------ */
+.iz-hinweis { position: absolute; left: 50%; bottom: calc(env(safe-area-inset-bottom) + 92px); transform: translateX(-50%); width: max-content;
+  max-width: calc(100% - 2 * var(--a4)); margin: 0; padding: 8px 16px; border-radius: 16px; background: var(--glas-leise); color: var(--tinte);
+  font: 600 var(--t-gross)/1.3 var(--schrift-rund); text-align: center; }
+.iz-hinweis:empty { display: none; }
+.iz-knoepfe { position: absolute; left: 0; right: 0; bottom: calc(env(safe-area-inset-bottom) + var(--a5)); display: flex; flex-wrap: wrap;
+  justify-content: center; gap: var(--a3); padding: 0 var(--a4); }
+.iz-knoepfe .knopf { pointer-events: auto; min-width: 136px; min-height: var(--knopf-hoehe); font-size: var(--t-gross); box-shadow: var(--schatten-knopf); }
+
+/* ---- Ende: ruhige Karte unten, der Junge winkt darüber ------------------------------------------------------------------ */
+.iz-ende { position: absolute; inset: 0; display: grid; place-items: end center; padding: var(--a4) var(--a4) calc(env(safe-area-inset-bottom) + 40px); }
+.iz-ende[hidden] { display: none; }
+.iz-karte { pointer-events: auto; display: grid; gap: var(--a3); justify-items: center; max-width: 420px; padding: 26px 30px; border-radius: 28px;
+  background: var(--glas-tafel); box-shadow: var(--schatten-karte); text-align: center; }
+.iz-karte > h2 { margin: 0; font: 800 var(--t-seite)/1.15 var(--schrift-rund); color: var(--tinte); }
+.iz-karte > p { margin: 0; color: var(--tinte-leise); font-size: var(--t-text); line-height: 1.4; }
+.iz-fertig { min-height: var(--ziel); }
+
+@media (prefers-reduced-motion: reduce) { .iz-fuellung { transition: none; } }
+
+/* ---- Einstieg: der Knopf in der Sprechblase von May (Startansicht) ------------------------------------------------------ */
+.may-blase > .start-inselzeit { display: grid; justify-items: start; gap: 2px; justify-self: start; min-height: var(--ziel); padding: 8px 16px; text-align: left; }
+.may-blase > .start-inselzeit > small { font-size: var(--t-klein); opacity: .9; }

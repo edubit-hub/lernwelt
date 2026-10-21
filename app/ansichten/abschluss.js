@@ -173,7 +173,9 @@
     const rundeKnopf = runde ? H('button.knopf.primaer.gross.abschluss-runde', { type: 'button', onclick: () => runde.tue(),
       'aria-label': `${s.naechsteRunde(runde.name)}, ${s.rundeUmfang(runde.aufgaben, runde.minuten)}` },
       H('b', s.naechsteRunde(runde.name)), H('small', s.rundeUmfang(runde.aufgaben, runde.minuten))) : '';
-    const dahin = [zurSiedlung, [s.zumStart, d.start, '.leise']];
+    // Inselzeit (E-2110-01): nach dem Tagesauftrag führt der erste Knopf für zwei Minuten auf die Insel
+    const aufInsel = d.erledigt && typeof d.inselzeit === 'function' && L.Texte.inselzeit && sicher(() => L.InselzeitDaten.offen(), false) ? [L.Texte.inselzeit.einstieg, d.inselzeit, '.primaer'] : null;
+    const dahin = [aufInsel, zurSiedlung, [s.zumStart, d.start, '.leise']];
     const torZeile = tor && L.AbschlussSchritt ? L.AbschlussSchritt.torZeile(tor) : '';
     const unterwegs = [...(b.stufen || []).map(x => H('p.abschluss-stufe', x.text)), torZeile].filter(Boolean);
     const platzhalter = !siedlung && !regler ? H('div.kachel.abschluss-siedlung', insel(), H('div', H('h3', t.siedlungFolgt), H('p.klein', t.siedlungText))) : '';

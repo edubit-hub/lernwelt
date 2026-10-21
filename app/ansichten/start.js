@@ -132,15 +132,23 @@
     if (ohneProfil(doc)) return profil(huelle, ctx);
     let t = null;
     try { t = L.Lernplan.tagesauftrag(); } catch (fehler) { melde(fehler); }
-    const ferien = !!(t && t.ferien);
+    const ferien = !!(t && t.ferien), inseln = !!(L.InselDaten && sicher(() => L.InselDaten.aktiv(), false));
     // Der eine Einstieg in den Tag ist der grosse Knopf «Tagesauftrag» im Dock (huelle-dock.js, auf dem Start mit .start-los); die Karte begrüsst und zeigt das Ziel
-    const zielKarte = t && !t.keinModul ? ziel(ctx) : '';
+    const zielKarte = t && !t.keinModul && !inseln ? ziel(ctx) : '';
     const tag = sicher(() => TS().datum(L.Lernplan.heute(doc)), '');
     // Die Versionsnummer steht im Elternbereich unter «Diagnose», nicht hier.
-    huelle.replaceChildren(H(`div.start-seite${zielKarte ? '.mit-ziel' : ''}${ferien ? '.ferien' : ''}`, { role: 'group', 'aria-label': TS().begruessung },
-      tag ? H('p.kicker.start-datum', tag) : '', H('h1', T().hallo(doc.profil.vorname)), H('p.unterzeile.start-satz', t ? heute(t) : ''),
-      zielKarte, t && t.keinModul ? H('div.kein-modul', H('p', T().keinModul), zuDenEltern(ctx)) : '', update(), hinweise()));
-    if (L.StartOrte && L.WeltDaten) sicher(() => L.StartOrte.setze(ctx.buehne, L.WeltDaten.kontext()));
+    const gruss = [tag ? H('p.kicker.start-datum', tag) : '', H('h1', T().hallo(doc.profil.vorname)), H('p.unterzeile.start-satz', t ? heute(t) : '')];
+    const rest = [zielKarte, t && t.keinModul ? H('div.kein-modul', H('p', T().keinModul), zuDenEltern(ctx)) : '', update(), hinweise()];
+    // Fachinseln: May, die Hauskatze, sagt die Begrüssung (Porträt aus der Szene, Text in der Sprechblase)
+    const may = inseln && ctx.buehne && typeof ctx.buehne.portraet === 'function' ? sicher(() => ctx.buehne.portraet(), null) : null;
+    // Inselzeit (E-2110-01): nach dem Tagesauftrag lädt May für zwei Minuten auf die Insel ein
+    const IZ = L.Texte.inselzeit, insel = may && t && IZ && L.InselzeitDaten && sicher(() => L.InselzeitDaten.offen(L.Zustand, t), false)
+      ? H('button.knopf.primaer.start-inselzeit', { type: 'button', 'aria-label': IZ.einstiegLabel, onclick: () => ctx.gehe('inselzeit') }, H('b', IZ.einstieg), H('small', IZ.einstiegKlein)) : '';
+    huelle.replaceChildren(H(`div.start-seite${zielKarte ? '.mit-ziel' : ''}${ferien ? '.ferien' : ''}${may ? '.may-spricht' : ''}`, { role: 'group', 'aria-label': TS().begruessung },
+      may ? H('div.may-gruss', H('img.may-portraet', { src: may, alt: TS().may }), H('div.may-blase', gruss, insel)) : gruss, rest));
+    // Fachinseln: ein Tipp auf ein Areal öffnet seine Tafel (inseln.js). Sonst sagen die Ortsschilder, was an jedem Ort geht.
+    if (inseln) { if (ctx.buehne && typeof ctx.buehne.beiWahl === 'function') ctx.buehne.beiWahl(w => { if (w && w.areal) ctx.gehe('areal', { areal: w.areal }); }); }
+    else if (L.StartOrte && L.WeltDaten) sicher(() => L.StartOrte.setze(ctx.buehne, L.WeltDaten.kontext()));
     gleite(huelle);
     kameraNebenKarte(huelle, ctx);
     return undefined;

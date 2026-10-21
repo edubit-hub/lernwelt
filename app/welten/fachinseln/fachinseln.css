@@ -1,0 +1,18 @@
+/* app/welten/fachinseln/fachinseln.css: Bühne der Fachinseln (W3.Szene). Die Leinwand füllt die Bühne, die Schilder der Areale liegen als Knöpfe ab 44 px darüber.
+   Schleier, ruhig und data-marken kommen aus app/stil/buehne.css und gelten hier gleich. */
+.buehne-ebene.fi-buehne { background: #a9dce0; touch-action: none; }
+.fi-buehne > .fi-leinwand { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+.fi-buehne > .fi-schilder { position: absolute; inset: 0; pointer-events: none; }
+.fi-buehne[data-marken="keine"] > .fi-schilder { display: none; }
+
+/* Ortsmarke: feste Grösse auf jeder Zoomstufe, hängt mit einem Zeiger (--zeiger, Länge von szene-marken.js) über dem Dach. Häuschen links zeigt die Bauphase. */
+.fi-schild { position: absolute; transform: translate(-50%, calc(-100% - var(--zeiger, 8px))); pointer-events: auto; min-width: 44px; min-height: 44px;
+  padding: 5px 13px 5px 8px; display: flex; align-items: center; gap: 7px; border: 0; border-radius: 22px; cursor: pointer;
+  background: rgba(255, 250, 238, .95); color: #b0663a; box-shadow: 0 2px 0 rgba(23, 61, 67, .2), 0 5px 12px rgba(23, 61, 67, .16);
+  font: inherit; font-size: 15px; line-height: 1.15; white-space: nowrap; }
+.fi-schild::after { content: ''; position: absolute; left: 50%; top: 100%; width: 2px; height: var(--zeiger, 8px); margin-left: -1px;
+  background: rgba(255, 250, 238, .95); box-shadow: 0 1px 0 rgba(23, 61, 67, .2); pointer-events: none; }
+.fi-schild > .fi-phase { display: flex; width: 22px; height: 22px; flex: none; }
+.fi-schild > b { font-weight: 700; color: #233b3f; }
+.fi-schild:focus-visible { outline: 3px solid #efc879; outline-offset: 2px; }
+@media (hover: hover) { .fi-schild:hover { background: #fffdf6; } }

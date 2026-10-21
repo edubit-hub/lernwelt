@@ -9,6 +9,7 @@
     tagesauftrag:    { modus: 'ueben',           schreibt: true,  nachfassen: true, deckel: true, nachschub: true },
     einstufung:      { modus: 'ueben',           schreibt: true,  nachfassen: false, deckel: true, einstufung: true },
     zusatz:          { modus: 'ueben',           schreibt: true,  nachfassen: true, grund: 'extra' },
+    frei:            { modus: 'ueben',           schreibt: true,  nachfassen: true },          // ein Thema frei üben (Fachinseln, «Üben» im Areal): Gründe aus dem Plan
     expedition:      { modus: 'ueben',           schreibt: true,  nachfassen: true },
     simulation:      { modus: 'simulation',      schreibt: true,  nachfassen: false, sammelt: true },
     herausforderung: { modus: 'herausforderung', schreibt: false, nachfassen: false },
@@ -58,7 +59,7 @@
     if (mitSprache && L.Sprache && typeof L.Sprache.bereit === 'function') await Promise.resolve(L.Sprache.bereit()).catch(() => false);
   }
 
-  /** Führt eine Runde durch. art: tagesauftrag, einstufung, zusatz, expedition, herausforderung, simulation oder vorschau.
+  /** Führt eine Runde durch. art: tagesauftrag, einstufung, zusatz, frei, expedition, herausforderung, simulation oder vorschau.
       plan: { heute, eintraege: [{ key, grund?, typ?, teil?, punkte? }], deckel?, maxMinuten?, ziel?, pruefung?: { modul, art }, modul? (einstufung),
       nachschub?: ({ offen, nachgerueckt }) → Eintrag | null (tagesauftrag: nächste neue Aufgabe für eine schon bekannte, AP-23),
       katalog? (nur vorschau: Dienste.beispielKatalog(typ), das eingebaute Beispiel eines Typs) }.

@@ -20,7 +20,7 @@
   L.Texte = L.Texte || {};
   L.Texte.startseite = {
     datum,
-    begruessung: 'Begrüssung',
+    begruessung: 'Begrüssung', may: 'May, die Katze',
     // Profil beim ersten Start (Tafel «halb»)
     profilKicker: 'Erste Angaben',
     profilTitel: 'Wie heisst du?',

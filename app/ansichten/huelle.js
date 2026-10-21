@@ -26,12 +26,17 @@
   /** Bühne je Ansicht, solange die Ansichten sie noch nicht selbst nennen (Phase 1). Die Angabe der Ansicht geht vor. */
   const STANDARD = { start: { kamera: 'start' }, lernen: { kamera: 'start', schleier: 'leicht' }, siedlung: { kamera: 'siedlung', marken: 'plaetze' },
     forschung: { kamera: 'forschung', schleier: 'leicht' }, auftraege: { kamera: 'hafen' }, logbuch: { kamera: 'logbuch', schleier: 'leicht' } };
-  const buehneVon = (id, a) => ({ kamera: 'start', schleier: 'keine', marken: 'orte', hud: 'voll', dock: true, ...(STANDARD[id] || {}), ...((a && a.buehne) || {}) });
+  // a.buehne darf eine Funktion der Daten sein (Fachinseln: die Kamera fährt zum gewählten Areal)
+  const buehneVon = (id, a, daten) => ({ kamera: 'start', schleier: 'keine', marken: 'orte', hud: 'voll', dock: true, ...(STANDARD[id] || {}),
+    ...((a && (typeof a.buehne === 'function' ? sicher(() => a.buehne(daten || {}), null) : a.buehne)) || {}) });
+  /** Art des Welt-Themas: «inseln» (Fachinseln) oder «archipel» (das bisherige Thema und jedes ohne Art). Eine Ansicht mit welt gehört nur zu dieser Art. */
+  const weltArt = () => sicher(() => (L.Start && L.Start.welt && L.Start.welt.art) || 'archipel', 'archipel');
+  const passt = a => !a.welt || a.welt === weltArt();
   const modusVon = (id, a) => (id === 'eltern' || (a && a.modus === 'eltern') ? 'eltern' : 'welt');
 
   const ansicht = id => { const a = L.Ansichten[id]; return a && typeof a.zeige === 'function' ? a : null; };
   const rang = a => (typeof a.dock === 'number' ? a.dock : null);
-  const dockEintraege = () => Object.entries(L.Ansichten).filter(([, a]) => a && typeof a.zeige === 'function' && rang(a) !== null)
+  const dockEintraege = () => Object.entries(L.Ansichten).filter(([, a]) => a && typeof a.zeige === 'function' && rang(a) !== null && passt(a))
     .sort((x, y) => rang(x[1]) - rang(y[1])).map(([id, a]) => ({ id, titel: a.titel || id, icon: a.icon || 'ueben', haupt: a.haupt === true || id === 'lernen' }));
 
   const klangAn = () => (sicher(() => L.Zustand.hole().einstellungen, null) || {}).klang !== false;
@@ -114,7 +119,7 @@
     schliesseAlte();                                      // vor dem Zeichnen: die alte Ansicht räumt in dieselbe Hauptfläche
     const vorher = z.aktuell, reihe = dockEintraege().map(e => e.id);
     z.musikRuht = false;                                  // eine neue Ansicht hebt die Ruhe der Musik auf
-    z.aktuell = id; z.b = buehneVon(id, a);
+    z.aktuell = id; z.b = buehneVon(id, a, daten);
     z.ansicht.replaceChildren();
     z.ansicht.setAttribute('class', 'ansicht');
     z.ansicht.setAttribute('data-ansicht', id);

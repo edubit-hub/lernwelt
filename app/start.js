@@ -23,11 +23,15 @@
   /** Die Module, die zur Klasse passen und im Manifest stehen (IDs). */
   S.modulWahl = klasse => { const nur = nurModule(); return (L.katalog || []).filter(k => L.manifest && L.manifest.module[k.id] && statusErlaubt().includes(k.status) && (!k.stufen || k.stufen.includes(klasse)) && (!nur || nur.includes(k.id))).map(k => k.id); };
 
-  /** Welt-Thema: ?welt=<id> (Entwicklung), sonst die Einstellung, sonst das erste Thema ausser «test». Nur was im Manifest steht, sonst keines. */
+  /** Welt-Thema: ?welt=<id> (Entwicklung), sonst die Einstellung, sonst «fachinseln», sonst das erste Thema ausser «test». Nur was im Manifest steht, sonst keines.
+      Die Fachinseln lösen den Archipel ab (E-2010-01): die alte Einstellung «archipel» (Standard jedes Lernstands) führt zu den Fachinseln, solange es sie gibt.
+      Der Archipel bleibt mit ?welt=archipel erreichbar. Der Lernstand selbst ändert sich dabei nicht. */
   function waehleWelt(manifest, einstellungen, suche) {
     const ids = Object.keys((manifest && manifest.welten) || {}), param = /[?&]welt=([a-z0-9._-]+)/.exec(suche || '');
     if (param && ids.includes(param[1])) return param[1];
-    return ids.includes(einstellungen && einstellungen.welt) ? einstellungen.welt : ids.find(id => id !== 'test') || null;
+    const e = einstellungen && einstellungen.welt, neu = ids.includes('fachinseln') ? 'fachinseln' : null;
+    if (e === 'archipel' && neu) return neu;
+    return ids.includes(e) ? e : neu || ids.find(id => id !== 'test') || null;
   }
 
   /** Lädt die Dateien der aktiven Module und des Welt-Themas (nach dem Start des Zustands) und zieht die Modulversion nach (Migration umbenannter IDs). */
@@ -116,12 +120,28 @@
   /** Die Bühne (docs/gestaltung-umbau.md 3.1 und 3.3): einmal beim Start in div.buehne-ebene, nur mit Welt-Thema und nur, wenn L.Buehne geladen ist.
       Die Weltschicht wird danach nie neu aufgebaut, die Hülle führt Modus, Kamera und geänderte Plätze nach. Ohne Bühne bleibt ein ruhiger Grund. */
   S.baueBuehne = function baueBuehne(ebene) {
-    if (!ebene || !S.welt || !L.Buehne || typeof L.Buehne.baue !== 'function') return null;
+    const inseln = !!(S.welt && S.welt.art === 'inseln'), B = inseln ? L.W3 && L.W3.Szene : L.Buehne;   // Fachinseln: 3D-Szene mit Three.js (E-2010-02)
+    if (!ebene || !S.welt || !B || typeof B.baue !== 'function') return null;
     try {
-      const doc = L.Zustand.hole(), stand = (doc.welt && doc.welt[S.welt.id]) || (L.Welt && L.Welt.leer ? L.Welt.leer() : {});
-      const wenig = !!(L.Effekte && typeof L.Effekte.wenig === 'function' && L.Effekte.wenig());
-      return L.Huelle.buehne(L.Buehne.baue(ebene, S.welt, stand, { wenig, kamera: 'start' }));
+      const doc = L.Zustand.hole(), wenig = !!(L.Effekte && typeof L.Effekte.wenig === 'function' && L.Effekte.wenig());
+      const stand = inseln ? L.InselDaten.stand(doc) : (doc.welt && doc.welt[S.welt.id]) || (L.Welt && L.Welt.leer ? L.Welt.leer() : {});
+      return L.Huelle.buehne(B.baue(ebene, S.welt, stand, { wenig, kamera: 'start', stand: inseln ? () => L.InselDaten.stand() : undefined }));
     } catch (fehler) { sicher(() => L.Fehlerlog.melde(fehler)); return null; }
+  };
+
+  /** Fachinseln: schreibt nach jedem Lern-Ereignis die Bauphasen der Areale in zustand.welt.fachinseln.bau (eine erreichte Phase bleibt, Ä19)
+      und führt die Szene nach. Ohne Thema der Art «inseln» tut der Hörer nichts. Gibt die Abmeldung zurück. */
+  S.merkeBau = function merkeBau(bus, zustand = L.Zustand) {
+    const nach = () => {
+      if (!L.InselDaten || !L.InselDaten.aktiv()) return;
+      const id = S.welt.id, alt = sicher(() => ((zustand.hole().welt || {})[id] || {}).bau, null) || {}, neu = L.InselDaten.bau();
+      if (JSON.stringify(neu) === JSON.stringify(alt)) return;
+      sicher(() => zustand.aendere(z => { z.welt = z.welt || {}; z.welt[id] = { ...(z.welt[id] || {}), bau: neu }; }));
+      const r = L.Huelle && L.Huelle.buehne();
+      if (r && typeof r.aktualisiere === 'function') sicher(() => r.aktualisiere());
+    };
+    const ab = [bus.on('lern:aufgabe', nach), bus.on('lern:thema', nach)];
+    return () => ab.forEach(f => f());
   };
 
   /** Im ersten Tipp irgendwo: Sprache und Klang entsperren (iOS gibt Audio nur aus einer Berührung frei, 5.7). Danach hört nichts mehr zu. */
@@ -201,6 +221,8 @@
         S.zuwachs = () => ab.zuwachs();
         if (S.ertragAb) S.ertragAb();
         S.ertragAb = S.merkeErtrag(L.bus, ab);
+        if (S.bauAb) S.bauAb();
+        S.bauAb = S.merkeBau(L.bus);
         S.persistenz = L.Speicher.persistenz(w.navigator, !!check.faehigkeiten.standalone);
       }
       S.sw = registriereSw(w);
@@ -211,6 +233,7 @@
       if (L.Klang) sicher(() => { const e = L.Zustand.hole().einstellungen; L.Klang.an(e.klang !== false); if (L.Klang.musikAn) L.Klang.musikAn(e.musik !== false); });   // ohne Feld: an
       S.ersterTipp(d);
       L.Huelle.gehe('start');
+      if (entwicklung() && /[?&]inselzeit(?:[&=]|$)/.test((w.location && w.location.search) || '')) L.Huelle.gehe('inselzeit', { probe: true });   // E-2110-01: Probe ohne Buchung
       L.gestartet = true;
     } catch (fehler) {
       sicher(() => L.Fehlerlog.melde(fehler));

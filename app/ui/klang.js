@@ -16,10 +16,12 @@
   /** Dezente Lautstärken je Klang (0 bis 1), abgestimmt auf die gelieferten Dateien (docs/klaenge/herkunft.md, Abschnitt Lautstärken):
       Ereignisse (richtig, bauen, freischalten, forschung, tor) wirken gleich laut, Rückmeldungen (hinweis, gebaut, stempel, muenze,
       sammeln) etwas leiser, Bedienung (taste, tafel, wechsel) deutlich leiser, die Schleife «meer» sehr leise darunter. Die Musik
-      (app/ui/musik.js) liegt mit ihrem Kurzzeit-Maximum mindestens 3 dB unter dem leisesten dieser Klänge (Schlussprüfung, G18). */
+      (app/ui/musik.js) liegt mit ihrem Kurzzeit-Maximum mindestens 3 dB unter dem leisesten dieser Klänge (Schlussprüfung, G18).
+      Inselzeit (E-2110-01): May (miau, mrrp, gurren) und der Pfiff wie Rückmeldungen, schnurren und boot leise wie die Bedienung. */
   const LAUT = {
     taste: 0.33, richtig: 0.3, hinweis: 0.17, muenze: 0.6, sammeln: 0.7, bauen: 0.3, gebaut: 0.4,
-    freischalten: 0.35, forschung: 0.14, stempel: 0.5, tafel: 0.1, wechsel: 0.2, tor: 0.25, meer: 0.06
+    freischalten: 0.35, forschung: 0.14, stempel: 0.5, tafel: 0.1, wechsel: 0.2, tor: 0.25, meer: 0.06,
+    miau: 0.13, mrrp: 0.17, gurren: 0.21, schnurren: 0.2, pfiff: 0.08, boot: 0.54
   };
   const NAMEN = Object.keys(LAUT);
   const SCHLEIFEN = ['meer'];                  // nur in Weltansichten, nie während einer Aufgabe (das schaltet die Hülle)
@@ -30,7 +32,8 @@
   // innerhalb von FENSTER ms, gilt der mit dem höheren Rang; ein späterer höherer löst den früheren ab und blendet ihn in WEICH s aus.
   // Das Urteil einer Antwort (richtig, hinweis) steht über muenze und sammeln: ein spät landender Ertragsflug verdrängt es nie.
   const FENSTER = 150, WEICH = 0.02;
-  const RANG = { taste: 1, tafel: 1, wechsel: 1, muenze: 3, sammeln: 3, hinweis: 4, richtig: 4, stempel: 4, bauen: 5, gebaut: 5, forschung: 5, freischalten: 6, tor: 7 };
+  const RANG = { taste: 1, tafel: 1, wechsel: 1, muenze: 3, sammeln: 3, hinweis: 4, richtig: 4, stempel: 4, bauen: 5, gebaut: 5, forschung: 5, freischalten: 6, tor: 7,
+    pfiff: 2, miau: 2, mrrp: 2, gurren: 2, schnurren: 2, boot: 2 };
   const jetzt = () => (L.Dienste && typeof L.Dienste.jetzt === 'function' ? L.Dienste.jetzt() : Date.now());   // Millisekunden, in Tests steuerbar
   let letzter = null;                          // { zeit, rang, offen (derselbe Durchlauf), quelle und stufe (sobald sie läuft), aus (verdrängt) }
   const nachDurchlauf = f => { if (typeof g.setTimeout === 'function') g.setTimeout(f, 0); else Promise.resolve().then(f); };

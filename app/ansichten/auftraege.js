@@ -171,6 +171,6 @@
     return { tun, routen, schliesse: aufraeumen };
   }
 
-  L.Ansichten.auftraege = { id: 'auftraege', get titel() { return L.Texte.welt.menue.auftraege; }, icon: 'auftraege', dock: 50,
+  L.Ansichten.auftraege = { id: 'auftraege', welt: 'archipel', get titel() { return L.Texte.welt.menue.auftraege; }, icon: 'auftraege', dock: 50,
     buehne: { kamera: 'hafen', schleier: 'keine', marken: 'keine' }, zeige };
 })(globalThis);

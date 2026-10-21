@@ -14,6 +14,11 @@
     },
     wissenspunkte: { basis: 0.5, sicher: 1, gefestigt: 0.5, aufgabenJePunkt: 10 },   // je Themenstufe, mal Grundwert des Themas
     weltzeit: { hinweisAnteil: 0.2 },                // Schutzregel 7: über 20 % der Zeit in der Welt zeigt der Elternbereich einen Hinweis
+    bau: {                                           // Bauphasen der Themenareale (Ä19, E-2010-03): eine erreichte Phase bleibt
+      fundament: { richtig: 3 },                     // drei verschiedene Aufgaben des Areals selbständig richtig (mindestens Box 1)
+      rohbau: { basisAnteil: 0.5 },                  // die Hälfte der Themen des Areals hat «basis» erreicht
+      fertig: { sicherAnteil: 0.8 }                  // 80 % der Themen des Areals haben «sicher» erreicht
+    },
     budget: {                                        // Obergrenzen für ein Welt-Thema (7.5), das Prüfskript meldet Überschreitungen
       epochen: 4, gebaeudeArtenJeEpoche: 4, gebaeudeArtenGesamt: 16, stufenJeGebaeude: 3,
       wirkungstypen: ['rezept', 'tausch', 'frei', 'ansicht'],

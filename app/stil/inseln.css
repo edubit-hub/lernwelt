@@ -1,0 +1,58 @@
+/* app/stil/inseln.css: Ansichten der Fachinseln (Plan 0.2, S3): Wahl der Insel, Tafel des Areals und Themenliste (app/ansichten/inseln.js).
+   Nur Token aus tokens.css. Knöpfe mindestens 44 px (--ziel). Die Schilder der Szene stehen in app/welten/fachinseln/fachinseln.css. */
+
+/* ---- May sagt die Begrüssung (Startansicht der Fachinseln) ------------------------------------------------------ */
+.app[data-modus="welt"] .ansicht[data-ansicht="start"]:has(.may-spricht) { width: 560px; }
+.app:has(.may-spricht) .hud-medaille { cursor: pointer; }
+.may-gruss { display: grid; grid-template-columns: 132px 1fr; gap: 14px; align-items: end; }
+.may-portraet { display: block; width: 132px; aspect-ratio: 600 / 720; object-fit: contain; filter: drop-shadow(0 6px 10px var(--linie)); }
+.may-blase { position: relative; display: grid; gap: var(--a2); align-self: center; padding: 14px 18px 16px; border-radius: 22px;
+  background: var(--papierweiss); box-shadow: inset 0 0 0 1px var(--papier-rand), var(--schatten-leicht); }
+.may-blase::before { content: ''; position: absolute; left: -12px; bottom: 26px; width: 0; height: 0;
+  border-top: 10px solid transparent; border-bottom: 10px solid transparent; border-right: 13px solid var(--papierweiss); }
+.may-blase > h1 { margin: 0; font: 800 36px/1.05 var(--schrift-rund); letter-spacing: -.02em; overflow-wrap: anywhere; }
+.may-blase > .start-datum { color: var(--tinte-leise); font-size: 14px; letter-spacing: .04em; }
+.may-blase > .start-satz { margin: 0; font: 600 17px/1.35 var(--schrift-rund); color: var(--tinte); }
+@media (max-width: 700px) {
+  .may-gruss { grid-template-columns: 96px 1fr; }
+  .may-portraet { width: 96px; }
+  .may-blase > h1 { font-size: 30px; }
+}
+
+/* ---- Wahl der Insel -------------------------------------------------------------------------------------------- */
+.inseln-liste { display: grid; gap: var(--a3); }
+.inseln-knopf { display: grid; grid-template-columns: 1fr auto; gap: 2px var(--a3); align-items: baseline; min-height: var(--ziel); padding: 12px 14px;
+  border: 0; border-radius: 16px; text-align: left; background: var(--flaeche); color: var(--tinte); box-shadow: var(--schatten-knopf); font: inherit; cursor: pointer; }
+.inseln-knopf > b { font: 700 var(--t-gross)/1.2 var(--schrift-rund); }
+.inseln-knopf > small { color: var(--tinte-leise); font-size: var(--t-klein); justify-self: end; }
+.inseln-knopf > .inseln-stand { grid-column: 1 / -1; color: var(--tinte-leise); font-size: var(--t-klein); }
+.inseln-knopf.aktuell { box-shadow: inset 0 0 0 2px var(--akzent), var(--schatten-knopf); }
+.inseln-knopf:focus-visible { outline: 3px solid var(--akzent-warm); outline-offset: 2px; }
+
+/* ---- Tafel des Areals ------------------------------------------------------------------------------------------ */
+.areal-bild { display: block; width: 100%; max-width: 320px; aspect-ratio: 4 / 3; margin: 0 auto; object-fit: contain; }
+.areal-text { color: var(--tinte); font-size: var(--t-text); line-height: 1.4; }
+.areal-stand { display: grid; gap: var(--a2); padding: 12px 14px; border-radius: 16px; background: var(--warm-flaeche); box-shadow: inset 0 0 0 1px var(--warm-linie); }
+.areal-phase { font-weight: 700; color: var(--warm-text); }
+.areal-naechste { color: var(--tinte); font-size: var(--t-klein); line-height: 1.4; }
+.areal-phasen { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; margin: 0; padding: 0; list-style: none; }
+.areal-phasen > li { padding: 4px 0; border-radius: 8px; text-align: center; font-size: var(--t-fein); color: var(--tinte-leise); background: var(--spur); }
+.areal-phasen > li.erreicht { color: var(--warm-text); background: var(--warm-hell); box-shadow: inset 0 0 0 1px var(--warm-kante); }
+.areal-themen-kopf { margin-top: var(--a3); font: 700 var(--t-gross)/1.2 var(--schrift-rund); }
+
+/* ---- Themenliste (Tafel des Areals und Ansicht «Themen») -------------------------------------------------------- */
+.thema-liste { display: grid; gap: var(--a2); margin: 0; padding: 0; list-style: none; }
+.thema-zeile { display: grid; grid-template-columns: 1fr auto auto; gap: var(--a3); align-items: center; min-height: var(--ziel); padding: 6px 6px 6px 12px;
+  border-radius: 14px; background: var(--flaeche); box-shadow: inset 0 0 0 1px var(--linie-leise); }
+.thema-titel { font-size: var(--t-text); line-height: 1.3; }
+.thema-stufe { font-size: var(--t-fein); padding: 3px 8px; border-radius: 999px; color: var(--tinte-leise); background: var(--spur); white-space: nowrap; }
+.thema-stufe.s-basis { color: var(--akzent-dunkel); background: var(--akzent-hell); }
+.thema-stufe.s-sicher, .thema-stufe.s-gefestigt { color: var(--ok-text); background: var(--ok-kante); }
+.thema-ueben { min-height: var(--ziel); }
+.themen-fach { border-radius: 16px; background: var(--glas-leise); padding: 4px 12px 12px; }
+.themen-fach + .themen-fach { margin-top: var(--a3); }
+.themen-fach > summary { display: flex; align-items: baseline; justify-content: space-between; gap: var(--a3); min-height: var(--ziel); padding: 10px 0; cursor: pointer; }
+.themen-fach > summary > b { font: 700 var(--t-gross)/1.2 var(--schrift-rund); }
+.themen-fach > summary > small { color: var(--tinte-leise); font-size: var(--t-klein); }
+.themen-areal > h4 { margin: var(--a3) 0 var(--a2); font-size: var(--t-text); color: var(--tinte-leise); }
+.thema-leer { display: grid; gap: var(--a3); }

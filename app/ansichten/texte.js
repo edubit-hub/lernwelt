@@ -40,6 +40,7 @@
       nichtsFaellig: 'Heute ist nichts fällig. Morgen geht es weiter.',
       zusatz: 'Zusatzrunde', zusatzStarten: 'Zusatzrunde starten',
       zusatzFrei: 'Eine Zusatzrunde ist freiwillig und bringt keinen Ertrag.',
+      themaLeer: 'In diesem Thema ist heute alles geübt. Morgen geht es weiter.', zurueck: 'Zurück',
       keinModul: 'Hier ist noch nichts eingerichtet. Frag deine Eltern.',
       ferien: name => `${name}: Heute gibt es keinen Tagesauftrag.`, ferienFrei: 'Wenn du trotzdem üben möchtest, stehen die Runden bereit.',
       ferienGeuebt: n => `Heute geübt: ${mz(n, 'Aufgabe', 'Aufgaben')}.`, weitere: 'Weitere Möglichkeiten',

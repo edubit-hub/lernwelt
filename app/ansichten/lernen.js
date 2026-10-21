@@ -51,8 +51,9 @@
     }
   }
 
-  /** Führt die gewählten Runden hintereinander durch und zeigt danach den Abschluss. art: 'tagesauftrag' oder 'zusatz'. quelle: Element für den Auswahl-Flug. */
-  async function spiele(huelle, ctx, t, runden, art, quelle) {
+  /** Führt die gewählten Runden hintereinander durch und zeigt danach den Abschluss. art: 'tagesauftrag', 'zusatz' oder 'frei' (ein Thema, Fachinseln).
+      quelle: Element für den Auswahl-Flug. frei: { fach, zurueck() } für «Weiter» im Abschluss nach einem freien Thema. */
+  async function spiele(huelle, ctx, t, runden, art, quelle, frei = null) {
     if (L.Lauf.laeuft()) return;
     if (L.Start && L.Start.entsperre) L.Start.entsperre();            // dieselbe Berührung wie der Tipp: iOS lässt Sprache nur aus einer Berührung zu
     if (tag.heute !== t.tag || tag.zustand !== L.Zustand) Object.assign(tag, { heute: t.tag, zustand: L.Zustand, berichte: [] });
@@ -63,9 +64,9 @@
     ctx.sperre(true);
     try {
       for (const [i, r] of runden.entries()) {
-        const plan = art === 'zusatz' ? { heute: t.tag, eintraege: r.eintraege, deckel: t.deckel }
+        const plan = art !== 'tagesauftrag' ? { heute: t.tag, eintraege: r.eintraege, deckel: t.deckel }
           : { heute: t.tag, eintraege: r.eintraege, deckel: t.deckel, maxMinuten: L.Lernplan.tagesauftrag().maxMinuten, nachschub: L.Einstieg.nachschub(t.tag) };
-        const b = await runde(huelle, { art, plan, fach: art === 'zusatz' ? null : r.id, flug: i === 0 && von ? { von } : null });
+        const b = await runde(huelle, { art, plan, fach: art === 'zusatz' ? null : frei ? frei.fach : r.id, flug: i === 0 && von ? { von } : null });
         berichte.push(b);
         if (b.abgebrochen || b.zeitdeckel) break;
       }
@@ -84,8 +85,8 @@
     L.Abschluss.zeige(huelle, { bericht: tagesweit ? L.Bericht.ausTageslog(doc, t.tag, { stufen: L.Lauf.summiere(tag.berichte).stufen }) : L.Lauf.summiere(berichte),
       ertrag: ertragListe(tagesweit ? L.Bericht.ertragVon(doc, t.tag) : gewinn, thema),
       erledigt: (art === 'zusatz' || tagesweit) && !abgebrochen, thema, neu,
-      weiter: () => ctx.gehe('lernen'), start: () => ctx.gehe('start'), siedlung: () => ctx.gehe('siedlung', { neu }),   // die Siedlung zeigt «Neu möglich: ...» (AP-16)
-      forschung: () => ctx.gehe('forschung'), ueben: fach => ctx.gehe('lernen', { fach }), naechste, hud: ctx.hud });
+      weiter: frei ? frei.zurueck : () => ctx.gehe('lernen'), start: () => ctx.gehe('start'), siedlung: () => ctx.gehe('siedlung', { neu }),   // die Siedlung zeigt «Neu möglich: ...» (AP-16)
+      forschung: () => ctx.gehe('forschung'), ueben: fach => ctx.gehe('lernen', { fach }), inselzeit: () => ctx.gehe('inselzeit'), naechste, hud: ctx.hud });
   }
 
   /** Die Einstufungsrunde eines Moduls (art 'einstufung'). Danach steht das Ergebnis oben in der Ansicht, der Rest des Tagesauftrags darunter. */
@@ -168,8 +169,28 @@
     return { schliesse: () => { if (tafel === eigene) raeume(huelle); } };
   }
 
+  /** Ein Thema frei üben (Fachinseln, «Üben» in der Tafel des Areals oder in der Themenliste). th: { modul, thema, areal? }.
+      Danach führt «Weiter» zurück zum Areal (oder zur Themenliste). Gibt es heute nichts mehr zu üben, sagt das eine Zeile. */
+  function themaUeben(huelle, ctx, th) {
+    const zurueck = () => ctx.gehe(th.areal ? 'areal' : 'themen', th.areal ? { areal: th.areal } : {});
+    let eintraege = [], t = null;
+    try {
+      const doc = L.Zustand.hole(), tag = L.Lernplan.heute(doc);
+      eintraege = L.Lernplan.themaRunde(th.modul, th.thema);
+      t = { tag, deckel: L.Lernplan.lagen(doc, tag).deckel };
+    } catch (fehler) { melde(fehler); }
+    if (!t || !eintraege.length) {
+      raeume(huelle);
+      huelle.replaceChildren(H('div.kasten.hilfe.thema-leer', { role: 'status' }, T().themaLeer, H('div', H('button.knopf', { type: 'button', onclick: zurueck }, T().zurueck))));
+      return;
+    }
+    const m = L.registry.module.get(th.modul);
+    spiele(huelle, ctx, t, [{ id: 'thema', eintraege }], 'frei', null, { fach: m ? m.fach : null, zurueck });
+  }
+
   function zeige(huelle, ctx) {
     if (ctx.daten && ctx.daten.vorschau) { vorschau(huelle, ctx, ctx.daten.vorschau); return undefined; }
+    if (ctx.daten && ctx.daten.thema) { themaUeben(huelle, ctx, ctx.daten.thema); return undefined; }
     let t, ergebnisse = [], angebote = [], frueh = true;
     try { t = L.Lernplan.tagesauftrag(); } catch (fehler) { melde(fehler); raeume(huelle); huelle.replaceChildren(H('div.kasten.fehler', T().modulFehler(fehler.message))); return undefined; }
     try {

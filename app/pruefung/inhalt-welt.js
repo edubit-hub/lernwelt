@@ -21,6 +21,7 @@
   function pruefeWelt(welt, ctx = {}) {
     const R = [], f = (ort, t, regel = 'welt') => R.push({ stufe: 'fehler', ort, text: t, regel });
     if (!objekt(welt)) { f('welt', 'Das Welt-Thema ist kein Objekt'); return R; }
+    if (welt.art === 'inseln') return typeof P.pruefeInseln === 'function' ? P.pruefeInseln(welt, ctx) : [{ stufe: 'fehler', ort: 'art', text: 'Prüfung der Fachinseln fehlt (inhalt-inseln.js)', regel: 'welt' }];
     const B = ctx.budget || (L.weltregeln && L.weltregeln.budget) || {};
     const module = L.registry ? [...L.registry.module.values()] : [];
     const faecher = ctx.faecher || [...new Set(module.map(m => m.fach))];

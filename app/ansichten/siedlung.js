@@ -235,6 +235,6 @@
     };
   }
 
-  L.Ansichten.siedlung = { id: 'siedlung', get titel() { return L.Texte.welt.menue.siedlung; }, icon: 'siedlung', dock: 30,
+  L.Ansichten.siedlung = { id: 'siedlung', welt: 'archipel', get titel() { return L.Texte.welt.menue.siedlung; }, icon: 'siedlung', dock: 30,
     buehne: { kamera: 'siedlung', marken: 'plaetze' }, zeige };
 })(globalThis);
